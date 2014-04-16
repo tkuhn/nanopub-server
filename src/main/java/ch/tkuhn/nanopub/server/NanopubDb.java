@@ -64,7 +64,11 @@ public class NanopubDb {
 			return null;
 		}
 		String nanopubString = cursor.next().get("nanopub").toString();
-		return new NanopubImpl(nanopubString, internalFormat);
+		Nanopub np = new NanopubImpl(nanopubString, internalFormat);
+		if (!CheckNanopub.isValid(np)) {
+			throw new Exception("Nanopub verification failed");
+		}
+		return np;
 	}
 
 	public void loadNanopub(Nanopub np) throws Exception {

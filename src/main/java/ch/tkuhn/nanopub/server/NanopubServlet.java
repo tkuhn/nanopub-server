@@ -40,6 +40,11 @@ public class NanopubServlet extends HttpServlet {
 			nanopub = NanopubDb.get().getNanopub(artifactCode);
 		} catch (Exception ex) {
 			resp.sendError(500, "Internal error: " + ex.getMessage());
+			ex.printStackTrace();
+			return;
+		}
+		if (nanopub == null) {
+			resp.sendError(404, "Nanopub not found: " + artifactCode);
 			return;
 		}
 		RDFFormat format = RDFFormat.forFileName("np." + extension);
@@ -59,6 +64,7 @@ public class NanopubServlet extends HttpServlet {
 			NanopubUtils.writeToStream(nanopub, resp.getOutputStream(), format);
 		} catch (Exception ex) {
 			resp.sendError(500, "Internal error: " + ex.getMessage());
+			ex.printStackTrace();
 		}
 		resp.getOutputStream().close();
 	}
