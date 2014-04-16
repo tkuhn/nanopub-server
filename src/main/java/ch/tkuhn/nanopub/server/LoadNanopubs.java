@@ -11,17 +11,8 @@ public class LoadNanopubs {
 	public static void main(String[] args) {
 		try {
 			for (String s : args) {
-				loadNanopub(new File(s));
+				NanopubDb.get().loadNanopub(new NanopubImpl(new File(s)));
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			System.exit(1);
-		}
-	}
-
-	public static void loadNanopub(File file) throws Exception {
-		try {
-			NanopubDb.get().loadNanopub(new NanopubImpl(file));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			System.exit(1);
