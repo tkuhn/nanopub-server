@@ -3,15 +3,15 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-  <display-name>Archetype Created Web Application</display-name>
+  <display-name>Nanopub Server</display-name>
 
   <servlet>
-    <servlet-name>Servlet Name For Demo1</servlet-name>
-    <servlet-class>ch.tkuhn.nanopub.server.NanopubServer</servlet-class>
+    <servlet-name>nanopub-server</servlet-name>
+    <servlet-class>ch.tkuhn.nanopub.server.NanopubServlet</servlet-class>
   </servlet>
 
   <servlet-mapping>
-    <servlet-name>Servlet Name For Demo1</servlet-name>
+    <servlet-name>nanopub-server</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
 

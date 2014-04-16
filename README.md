@@ -1,10 +1,10 @@
 Nanopub Server
 ==============
 
-_work in progress_
+_(work in progress)_
 
-This is a simple server to publish nanopublications. All it is supposed to do
-is to provide stored nanopublications. No queries. No triple store.
+This is a simple server to publish nanopublications that have a trusty URI. It
+only returns single nanopubs. No queries. No triple store involved.
 
 
 Dependencies
@@ -36,7 +36,7 @@ Running the server using Maven's Jetty plugin:
 
     $ mvn jetty:run
 
-Then you should be able to locally access the web interface from your browser:
+Then you should be able to locally access the server from your browser:
 
     http://0.0.0.0:8080/nanopub-server/
 
