@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,7 +37,15 @@ public class NanopubServlet extends HttpServlet {
 		} else {
 			artifactCode = r;
 		}
-		if (artifactCode.matches("RA[A-Za-z0-9\\-_]{43}")) {
+		if (r.isEmpty()) {
+			ServletOutputStream out = resp.getOutputStream();
+			out.println("Nanopub Server");
+			out.println("==============");
+			out.println("");
+			long c = NanopubDb.get().getNanopubCollection().count();
+			out.println("Number of stored nanopubs: " + c);
+			resp.setContentType("text/plain");
+		} else if (artifactCode.matches("RA[A-Za-z0-9\\-_]{43}")) {
 			Nanopub nanopub;
 			try {
 				nanopub = NanopubDb.get().getNanopub(artifactCode);
