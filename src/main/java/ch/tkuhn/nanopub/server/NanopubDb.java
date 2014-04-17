@@ -58,7 +58,7 @@ public class NanopubDb {
 	}
 
 	public Nanopub getNanopub(String artifactCode) throws Exception {
-		BasicDBObject query = new BasicDBObject("id", artifactCode);
+		BasicDBObject query = new BasicDBObject("_id", artifactCode);
 		DBCursor cursor = NanopubDb.get().getNanopubCollection().find(query);
 		if (!cursor.hasNext()) {
 			return null;
@@ -77,10 +77,9 @@ public class NanopubDb {
 		}
 		String artifactCode = TrustyUriUtils.getArtifactCode(np.getUri().toString());
 		String npString = NanopubUtils.writeToString(np, internalFormat);
-		BasicDBObject id = new BasicDBObject("id", artifactCode);
-		getNanopubCollection().remove(id);
+		BasicDBObject id = new BasicDBObject("_id", artifactCode);
 		BasicDBObject dbObj = id.append("nanopub", npString);
-		getNanopubCollection().insert(dbObj);
+		getNanopubCollection().update(id, dbObj, true, false);
 	}
 
 }
