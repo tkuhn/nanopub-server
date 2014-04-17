@@ -1,6 +1,7 @@
 package ch.tkuhn.nanopub.server;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -10,6 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubUtils;
 import org.openrdf.rio.RDFFormat;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 
 public class NanopubServlet extends HttpServlet {
 
@@ -31,40 +36,57 @@ public class NanopubServlet extends HttpServlet {
 		} else {
 			artifactCode = r;
 		}
-		if (!artifactCode.matches("RA[A-Za-z0-9\\-_]{43}")) {
-			resp.sendError(400, "Invalid artifact code: " + artifactCode);
-			return;
-		}
-		Nanopub nanopub;
-		try {
-			nanopub = NanopubDb.get().getNanopub(artifactCode);
-		} catch (Exception ex) {
-			resp.sendError(500, "Internal error: " + ex.getMessage());
-			ex.printStackTrace();
-			return;
-		}
-		if (nanopub == null) {
-			resp.sendError(404, "Nanopub not found: " + artifactCode);
-			return;
-		}
-		RDFFormat format = RDFFormat.forFileName("np." + extension);
-		if (format == null) {
-			resp.sendError(400, "Unknown format: " + extension);
-			return;
-		} else if (NanopubUtils.isUnsuitableFormat(format)) {
-			resp.sendError(400, "Unsuitable RDF format: " + extension);
-			return;
-		}
-		if (showInPlainText) {
+		if (artifactCode.matches("RA[A-Za-z0-9\\-_]{43}")) {
+			Nanopub nanopub;
+			try {
+				nanopub = NanopubDb.get().getNanopub(artifactCode);
+			} catch (Exception ex) {
+				resp.sendError(500, "Internal error: " + ex.getMessage());
+				ex.printStackTrace();
+				return;
+			}
+			if (nanopub == null) {
+				resp.sendError(404, "Nanopub not found: " + artifactCode);
+				return;
+			}
+			RDFFormat format = RDFFormat.forFileName("np." + extension);
+			if (format == null) {
+				resp.sendError(400, "Unknown format: " + extension);
+				return;
+			} else if (NanopubUtils.isUnsuitableFormat(format)) {
+				resp.sendError(400, "Unsuitable RDF format: " + extension);
+				return;
+			}
+			if (showInPlainText) {
+				resp.setContentType("text/plain");
+			} else {
+				resp.setContentType(format.getDefaultMIMEType());
+			}
+			try {
+				NanopubUtils.writeToStream(nanopub, resp.getOutputStream(), format);
+			} catch (Exception ex) {
+				resp.sendError(500, "Internal error: " + ex.getMessage());
+				ex.printStackTrace();
+			}
+		} else if (r.matches("[A-Za-z0-9\\-_]{0,45}\\+")) {
+			DBCollection coll = NanopubDb.get().getNanopubCollection();
+			Pattern p = Pattern.compile(r.substring(0, r.length()-1) + ".*");
+			BasicDBObject query = new BasicDBObject("_id", p);
+			DBCursor cursor = coll.find(query);
+			int c = 0;
+			int maxListSize = ServerConf.get().getMaxListSize();
+			while (cursor.hasNext()) {
+				c++;
+				if (c > maxListSize) {
+					resp.getOutputStream().println("...");
+					break;
+				}
+				String npUri = cursor.next().get("uri").toString();
+				resp.getOutputStream().println(npUri);
+			}
 			resp.setContentType("text/plain");
 		} else {
-			resp.setContentType(format.getDefaultMIMEType());
-		}
-		try {
-			NanopubUtils.writeToStream(nanopub, resp.getOutputStream(), format);
-		} catch (Exception ex) {
-			resp.sendError(500, "Internal error: " + ex.getMessage());
-			ex.printStackTrace();
+			resp.sendError(400, "Invalid request: " + r);
 		}
 		resp.getOutputStream().close();
 	}

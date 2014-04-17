@@ -38,4 +38,8 @@ public class ServerConf {
 		return conf.getProperty("mongodb.dbname");
 	}
 
+	public int getMaxListSize() {
+		return Integer.parseInt(conf.getProperty("maxlistsize"));
+	}
+
 }

@@ -78,8 +78,8 @@ public class NanopubDb {
 		String artifactCode = TrustyUriUtils.getArtifactCode(np.getUri().toString());
 		String npString = NanopubUtils.writeToString(np, internalFormat);
 		BasicDBObject id = new BasicDBObject("_id", artifactCode);
-		BasicDBObject dbObj = id.append("nanopub", npString);
-		getNanopubCollection().update(id, dbObj, true, false);
+		BasicDBObject dbObj = id.append("nanopub", npString).append("uri", np.getUri().toString());
+		getNanopubCollection().insert(dbObj);
 	}
 
 }
