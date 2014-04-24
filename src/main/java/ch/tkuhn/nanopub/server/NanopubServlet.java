@@ -28,12 +28,12 @@ public class NanopubServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String r = req.getServletPath().substring(1);
-		boolean showInPlainText = false;
+		String presentationFormat = null;
 		if (r.endsWith(".txt")) {
-			showInPlainText = true;
+			presentationFormat = "text/plain";
 			r = r.replaceFirst("\\.txt$", "");
 		}
-		String extension = "trig";
+		String extension = null;
 		String artifactCode;
 		if (r.matches(".*\\.[a-z]{1,10}")) {
 			extension = r.replaceFirst("^.*\\.([a-z]{1,10})$", "$1");
@@ -64,16 +64,25 @@ public class NanopubServlet extends HttpServlet {
 				resp.sendError(404, "Nanopub not found: " + artifactCode);
 				return;
 			}
-			RDFFormat format = RDFFormat.forFileName("np." + extension);
+			RDFFormat format = null;
+			if (extension != null) {
+				format = RDFFormat.forFileName("np." + extension);
+				if (format == null) {
+					resp.sendError(400, "Unknown format: " + extension);
+					return;
+				}
+			} else if (presentationFormat == null) {
+				format = RDFFormat.forMIMEType(getMimeType(req, "application/x-trig,text/x-nquads,application/trix"));
+			}
 			if (format == null) {
-				resp.sendError(400, "Unknown format: " + extension);
-				return;
-			} else if (!format.supportsContexts()) {
+				format = RDFFormat.TRIG;
+			}
+			if (!format.supportsContexts()) {
 				resp.sendError(400, "Unsuitable RDF format: " + extension);
 				return;
 			}
-			if (showInPlainText) {
-				resp.setContentType("text/plain");
+			if (presentationFormat != null) {
+				resp.setContentType(presentationFormat);
 			} else {
 				resp.setContentType(format.getDefaultMIMEType());
 			}
@@ -106,8 +115,7 @@ public class NanopubServlet extends HttpServlet {
 		resp.getOutputStream().close();
 	}
 
-	// to be used soon...
-	private static String negotiateMimeType(HttpServletRequest req, String supported) {
+	private static String getMimeType(HttpServletRequest req, String supported) {
 		List<String> supportedList = Arrays.asList(StringUtils.split(supported, ','));
 		String mimeType = supportedList.get(0);
 		try {
