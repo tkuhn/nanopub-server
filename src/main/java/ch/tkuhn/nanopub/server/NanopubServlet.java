@@ -1,6 +1,8 @@
 package ch.tkuhn.nanopub.server;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
@@ -9,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
+import org.commonjava.mimeparse.MIMEParse;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubUtils;
 import org.openrdf.rio.RDFFormat;
@@ -39,12 +43,14 @@ public class NanopubServlet extends HttpServlet {
 		}
 		if (r.isEmpty()) {
 			ServletOutputStream out = resp.getOutputStream();
-			out.println("Nanopub Server");
-			out.println("==============");
-			out.println("");
+			out.println("<!DOCTYPE HTML>");
+			out.println("<html><body>");
+			out.println("<h1>Nanopub Server</h1>");
 			long c = NanopubDb.get().getNanopubCollection().count();
-			out.println("Number of stored nanopubs: " + c);
-			resp.setContentType("text/plain");
+			out.println("<p>Number of stored nanopubs: " + c + "</p>");
+			out.println("<p><a href=\"+\">List of stored nanopubs (up to " + ServerConf.get().getMaxListSize() + ")</a></p>");
+			out.println("</body></html>");
+			resp.setContentType("text/html");
 		} else if (artifactCode.matches("RA[A-Za-z0-9\\-_]{43}")) {
 			Nanopub nanopub;
 			try {
@@ -62,7 +68,7 @@ public class NanopubServlet extends HttpServlet {
 			if (format == null) {
 				resp.sendError(400, "Unknown format: " + extension);
 				return;
-			} else if (NanopubUtils.isUnsuitableFormat(format)) {
+			} else if (!format.supportsContexts()) {
 				resp.sendError(400, "Unsuitable RDF format: " + extension);
 				return;
 			}
@@ -98,6 +104,16 @@ public class NanopubServlet extends HttpServlet {
 			resp.sendError(400, "Invalid request: " + r);
 		}
 		resp.getOutputStream().close();
+	}
+
+	// to be used soon...
+	private static String negotiateMimeType(HttpServletRequest req, String supported) {
+		List<String> supportedList = Arrays.asList(StringUtils.split(supported, ','));
+		String mimeType = supportedList.get(0);
+		try {
+			mimeType = MIMEParse.bestMatch(supportedList, req.getHeader("Accept"));
+		} catch (Exception ex) {}
+		return mimeType;
 	}
 
 }
