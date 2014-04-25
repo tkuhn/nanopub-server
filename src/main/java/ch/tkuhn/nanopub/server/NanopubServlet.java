@@ -27,92 +27,92 @@ public class NanopubServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String r = req.getServletPath().substring(1);
-		String presentationFormat = null;
-		if (r.endsWith(".txt")) {
-			presentationFormat = "text/plain";
-			r = r.replaceFirst("\\.txt$", "");
-		}
-		String extension = null;
-		String artifactCode;
-		if (r.matches(".*\\.[a-z]{1,10}")) {
-			extension = r.replaceFirst("^.*\\.([a-z]{1,10})$", "$1");
-			artifactCode = r.replaceFirst("^(.*)\\.[a-z]{1,10}$", "$1");
-		} else {
-			artifactCode = r;
-		}
+		ServerRequest r = new ServerRequest(req);
 		if (r.isEmpty()) {
-			ServletOutputStream out = resp.getOutputStream();
-			out.println("<!DOCTYPE HTML>");
-			out.println("<html><body>");
-			out.println("<h1>Nanopub Server</h1>");
-			long c = NanopubDb.get().getNanopubCollection().count();
-			out.println("<p>Number of stored nanopubs: " + c + "</p>");
-			out.println("<p><a href=\"+\">List of stored nanopubs (up to " + ServerConf.get().getMaxListSize() + ")</a></p>");
-			out.println("</body></html>");
-			resp.setContentType("text/html");
-		} else if (artifactCode.matches("RA[A-Za-z0-9\\-_]{43}")) {
-			Nanopub nanopub;
-			try {
-				nanopub = NanopubDb.get().getNanopub(artifactCode);
-			} catch (Exception ex) {
-				resp.sendError(500, "Internal error: " + ex.getMessage());
-				ex.printStackTrace();
-				return;
-			}
-			if (nanopub == null) {
-				resp.sendError(404, "Nanopub not found: " + artifactCode);
-				return;
-			}
-			RDFFormat format = null;
-			if (extension != null) {
-				format = RDFFormat.forFileName("np." + extension);
-				if (format == null) {
-					resp.sendError(400, "Unknown format: " + extension);
-					return;
-				}
-			} else if (presentationFormat == null) {
-				format = RDFFormat.forMIMEType(getMimeType(req, "application/x-trig,text/x-nquads,application/trix"));
-			}
-			if (format == null) {
-				format = RDFFormat.TRIG;
-			}
-			if (!format.supportsContexts()) {
-				resp.sendError(400, "Unsuitable RDF format: " + extension);
-				return;
-			}
-			if (presentationFormat != null) {
-				resp.setContentType(presentationFormat);
-			} else {
-				resp.setContentType(format.getDefaultMIMEType());
-			}
-			try {
-				NanopubUtils.writeToStream(nanopub, resp.getOutputStream(), format);
-			} catch (Exception ex) {
-				resp.sendError(500, "Internal error: " + ex.getMessage());
-				ex.printStackTrace();
-			}
-		} else if (r.matches("[A-Za-z0-9\\-_]{0,45}\\+")) {
-			DBCollection coll = NanopubDb.get().getNanopubCollection();
-			Pattern p = Pattern.compile(r.substring(0, r.length()-1) + ".*");
-			BasicDBObject query = new BasicDBObject("_id", p);
-			DBCursor cursor = coll.find(query);
-			int c = 0;
-			int maxListSize = ServerConf.get().getMaxListSize();
-			while (cursor.hasNext()) {
-				c++;
-				if (c > maxListSize) {
-					resp.getOutputStream().println("...");
-					break;
-				}
-				String npUri = cursor.next().get("uri").toString();
-				resp.getOutputStream().println(npUri);
-			}
-			resp.setContentType("text/plain");
+			showMainPage(resp);
+		} else if (r.hasArtifactCode()) {
+			showArtifact(r, resp);
+		} else if (r.hasListQuery()) {
+			showList(r, resp);
 		} else {
 			resp.sendError(400, "Invalid request: " + r);
 		}
 		resp.getOutputStream().close();
+	}
+
+	private static void showMainPage(HttpServletResponse resp) throws IOException {
+		ServletOutputStream out = resp.getOutputStream();
+		out.println("<!DOCTYPE HTML>");
+		out.println("<html><body>");
+		out.println("<h1>Nanopub Server</h1>");
+		long c = NanopubDb.get().getNanopubCollection().count();
+		out.println("<p>Number of stored nanopubs: " + c + "</p>");
+		out.println("<p><a href=\"+\">List of stored nanopubs (up to " + ServerConf.get().getMaxListSize() + ")</a></p>");
+		out.println("</body></html>");
+		resp.setContentType("text/html");
+	}
+
+	private static void showArtifact(ServerRequest r, HttpServletResponse resp) throws IOException {
+		Nanopub nanopub;
+		try {
+			nanopub = NanopubDb.get().getNanopub(r.getArtifactCode());
+		} catch (Exception ex) {
+			resp.sendError(500, "Internal error: " + ex.getMessage());
+			ex.printStackTrace();
+			return;
+		}
+		if (nanopub == null) {
+			resp.sendError(404, "Nanopub not found: " + r.getArtifactCode());
+			return;
+		}
+		RDFFormat format = null;
+		if (r.getExtension() != null) {
+			format = RDFFormat.forFileName("np." + r.getExtension());
+			if (format == null) {
+				resp.sendError(400, "Unknown format: " + r.getExtension());
+				return;
+			}
+		} else if (r.getPresentationFormat() == null) {
+			String suppFormats = "application/x-trig,text/x-nquads,application/trix";
+			format = RDFFormat.forMIMEType(getMimeType(r.getHttpRequest(), suppFormats));
+		}
+		if (format == null) {
+			format = RDFFormat.TRIG;
+		}
+		if (!format.supportsContexts()) {
+			resp.sendError(400, "Unsuitable RDF format: " + r.getExtension());
+			return;
+		}
+		if (r.getPresentationFormat() != null) {
+			resp.setContentType(r.getPresentationFormat());
+		} else {
+			resp.setContentType(format.getDefaultMIMEType());
+		}
+		try {
+			NanopubUtils.writeToStream(nanopub, resp.getOutputStream(), format);
+		} catch (Exception ex) {
+			resp.sendError(500, "Internal error: " + ex.getMessage());
+			ex.printStackTrace();
+		}
+	}
+
+	private static void showList(ServerRequest r, HttpServletResponse resp) throws IOException {
+		DBCollection coll = NanopubDb.get().getNanopubCollection();
+		Pattern p = Pattern.compile(r.getListQueryRegex());
+		BasicDBObject query = new BasicDBObject("_id", p);
+		DBCursor cursor = coll.find(query);
+		int c = 0;
+		int maxListSize = ServerConf.get().getMaxListSize();
+		while (cursor.hasNext()) {
+			c++;
+			if (c > maxListSize) {
+				resp.getOutputStream().println("...");
+				break;
+			}
+			String npUri = cursor.next().get("uri").toString();
+			resp.getOutputStream().println(npUri);
+		}
+		resp.setContentType("text/plain");
 	}
 
 	private static String getMimeType(HttpServletRequest req, String supported) {
