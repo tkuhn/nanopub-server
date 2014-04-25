@@ -19,6 +19,9 @@ public class ServerRequest {
 		if (r.endsWith(".txt")) {
 			presentationFormat = "text/plain";
 			r = r.replaceFirst("\\.txt$", "");
+		} else if (r.endsWith(".html")) {
+			presentationFormat = "text/html";
+			r = r.replaceFirst("\\.html$", "");
 		}
 		if (r.matches(".*\\.[a-z]{1,10}")) {
 			extension = r.replaceFirst("^.*\\.([a-z]{1,10})$", "$1");
