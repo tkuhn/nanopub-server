@@ -37,4 +37,15 @@ public abstract class Page {
 
 	public abstract void show() throws IOException;
 
+	public void printHtmlHeader() throws IOException {
+		println("<!DOCTYPE HTML>");
+		println("<html><head>");
+		println("<link rel=\"stylesheet\" href=\"style/plain.css\" type=\"text/css\" media=\"screen\" title=\"Stylesheet\" />");
+		println("</head><body>");
+	}
+
+	public void printHtmlFooter() throws IOException {
+		println("</body></html>");
+	}
+
 }

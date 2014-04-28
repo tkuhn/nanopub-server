@@ -16,13 +16,12 @@ public class MainPage extends Page {
 	}
 
 	public void show() throws IOException {
-		println("<!DOCTYPE HTML>");
-		println("<html><body>");
+		printHtmlHeader();
 		println("<h1>Nanopub Server</h1>");
 		long c = NanopubDb.get().getNanopubCollection().count();
 		println("<p>Number of stored nanopubs: " + c + "</p>");
 		println("<p><a href=\"+\">List of stored nanopubs (up to " + ServerConf.get().getMaxListSize() + ")</a></p>");
-		println("</body></html>");
+		printHtmlFooter();
 		getResp().setContentType("text/html");
 	}
 

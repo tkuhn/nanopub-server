@@ -47,6 +47,10 @@ public class ServerRequest {
 		return requestString;
 	}
 
+	public String getFullRequest() {
+		return httpRequest.getServletPath();
+	}
+
 	public boolean isEmpty() {
 		return requestString.isEmpty() && extension == null && presentationFormat == null;
 	}

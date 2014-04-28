@@ -20,8 +20,10 @@ public class NanopubServlet extends HttpServlet {
 			NanopubPage.show(r, resp);
 		} else if (r.hasListQuery()) {
 			ListPage.show(r, resp);
+		} else if (r.getFullRequest().equals("/style/plain.css")) {
+			ResourcePage.show(r, resp, "style.css", "text/css");
 		} else {
-			resp.sendError(400, "Invalid request: " + r);
+			resp.sendError(400, "Invalid request: " + r.getFullRequest());
 		}
 		resp.getOutputStream().close();
 	}

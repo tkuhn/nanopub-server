@@ -57,8 +57,7 @@ public class ListPage extends Page {
 
 	private void printStart() throws IOException {
 		if (asHtml) {
-			println("<!DOCTYPE HTML>");
-			println("<html><body>");
+			printHtmlHeader();
 			println("<table><tbody>");
 		}
 	}
@@ -96,7 +95,7 @@ public class ListPage extends Page {
 	private void printEnd() throws IOException {
 		if (asHtml) {
 			println("</tbody></table>");
-			println("</body></html>");
+			printHtmlFooter();
 		}
 	}
 
