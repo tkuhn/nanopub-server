@@ -75,4 +75,11 @@ public class ServerRequest {
 		return null;
 	}
 
+	public String getListQuerySequence() {
+		if (hasListQuery()) {
+			return requestString.substring(0, requestString.length()-1);
+		}
+		return null;
+	}
+
 }

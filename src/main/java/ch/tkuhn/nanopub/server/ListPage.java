@@ -58,6 +58,12 @@ public class ListPage extends Page {
 	private void printStart() throws IOException {
 		if (asHtml) {
 			printHtmlHeader();
+			String seq = getReq().getListQuerySequence();
+			print("<h3>List of stored nanopubs");
+			if (seq.length() > 0) {
+				print(" (with artifact code starting with '" + seq + "')");
+			}
+			println("</h3>");
 			println("<table><tbody>");
 		}
 	}
