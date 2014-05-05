@@ -70,7 +70,7 @@ public class ServerRequest {
 
 	public String getListQueryRegex() {
 		if (hasListQuery()) {
-			return requestString.substring(0, requestString.length()-1) + ".*";
+			return "^" + requestString.substring(0, requestString.length()-1);
 		}
 		return null;
 	}

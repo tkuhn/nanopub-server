@@ -39,15 +39,22 @@ public class ListPage extends Page {
 		int c = 0;
 		int maxListSize = ServerConf.get().getMaxListSize();
 		printStart();
+		boolean hasContinuation = false;
 		while (cursor.hasNext()) {
 			c++;
 			if (c > maxListSize) {
-				printContinuation();
+				hasContinuation = true;
 				break;
 			}
 			printElement(cursor.next().get("uri").toString());
 		}
+		if (c == 0 && asHtml) {
+			println("<p><em>(no nanopub with artifact code starting with '" + getReq().getListQuerySequence() + "')</em></p>");
+		}
 		printEnd();
+		if (hasContinuation) {
+			printContinuation();
+		}
 		if (asHtml) {
 			getResp().setContentType("text/html");
 		} else {
@@ -83,7 +90,7 @@ public class ListPage extends Page {
 			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + ".nq.txt\">nq</a>,");
 			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + ".xml.txt\">xml</a>)");
 			print("</td>");
-			print("<td>" + npUri + "</td>");
+			print("<td><span class=\"code\">" + npUri + "</span></td>");
 			println("</tr>");
 		} else {
 			println(npUri);
@@ -92,7 +99,11 @@ public class ListPage extends Page {
 
 	private void printContinuation() throws IOException {
 		if (asHtml) {
-			println("<p>...</p>");
+			println("<p><em>... and more:</em> ");
+			for (char ch : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray()) {
+				println("<span class=\"code\"><a href=\"" + getReq().getListQuerySequence() + ch + "+\">" + ch + "</a></span>");
+			}
+			println("</p>");
 		} else {
 			println("...");
 		}

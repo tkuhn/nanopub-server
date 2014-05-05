@@ -20,7 +20,7 @@ public class MainPage extends Page {
 		println("<h1>Nanopub Server</h1>");
 		long c = NanopubDb.get().getNanopubCollection().count();
 		println("<p>Number of stored nanopubs: " + c + "</p>");
-		println("<p><a href=\"+\">List of stored nanopubs (up to " + ServerConf.get().getMaxListSize() + ")</a></p>");
+		println("<p><a href=\"+\">List of stored nanopubs</a></p>");
 		printHtmlFooter();
 		getResp().setContentType("text/html");
 	}

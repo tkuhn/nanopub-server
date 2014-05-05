@@ -37,3 +37,7 @@ td {
 	padding-bottom: 2px;
 	vertical-align: top;
 }
+
+span.code {
+	font-family: "Lucida Console", Monaco, monospace;
+}
