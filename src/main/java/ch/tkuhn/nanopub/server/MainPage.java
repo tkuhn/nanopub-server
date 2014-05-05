@@ -16,7 +16,7 @@ public class MainPage extends Page {
 	}
 
 	public void show() throws IOException {
-		printHtmlHeader();
+		printHtmlHeader("Nanopub Server");
 		println("<h1>Nanopub Server</h1>");
 		long c = NanopubDb.get().getNanopubCollection().count();
 		println("<p>Number of stored nanopubs: " + c + "</p>");
