@@ -36,6 +36,10 @@ public class NanopubServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		if (!ServerConf.get().isPushEnabled()) {
+			super.doPost(req, resp);
+			return;
+		}
 		ServerRequest r = new ServerRequest(req);
 		if (!r.isEmpty()) {
 			resp.sendError(400, "Invalid POST request: " + r.getFullRequest());
