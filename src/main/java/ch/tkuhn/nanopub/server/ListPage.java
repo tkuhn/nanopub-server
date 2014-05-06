@@ -71,6 +71,7 @@ public class ListPage extends Page {
 				print(" (with artifact code starting with '" + seq + "')");
 			}
 			println("</h3>");
+			println("<p>[ <a href=\"" + getReq().getRequestString() + ".txt\">as plain text</a> | <a href=\".\">home</a> ]</p>");
 			println("<table><tbody>");
 		}
 	}
@@ -112,7 +113,6 @@ public class ListPage extends Page {
 	private void printEnd() throws IOException {
 		if (asHtml) {
 			println("</tbody></table>");
-			println("<p>[<a href=\"" + getReq().getRequestString() + ".txt\">as plain text</a>]</p>");
 			printHtmlFooter();
 		}
 	}
