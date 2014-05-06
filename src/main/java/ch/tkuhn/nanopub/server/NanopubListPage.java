@@ -49,7 +49,7 @@ public class NanopubListPage extends Page {
 			printElement(cursor.next().get("uri").toString());
 		}
 		if (c == 0 && asHtml) {
-			println("<p><em>(no nanopub with artifact code starting with '" + getReq().getListQuerySequence() + "')</em></p>");
+			println("<tr><td><em>(no nanopub with artifact code starting with '" + getReq().getListQuerySequence() + "')</em></tr></td>");
 		}
 		if (hasContinuation) {
 			printContinuation();

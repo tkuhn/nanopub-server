@@ -37,7 +37,7 @@ public class PeerListPage extends Page {
 			printElement(cursor.next().get("_id").toString());
 		}
 		if (c == 0 && asHtml) {
-			println("<p><em>(no known peers)</em></p>");
+			println("<li><em>(no known peers)</em></li>");
 		}
 		printEnd();
 		if (asHtml) {

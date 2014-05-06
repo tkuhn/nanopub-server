@@ -22,6 +22,7 @@ public class ServerInfo {
 	private String publicUrl;
 	private String admin;
 	private boolean postNanopubsEnabled;
+	private boolean postPeersEnabled;
 	private int maxListSize = 1000;
 
 	public ServerInfo() {
@@ -31,11 +32,16 @@ public class ServerInfo {
 		publicUrl = prop.getProperty("public-url");
 		admin = prop.getProperty("admin");
 		postNanopubsEnabled = Boolean.parseBoolean(prop.getProperty("post-nanopubs-enabled"));
+		postPeersEnabled = Boolean.parseBoolean(prop.getProperty("post-peers-enabled"));
 		maxListSize = Integer.parseInt(prop.getProperty("maxlistsize"));
 	}
 
 	public boolean isPostNanopubsEnabled() {
 		return postNanopubsEnabled;
+	}
+
+	public boolean isPostPeersEnabled() {
+		return postPeersEnabled;
 	}
 
 	public int getMaxListSize() {
