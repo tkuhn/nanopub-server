@@ -42,8 +42,8 @@ public class ServerConf {
 		return Integer.parseInt(conf.getProperty("maxlistsize"));
 	}
 
-	public boolean isPushEnabled() {
-		return Boolean.parseBoolean(conf.getProperty("push-enabled"));
+	public boolean isPostEnabled() {
+		return Boolean.parseBoolean(conf.getProperty("post-enabled"));
 	}
 
 }
