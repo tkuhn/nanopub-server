@@ -13,7 +13,12 @@ public class ServerConf {
 		return obj;
 	}
 
+	public static ServerInfo getInfo() {
+		return obj.info;
+	}
+
 	private Properties conf;
+	private ServerInfo info;
 
 	private ServerConf() {
 		conf = new Properties();
@@ -24,6 +29,7 @@ public class ServerConf {
 			ex.printStackTrace();
 			System.exit(1);
 		}
+		info = new ServerInfo(conf);
 	}
 
 	public String getMongoDbHost() {
@@ -36,14 +42,6 @@ public class ServerConf {
 
 	public String getMongoDbName() {
 		return conf.getProperty("mongodb.dbname");
-	}
-
-	public int getMaxListSize() {
-		return Integer.parseInt(conf.getProperty("maxlistsize"));
-	}
-
-	public boolean isPostEnabled() {
-		return Boolean.parseBoolean(conf.getProperty("post-enabled"));
 	}
 
 }

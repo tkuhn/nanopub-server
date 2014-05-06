@@ -5,6 +5,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 public abstract class Page {
 
 	private ServerRequest req;
@@ -48,6 +50,10 @@ public abstract class Page {
 
 	public void printHtmlFooter() throws IOException {
 		println("</body></html>");
+	}
+
+	public String escapeHtml(String text) {
+		return StringEscapeUtils.escapeHtml(text);
 	}
 
 }

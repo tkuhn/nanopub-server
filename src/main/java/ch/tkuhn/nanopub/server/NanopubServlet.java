@@ -38,7 +38,7 @@ public class NanopubServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		if (!ServerConf.get().isPostEnabled()) {
+		if (!ServerConf.getInfo().isPostNanopubsEnabled()) {
 			super.doPost(req, resp);
 			return;
 		}

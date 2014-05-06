@@ -37,7 +37,7 @@ public class ListPage extends Page {
 		BasicDBObject query = new BasicDBObject("_id", p);
 		DBCursor cursor = coll.find(query);
 		int c = 0;
-		int maxListSize = ServerConf.get().getMaxListSize();
+		int maxListSize = ServerConf.getInfo().getMaxListSize();
 		printStart();
 		boolean hasContinuation = false;
 		while (cursor.hasNext()) {

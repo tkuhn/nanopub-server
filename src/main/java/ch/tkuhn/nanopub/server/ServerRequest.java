@@ -52,7 +52,7 @@ public class ServerRequest {
 	}
 
 	public boolean isEmpty() {
-		return requestString.isEmpty() && extension == null && presentationFormat == null;
+		return requestString.isEmpty() && presentationFormat == null;
 	}
 
 	public boolean hasArtifactCode() {
