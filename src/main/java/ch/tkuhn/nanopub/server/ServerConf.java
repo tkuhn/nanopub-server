@@ -44,4 +44,10 @@ public class ServerConf {
 		return conf.getProperty("mongodb.dbname");
 	}
 
+	public String[] getBootstrapPeers() {
+		String s = conf.getProperty("bootstrap-peers");
+		if (s == null) return new String[] {};
+		return s.split(" ");
+	}
+
 }

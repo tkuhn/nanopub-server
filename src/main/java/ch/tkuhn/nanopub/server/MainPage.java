@@ -32,12 +32,28 @@ public class MainPage extends Page {
 		} else {
 			printHtmlHeader("Nanopub Server");
 			println("<h1>Nanopub Server</h1>");
-			long c = NanopubDb.get().getNanopubCollection().count();
 			String url = ServerConf.getInfo().getPublicUrl();
-			println("<p>Public URL: <span class=\"code\"><a href=\"" + url + "\">" + url + "</a></span></p>");
-			println("<p>Administrator: " + escapeHtml(ServerConf.getInfo().getAdmin()) + "</p>");
-			println("<p>Number of stored nanopubs: " + c + "</p>");
-			println("<p><a href=\"+\">List of stored nanopubs</a></p>");
+			if (url == null || url.isEmpty()) {
+				url = "<em>(unknown)</em>";
+			} else {
+				url = "<a href=\"" + url + "\">" + url + "</a>";
+			}
+			println("<p>Public URL: <span class=\"code\">" + url + "</span></p>");
+			String admin = ServerConf.getInfo().getAdmin();
+			if (admin == null || admin.isEmpty()) {
+				admin = "<em>(unknown)</em>";
+			} else {
+				admin = escapeHtml(admin);
+			}
+			println("<p>Administrator: " + admin + "</p>");
+			println("<p>Content:");
+			println("<ul>");
+			long npc = NanopubDb.get().getNanopubCollection().count();
+			println("<li><a href=\"+\">" + npc + " nanopubs</a></li>");
+			long peerc = NanopubDb.get().getPeerCollection().count();
+			println("<li><a href=\"peers\">" + peerc + " peers</a></li>");
+			println("</ul>");
+			println("<p>[ <a href=\".json\">json</a> ]</p>");
 			printHtmlFooter();
 		}
 		getResp().setContentType(format);

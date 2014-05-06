@@ -11,16 +11,16 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
-public class ListPage extends Page {
+public class NanopubListPage extends Page {
 
 	private boolean asHtml;
 
 	public static void show(ServerRequest req, HttpServletResponse httpResp) throws IOException {
-		ListPage obj = new ListPage(req, httpResp);
+		NanopubListPage obj = new NanopubListPage(req, httpResp);
 		obj.show();
 	}
 
-	public ListPage(ServerRequest req, HttpServletResponse httpResp) {
+	public NanopubListPage(ServerRequest req, HttpServletResponse httpResp) {
 		super(req, httpResp);
 		String rf = getReq().getPresentationFormat();
 		if (rf == null) {

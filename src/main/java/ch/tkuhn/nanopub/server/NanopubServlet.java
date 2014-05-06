@@ -25,7 +25,9 @@ public class NanopubServlet extends HttpServlet {
 		} else if (r.hasArtifactCode()) {
 			NanopubPage.show(r, resp);
 		} else if (r.hasListQuery()) {
-			ListPage.show(r, resp);
+			NanopubListPage.show(r, resp);
+		} else if (r.getRequestString().equals("peers")) {
+			PeerListPage.show(r, resp);
 		} else if (r.getFullRequest().equals("/style/plain.css")) {
 			ResourcePage.show(r, resp, "style.css", "text/css");
 		} else if (r.getFullRequest().equals("/style/favicon.ico")) {

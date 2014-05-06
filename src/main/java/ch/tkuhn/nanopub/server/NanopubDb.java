@@ -43,14 +43,17 @@ public class NanopubDb {
 		conf = ServerConf.get();
 		mongo = new MongoClient(conf.getMongoDbHost(), conf.getMongoDbPort());
 		db = mongo.getDB(conf.getMongoDbName());
+		init();
+	}
+
+	private void init() {
+		for (String s : conf.getBootstrapPeers()) {
+			addPeer(s);
+		}
 	}
 
 	public MongoClient getMongoClient() {
 		return mongo;
-	}
-
-	public DB getDb() {
-		return db;
 	}
 
 	public DBCollection getNanopubCollection() {
@@ -80,6 +83,18 @@ public class NanopubDb {
 		BasicDBObject id = new BasicDBObject("_id", artifactCode);
 		BasicDBObject dbObj = id.append("nanopub", npString).append("uri", np.getUri().toString());
 		getNanopubCollection().insert(dbObj);
+	}
+
+	public DBCollection getPeerCollection() {
+		return db.getCollection("nanopub-server-peers");
+	}
+
+	public void addPeer(String peerUrl) {
+		DBCollection coll = getPeerCollection();
+		BasicDBObject dbObj = new BasicDBObject("_id", peerUrl);
+		if (!coll.find(dbObj).hasNext()) {
+			coll.insert(dbObj);
+		}
 	}
 
 }
