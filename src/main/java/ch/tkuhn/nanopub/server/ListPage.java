@@ -51,10 +51,10 @@ public class ListPage extends Page {
 		if (c == 0 && asHtml) {
 			println("<p><em>(no nanopub with artifact code starting with '" + getReq().getListQuerySequence() + "')</em></p>");
 		}
-		printEnd();
 		if (hasContinuation) {
 			printContinuation();
 		}
+		printEnd();
 		if (asHtml) {
 			getResp().setContentType("text/html");
 		} else {
@@ -112,6 +112,7 @@ public class ListPage extends Page {
 	private void printEnd() throws IOException {
 		if (asHtml) {
 			println("</tbody></table>");
+			println("<p>[<a href=\"" + getReq().getRequestString() + ".txt\">as plain text</a>]</p>");
 			printHtmlFooter();
 		}
 	}
