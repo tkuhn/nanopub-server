@@ -48,7 +48,11 @@ public class NanopubDb {
 
 	private void init() {
 		for (String s : conf.getBootstrapPeers()) {
-			addPeer(s);
+			try {
+				addPeer(s, false);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -89,7 +93,20 @@ public class NanopubDb {
 		return db.getCollection("nanopub-server-peers");
 	}
 
-	public void addPeer(String peerUrl) {
+	public void addPeer(String peerUrl) throws Exception {
+		addPeer(peerUrl, true);
+	}
+
+	private void addPeer(String peerUrl, boolean check) throws Exception {
+		if (peerUrl.equals(ServerConf.getInfo().getPublicUrl())) {
+			return;
+		}
+		if (check) {
+			ServerInfo info = ServerInfo.load(peerUrl);
+			if (!info.getPublicUrl().equals(peerUrl)) {
+				throw new Exception("Peer URL does not match its declared public URL");
+			}
+		}
 		DBCollection coll = getPeerCollection();
 		BasicDBObject dbObj = new BasicDBObject("_id", peerUrl);
 		if (!coll.find(dbObj).hasNext()) {
