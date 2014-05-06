@@ -1,13 +1,12 @@
 package ch.tkuhn.nanopub.server;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.IOUtils;
 
 public class ResourcePage extends Page {
 
@@ -27,15 +26,11 @@ public class ResourcePage extends Page {
 	}
 
 	public void show() throws IOException {
-		InputStream rs = NanopubServlet.class.getResourceAsStream(resourceName);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(rs));
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(getResp().getOutputStream()));
-		String line;
-		while ((line = reader.readLine()) != null) {
-			writer.write(line + "\n");
-		}
-		reader.close();
-		writer.close();
+		InputStream in = NanopubServlet.class.getResourceAsStream(resourceName);
+		OutputStream out = getResp().getOutputStream();
+		IOUtils.copy(in, out);
+		in.close();
+		out.close();
 		getResp().setContentType(resourceType);
 	}
 

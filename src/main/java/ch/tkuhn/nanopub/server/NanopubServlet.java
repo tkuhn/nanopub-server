@@ -28,6 +28,8 @@ public class NanopubServlet extends HttpServlet {
 			ListPage.show(r, resp);
 		} else if (r.getFullRequest().equals("/style/plain.css")) {
 			ResourcePage.show(r, resp, "style.css", "text/css");
+		} else if (r.getFullRequest().equals("/style/favicon.ico")) {
+			ResourcePage.show(r, resp, "favicon.ico", "image/x-icon");
 		} else {
 			resp.sendError(400, "Invalid GET request: " + r.getFullRequest());
 		}

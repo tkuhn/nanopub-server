@@ -42,6 +42,7 @@ public abstract class Page {
 		println("<html><head>");
 		println("<title>" + title + "</title>");
 		println("<link rel=\"stylesheet\" href=\"style/plain.css\" type=\"text/css\" media=\"screen\" title=\"Stylesheet\" />");
+		println("<link rel=\"shortcut icon\" href=\"style/favicon.ico\" type=\"image/x-icon\" />");
 		println("</head><body>");
 	}
 
