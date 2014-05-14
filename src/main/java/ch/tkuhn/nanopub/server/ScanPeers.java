@@ -22,7 +22,7 @@ public class ScanPeers implements Runnable {
 		for (String peerUri : db.getPeerUris()) {
 			try {
 				ServerInfo si = ServerInfo.load(peerUri);
-				for (String peerFromPeer : si.loadPeerList()) {
+				for (String peerFromPeer : Utils.loadPeerList(si)) {
 					db.addPeer(peerFromPeer);
 				}
 			} catch (Exception ex) {
