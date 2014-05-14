@@ -1,6 +1,8 @@
 package ch.tkuhn.nanopub.server;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.trustyuri.TrustyUriUtils;
 import net.trustyuri.rdf.CheckNanopub;
@@ -91,6 +93,15 @@ public class NanopubDb {
 
 	public DBCollection getPeerCollection() {
 		return db.getCollection("nanopub-server-peers");
+	}
+
+	public List<String> getPeerUris() {
+		List<String> peers = new ArrayList<String>();
+		DBCursor cursor = getPeerCollection().find();
+		while (cursor.hasNext()) {
+			peers.add(cursor.next().get("_id").toString());
+		}
+		return peers;
 	}
 
 	public void addPeer(String peerUrl) throws Exception {

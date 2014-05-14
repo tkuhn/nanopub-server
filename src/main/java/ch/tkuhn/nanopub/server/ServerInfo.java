@@ -1,8 +1,11 @@
 package ch.tkuhn.nanopub.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.http.client.methods.HttpGet;
@@ -58,6 +61,20 @@ public class ServerInfo {
 
 	public String asJson() {
 		return new Gson().toJson(this);
+	}
+
+	public List<String> loadPeerList() throws IOException {
+		List<String> peerList = new ArrayList<String>();
+		HttpGet get = new HttpGet(getPublicUrl() + "peers");
+		get.setHeader("Content-Type", "text/plain");
+		InputStream in = HttpClientBuilder.create().build().execute(get).getEntity().getContent();
+	    BufferedReader r = new BufferedReader(new InputStreamReader(in));
+	    String line = null;
+	    while ((line = r.readLine()) != null) {
+	    	peerList.add(line);
+	    }
+	    r.close();
+		return peerList;
 	}
 
 }

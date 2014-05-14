@@ -38,6 +38,7 @@ public class NanopubServlet extends HttpServlet {
 			resp.sendError(400, "Invalid GET request: " + r.getFullRequest());
 		}
 		resp.getOutputStream().close();
+		check();
 	}
 
 	@Override
@@ -79,6 +80,11 @@ public class NanopubServlet extends HttpServlet {
 		} else {
 			resp.sendError(400, "Invalid POST request: " + r.getFullRequest());
 		}
+		check();
+	}
+
+	private void check() {
+		ScanPeers.check();
 	}
 
 }
