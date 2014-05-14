@@ -92,7 +92,7 @@ public class NanopubDb {
 	}
 
 	public DBCollection getPeerCollection() {
-		return db.getCollection("nanopub-server-peers");
+		return db.getCollection("peers");
 	}
 
 	public List<String> getPeerUris() {
