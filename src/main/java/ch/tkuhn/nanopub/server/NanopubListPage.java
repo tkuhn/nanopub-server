@@ -14,6 +14,7 @@ import com.mongodb.DBCursor;
 public class NanopubListPage extends Page {
 
 	private boolean asHtml;
+	private boolean hasContinuation = false;
 
 	public static void show(ServerRequest req, HttpServletResponse httpResp) throws IOException {
 		NanopubListPage obj = new NanopubListPage(req, httpResp);
@@ -39,7 +40,6 @@ public class NanopubListPage extends Page {
 		int c = 0;
 		int maxListSize = ServerConf.getInfo().getMaxListSize();
 		printStart();
-		boolean hasContinuation = false;
 		while (cursor.hasNext()) {
 			c++;
 			if (c > maxListSize) {
@@ -50,9 +50,6 @@ public class NanopubListPage extends Page {
 		}
 		if (c == 0 && asHtml) {
 			println("<tr><td><em>(no nanopub with artifact code starting with '" + getReq().getListQuerySequence() + "')</em></tr></td>");
-		}
-		if (hasContinuation) {
-			printContinuation();
 		}
 		printEnd();
 		if (asHtml) {
@@ -98,21 +95,16 @@ public class NanopubListPage extends Page {
 		}
 	}
 
-	private void printContinuation() throws IOException {
-		if (asHtml) {
-			println("<p><em>... and more:</em> ");
-			for (char ch : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray()) {
-				println("<span class=\"code\"><a href=\"" + getReq().getListQuerySequence() + ch + "+\">" + ch + "</a></span>");
-			}
-			println("</p>");
-		} else {
-			println("...");
-		}
-	}
-
 	private void printEnd() throws IOException {
 		if (asHtml) {
 			println("</tbody></table>");
+			if (hasContinuation) {
+				println("<p><em>... and more:</em> ");
+				for (char ch : Utils.base64Alphabet.toCharArray()) {
+					println("<span class=\"code\"><a href=\"" + getReq().getListQuerySequence() + ch + "+\">" + ch + "</a></span>");
+				}
+				println("</p>");
+			}
 			printHtmlFooter();
 		}
 	}

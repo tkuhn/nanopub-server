@@ -1,10 +1,5 @@
 package ch.tkuhn.nanopub.server;
 
-import java.net.URL;
-
-import net.trustyuri.TrustyUriUtils;
-
-import org.nanopub.NanopubImpl;
 
 public class ScanPeers implements Runnable {
 
@@ -17,7 +12,7 @@ public class ScanPeers implements Runnable {
 		new Thread(running).start();
 	}
 
-	NanopubDb db = NanopubDb.get();
+	private static NanopubDb db = NanopubDb.get();
 
 	private ScanPeers() {
 	}
@@ -50,16 +45,8 @@ public class ScanPeers implements Runnable {
 	private void collectNanopubs() {
 		if (!ServerConf.get().isCollectNanopubsEnabled()) return;
 		for (String peerUri : db.getPeerUris()) {
-			try {
-				ServerInfo si = ServerInfo.load(peerUri);
-				for (String nanopubUri : Utils.loadNanopubUriList(si, "")) {
-					if ("...".equals(nanopubUri)) break;
-					String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
-					db.loadNanopub(new NanopubImpl(new URL(peerUri + ac)));
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
+			CollectNanopubs r = new CollectNanopubs(peerUri, "RA");
+			r.run();
 		}
 	}
 

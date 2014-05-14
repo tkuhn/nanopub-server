@@ -50,4 +50,6 @@ public class Utils {
 		return mimeType;
 	}
 
+	public static final String base64Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
 }
