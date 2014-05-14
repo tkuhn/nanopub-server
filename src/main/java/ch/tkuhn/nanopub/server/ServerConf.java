@@ -36,6 +36,10 @@ public class ServerConf {
 		return Boolean.parseBoolean(conf.getProperty("peer-scan-enabled"));
 	}
 
+	public boolean isCollectNanopubsEnabled() {
+		return Boolean.parseBoolean(conf.getProperty("collect-nanopubs-enabled"));
+	}
+
 	public String getMongoDbHost() {
 		return conf.getProperty("mongodb.host");
 	}

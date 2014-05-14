@@ -88,7 +88,10 @@ public class NanopubDb {
 		String npString = NanopubUtils.writeToString(np, internalFormat);
 		BasicDBObject id = new BasicDBObject("_id", artifactCode);
 		BasicDBObject dbObj = id.append("nanopub", npString).append("uri", np.getUri().toString());
-		getNanopubCollection().insert(dbObj);
+		DBCollection coll = getNanopubCollection();
+		if (!coll.find(id).hasNext()) {
+			coll.insert(dbObj);
+		}
 	}
 
 	public DBCollection getPeerCollection() {

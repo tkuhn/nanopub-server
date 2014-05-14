@@ -35,7 +35,7 @@ public class Utils {
 	    BufferedReader r = new BufferedReader(new InputStreamReader(in));
 	    String line = null;
 	    while ((line = r.readLine()) != null) {
-	    	list.add(line);
+	    	list.add(line.trim());
 	    }
 	    r.close();
 		return list;
