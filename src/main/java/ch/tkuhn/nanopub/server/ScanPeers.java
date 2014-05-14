@@ -6,6 +6,7 @@ public class ScanPeers implements Runnable {
 
 	public static void check() {
 		if (running != null) return;
+		if (!ServerConf.get().isPeerScanEnabled()) return;
 		running = new ScanPeers();
 		new Thread(running).start();
 	}

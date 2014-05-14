@@ -32,6 +32,10 @@ public class ServerConf {
 		info = new ServerInfo(conf);
 	}
 
+	public boolean isPeerScanEnabled() {
+		return Boolean.parseBoolean(conf.getProperty("peer-scan-enabled"));
+	}
+
 	public String getMongoDbHost() {
 		return conf.getProperty("mongodb.host");
 	}
