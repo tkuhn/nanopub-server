@@ -51,7 +51,7 @@ public class ScanPeers implements Runnable {
 					HttpPost post = new HttpPost(peerUri + "peers");
 					post.setEntity(new StringEntity(myUrl));
 					HttpResponse response = HttpClientBuilder.create().build().execute(post);
-					System.err.println("Introduced myself to " + peerUri + ": " + response.getStatusLine());
+					System.err.println("Introduced myself to " + peerUri + ": " + response.getStatusLine().getReasonPhrase());
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
