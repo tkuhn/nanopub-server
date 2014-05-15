@@ -68,7 +68,7 @@ public class NanopubDb {
 
 	public Nanopub getNanopub(String artifactCode) throws Exception {
 		BasicDBObject query = new BasicDBObject("_id", artifactCode);
-		DBCursor cursor = NanopubDb.get().getNanopubCollection().find(query);
+		DBCursor cursor = getNanopubCollection().find(query);
 		if (!cursor.hasNext()) {
 			return null;
 		}
@@ -78,6 +78,11 @@ public class NanopubDb {
 			throw new Exception("Nanopub verification failed");
 		}
 		return np;
+	}
+
+	public boolean hasNanopub(String artifactCode) throws Exception {
+		BasicDBObject query = new BasicDBObject("_id", artifactCode);
+		return getNanopubCollection().find(query).hasNext();
 	}
 
 	public void loadNanopub(Nanopub np) throws Exception {

@@ -28,7 +28,9 @@ public class CollectNanopubs implements Runnable {
 					break;
 				}
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
-				db.loadNanopub(new NanopubImpl(new URL(serverUri + ac)));
+				if (!db.hasNanopub(ac)) {
+					db.loadNanopub(new NanopubImpl(new URL(serverUri + ac)));
+				}
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
