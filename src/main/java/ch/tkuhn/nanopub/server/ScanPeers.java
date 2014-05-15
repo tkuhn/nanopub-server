@@ -1,5 +1,10 @@
 package ch.tkuhn.nanopub.server;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
+
 
 public class ScanPeers implements Runnable {
 
@@ -24,17 +29,29 @@ public class ScanPeers implements Runnable {
 		} catch(InterruptedException ex) {
 			Thread.currentThread().interrupt();
 		}
-		collectPeers();
+		collectAndContactPeers();
 		collectNanopubs();
 		running = null;
 	}
 
-	private void collectPeers() {
+	private void collectAndContactPeers() {
 		for (String peerUri : db.getPeerUris()) {
 			try {
 				ServerInfo si = ServerInfo.load(peerUri);
+				String myUrl = ServerConf.getInfo().getPublicUrl();
+				boolean knowsMe = false;
 				for (String peerFromPeer : Utils.loadPeerList(si)) {
-					db.addPeer(peerFromPeer);
+					if (myUrl.equals(peerFromPeer)) {
+						knowsMe = true;
+					} else {
+						db.addPeer(peerFromPeer);
+					}
+				}
+				if (!myUrl.isEmpty() && !knowsMe && si.isPostPeersEnabled()) {
+					HttpPost post = new HttpPost(peerUri + "peers");
+					post.setEntity(new StringEntity(myUrl));
+					HttpResponse response = HttpClientBuilder.create().build().execute(post);
+					System.err.println("Introduced myself to " + peerUri + ": " + response.getStatusLine());
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();

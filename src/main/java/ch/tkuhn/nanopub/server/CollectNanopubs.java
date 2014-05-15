@@ -34,7 +34,7 @@ public class CollectNanopubs implements Runnable {
 				if (ac != null && !db.hasNanopub(ac)) {
 					HttpGet get = new HttpGet(serverUri + ac);
 					get.setHeader("Content-Type", "application/trig");
-				    InputStream in = HttpClientBuilder.create().build().execute(get).getEntity().getContent();
+					InputStream in = HttpClientBuilder.create().build().execute(get).getEntity().getContent();
 					db.loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
 				}
 			}
