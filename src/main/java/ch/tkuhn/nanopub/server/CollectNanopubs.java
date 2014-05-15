@@ -1,10 +1,13 @@
 package ch.tkuhn.nanopub.server;
 
-import java.net.URL;
+import java.io.InputStream;
 
 import net.trustyuri.TrustyUriUtils;
 
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.nanopub.NanopubImpl;
+import org.openrdf.rio.RDFFormat;
 
 public class CollectNanopubs implements Runnable {
 
@@ -28,8 +31,11 @@ public class CollectNanopubs implements Runnable {
 					break;
 				}
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
-				if (!db.hasNanopub(ac)) {
-					db.loadNanopub(new NanopubImpl(new URL(serverUri + ac)));
+				if (ac != null && !db.hasNanopub(ac)) {
+					HttpGet get = new HttpGet(serverUri + ac);
+					get.setHeader("Content-Type", "application/trig");
+				    InputStream in = HttpClientBuilder.create().build().execute(get).getEntity().getContent();
+					db.loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
 				}
 			}
 		} catch (Exception ex) {
