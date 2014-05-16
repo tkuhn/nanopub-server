@@ -101,7 +101,7 @@ public class NanopubListPage extends Page {
 			if (hasContinuation) {
 				println("<p><em>... and more:</em> ");
 				for (char ch : Utils.base64Alphabet.toCharArray()) {
-					println("<span class=\"code\"><a href=\"" + getReq().getListQuerySequence() + ch + "+\">" + ch + "</a></span>");
+					println("<span class=\"code\"><a href=\"" + getReq().getListQuerySequence() + ch + "+.html\">" + ch + "</a></span>");
 				}
 				println("</p>");
 			}
