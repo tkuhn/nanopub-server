@@ -106,6 +106,10 @@ public class NanopubListPage extends Page {
 				println("</p>");
 			}
 			printHtmlFooter();
+		} else {
+			if (hasContinuation) {
+				println("...");
+			}
 		}
 	}
 
