@@ -28,9 +28,10 @@ public class NanopubListPage extends Page {
 
 	public void show() throws IOException {
 		NanopubDb db = NanopubDb.get();
-		String pageContent = db.getCurrentPageContent();
+		long currentPageNo = db.getCurrentPageNo();
+		String pageContent = db.getPageContent(currentPageNo);
 		printStart();
-		long n = db.getCurrentPageNo() * db.getPageSize();
+		long n = currentPageNo * db.getPageSize();
 		for (String uri : pageContent.split("\\n")) {
 			printElement(n, uri);
 			n++;

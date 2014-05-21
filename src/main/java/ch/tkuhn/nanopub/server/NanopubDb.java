@@ -41,9 +41,6 @@ public class NanopubDb {
 	private ServerConf conf;
 	private MongoClient mongo;
 	private DB db;
-	private long journalId;
-	private long nextNanopubNo;
-	private int pageSize;
 
 	private NanopubDb() throws UnknownHostException {
 		conf = ServerConf.get();
@@ -65,14 +62,16 @@ public class NanopubDb {
 			setJournalField("next-nanopub-no", "0");
 			setJournalField("page-size", ServerConf.getInfo().getInitPageSize() + "");
 		}
-		journalId = Long.parseLong(getJournalField("journal-id"));
-		nextNanopubNo = Long.parseLong(getJournalField("next-nanopub-no"));
-		pageSize = Integer.parseInt(getJournalField("page-size"));
 	}
 
 	private String getJournalField(String field) {
 		BasicDBObject query = new BasicDBObject("_id", field);
-		return getJournalCollection().find(query).next().get("value").toString();
+		DBCursor cursor = getJournalCollection().find(query);
+		if (cursor.hasNext()) {
+			return cursor.next().get("value").toString();
+		} else {
+			return null;
+		}
 	}
 
 	private void setJournalField(String field, String value) {
@@ -131,31 +130,33 @@ public class NanopubDb {
 	}
 
 	private void addToJournal(Nanopub np) {
-		String pageContent = getCurrentPageContent();
+		long currentPageNo = getCurrentPageNo();
+		String pageContent = getPageContent(currentPageNo);
 		pageContent += np.getUri() + "\n";
-		setJournalField(getCurrentPageName(), pageContent);
-		nextNanopubNo++;
+		setPageContent(currentPageNo, pageContent);
+		long nextNanopubNo = getNextNanopubNo() + 1;
 		setJournalField("next-nanopub-no", "" + nextNanopubNo);
 	}
 
 	public long getCurrentPageNo() {
-		return nextNanopubNo / pageSize;
+		return getNextNanopubNo() / getPageSize();
 	}
 
-	public String getCurrentPageName() {
-		return "page" + getCurrentPageNo();
+	private void setPageContent(long pageNo, String pageContent) {
+		setJournalField("page" + pageNo, pageContent);
 	}
 
 	public String getPageContent(long pageNo) {
-		String pageContent = "";
-		if (nextNanopubNo % pageSize > 0) {
-			pageContent = getJournalField(getCurrentPageName());
+		String pageName = "page" + pageNo;
+		String pageContent = getJournalField(pageName);
+		if (pageContent == null) {
+			if (getNextNanopubNo() % getPageSize() > 0) {
+				throw new RuntimeException("Cannot find journal page: " + pageName);
+			}
+			// Make new page
+			pageContent = "";
 		}
 		return pageContent;
-	}
-
-	public String getCurrentPageContent() {
-		return getPageContent(getCurrentPageNo());
 	}
 
 	public DBCollection getPeerCollection() {
@@ -193,15 +194,15 @@ public class NanopubDb {
 	}
 
 	public long getJournalId() {
-		return journalId;
+		return Long.parseLong(getJournalField("journal-id"));
 	}
 
 	public synchronized long getNextNanopubNo() {
-		return nextNanopubNo;
+		return Long.parseLong(getJournalField("next-nanopub-no"));
 	}
 
 	public int getPageSize() {
-		return pageSize;
+		return Integer.parseInt(getJournalField("page-size"));
 	}
 
 }
