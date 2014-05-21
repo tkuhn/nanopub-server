@@ -15,8 +15,19 @@ public class NanopubListPage extends Page {
 		obj.show();
 	}
 
+	private NanopubDb db = NanopubDb.get();
+	private int pageSize = db.getPageSize();
+	private long lastPage = db.getCurrentPageNo();
+	private long pageNo;
+
 	public NanopubListPage(ServerRequest req, HttpServletResponse httpResp) {
 		super(req, httpResp);
+		String[] paramValues = req.getHttpRequest().getParameterValues("page");
+		if (paramValues != null && paramValues.length > 0) {
+			pageNo = Integer.parseInt(paramValues[0]);
+		} else {
+			pageNo = lastPage;
+		}
 		String rf = getReq().getPresentationFormat();
 		if (rf == null) {
 			String suppFormats = "text/plain,text/html";
@@ -27,14 +38,15 @@ public class NanopubListPage extends Page {
 	}
 
 	public void show() throws IOException {
-		NanopubDb db = NanopubDb.get();
-		long currentPageNo = db.getCurrentPageNo();
-		String pageContent = db.getPageContent(currentPageNo);
+		String pageContent = db.getPageContent(pageNo);
 		printStart();
-		long n = currentPageNo * db.getPageSize();
+		long n = pageNo * pageSize;
 		for (String uri : pageContent.split("\\n")) {
 			printElement(n, uri);
 			n++;
+		}
+		if (asHtml && n % pageSize > 0 && db.getNextNanopubNo() == n) {
+			println("<tr><td>*END*</td></tr>");
 		}
 		printEnd();
 		if (asHtml) {
@@ -46,10 +58,14 @@ public class NanopubListPage extends Page {
 
 	private void printStart() throws IOException {
 		if (asHtml) {
-			long pageNo = NanopubDb.get().getCurrentPageNo();
-			printHtmlHeader("Nanopub Server: Nanopub Journal Page " + pageNo);
-			print("<h3>Nanopub Journal Page " + pageNo + "</h3>");
-			println("<p>[ <a href=\"" + getReq().getRequestString() + ".txt\">as plain text</a> | <a href=\".\">home</a> ]</p>");
+			String title = "Nanopub Server Journal Page " + pageNo + " of " + lastPage;
+			printHtmlHeader(title);
+			print("<h3>" + title + "</h3>");
+			println("<p>[ <a href=\"" + getReq().getRequestString() + ".txt?page=" + pageNo + "\">as plain text</a> | <a href=\".\">home</a> |");
+			long pr = Math.max(0, pageNo-1);
+			println("<a href=\"journal.html?page=0\">&lt;&lt; first page</a> | <a href=\"journal.html?page=" + pr + "\">&lt; previous page</a> |");
+			long nx = Math.min(lastPage, pageNo+1);
+			println("<a href=\"journal.html?page=" + nx + "\">next page &gt;</a> | <a href=\"journal.html?page=" + lastPage + "\">last page &gt;&gt;</a> ]</p>");
 			println("<table><tbody>");
 		}
 	}

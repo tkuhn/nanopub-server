@@ -41,6 +41,7 @@ public class NanopubDb {
 	private ServerConf conf;
 	private MongoClient mongo;
 	private DB db;
+	private int pageSize;
 
 	private NanopubDb() throws UnknownHostException {
 		conf = ServerConf.get();
@@ -62,6 +63,7 @@ public class NanopubDb {
 			setJournalField("next-nanopub-no", "0");
 			setJournalField("page-size", ServerConf.getInfo().getInitPageSize() + "");
 		}
+		pageSize = Integer.parseInt(getJournalField("page-size"));
 	}
 
 	private String getJournalField(String field) {
@@ -202,7 +204,7 @@ public class NanopubDb {
 	}
 
 	public int getPageSize() {
-		return Integer.parseInt(getJournalField("page-size"));
+		return pageSize;
 	}
 
 }
