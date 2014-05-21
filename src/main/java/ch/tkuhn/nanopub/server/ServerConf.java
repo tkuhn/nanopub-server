@@ -37,7 +37,9 @@ public class ServerConf {
 	}
 
 	public boolean isCollectNanopubsEnabled() {
-		return Boolean.parseBoolean(conf.getProperty("collect-nanopubs-enabled"));
+//		return Boolean.parseBoolean(conf.getProperty("collect-nanopubs-enabled"));
+		// Disable nanopub collection until new protocol is implemented
+		return false;
 	}
 
 	public String getMongoDbHost() {
@@ -52,8 +54,8 @@ public class ServerConf {
 		return conf.getProperty("mongodb.dbname");
 	}
 
-	public String[] getBootstrapPeers() {
-		String s = conf.getProperty("bootstrap-peers");
+	public String[] getInitialPeers() {
+		String s = conf.getProperty("initial-peers");
 		if (s == null) return new String[] {};
 		return s.split(" ");
 	}

@@ -38,7 +38,7 @@ public class NanopubListPage extends Page {
 		BasicDBObject query = new BasicDBObject("_id", p);
 		DBCursor cursor = coll.find(query);
 		int c = 0;
-		int maxListSize = ServerConf.getInfo().getMaxListSize();
+		int maxListSize = 1000;
 		printStart();
 		while (cursor.hasNext()) {
 			c++;

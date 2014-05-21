@@ -3,6 +3,7 @@ package ch.tkuhn.nanopub.server;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import net.trustyuri.TrustyUriUtils;
 import net.trustyuri.rdf.CheckNanopub;
@@ -40,6 +41,9 @@ public class NanopubDb {
 	private ServerConf conf;
 	private MongoClient mongo;
 	private DB db;
+	private long journalId;
+	private long nextNanopubNo;
+	private int pageSize;
 
 	private NanopubDb() throws UnknownHostException {
 		conf = ServerConf.get();
@@ -49,13 +53,31 @@ public class NanopubDb {
 	}
 
 	private void init() {
-		for (String s : conf.getBootstrapPeers()) {
+		for (String s : conf.getInitialPeers()) {
 			try {
 				addPeer(s, false);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
+		if (!db.getCollectionNames().contains("journal")) {
+			setJournalField("journal-id", new Random().nextLong() + "");
+			setJournalField("next-nanopub-no", "0");
+			setJournalField("page-size", ServerConf.getInfo().getInitPageSize() + "");
+		}
+		journalId = Long.parseLong(getJournalField("journal-id"));
+		nextNanopubNo = Long.parseLong(getJournalField("next-nanopub-no"));
+		pageSize = Integer.parseInt(getJournalField("page-size"));
+	}
+
+	private String getJournalField(String field) {
+		BasicDBObject query = new BasicDBObject("_id", field);
+		return getJournalCollection().find(query).next().get("value").toString();
+	}
+
+	private void setJournalField(String field, String value) {
+		BasicDBObject dbObj = new BasicDBObject("_id", field).append("value", value);
+		getJournalCollection().save(dbObj);
 	}
 
 	public MongoClient getMongoClient() {
@@ -64,6 +86,10 @@ public class NanopubDb {
 
 	public DBCollection getNanopubCollection() {
 		return db.getCollection("nanopubs");
+	}
+
+	public DBCollection getJournalCollection() {
+		return db.getCollection("journal");
 	}
 
 	public Nanopub getNanopub(String artifactCode) throws Exception {
@@ -85,18 +111,33 @@ public class NanopubDb {
 		return getNanopubCollection().find(query).hasNext();
 	}
 
-	public void loadNanopub(Nanopub np) throws Exception {
+	public synchronized void loadNanopub(Nanopub np) throws Exception {
 		if (!CheckNanopub.isValid(np)) {
 			throw new Exception("Nanopub doesn't have a valid trusty URI");
 		}
 		String artifactCode = TrustyUriUtils.getArtifactCode(np.getUri().toString());
 		String npString = NanopubUtils.writeToString(np, internalFormat);
 		BasicDBObject id = new BasicDBObject("_id", artifactCode);
-		BasicDBObject dbObj = id.append("nanopub", npString).append("uri", np.getUri().toString());
+		BasicDBObject dbObj = new BasicDBObject("_id", artifactCode).append("nanopub", npString).append("uri", np.getUri().toString());
 		DBCollection coll = getNanopubCollection();
 		if (!coll.find(id).hasNext()) {
 			coll.insert(dbObj);
+			addToJournal(np);
 		}
+	}
+
+	private void addToJournal(Nanopub np) {
+		long pageNo = nextNanopubNo / pageSize;
+		String pageName = "page" + pageNo;
+		String pageContent = "";
+		if (nextNanopubNo % pageSize > 0) {
+			pageContent = getJournalField(pageName);
+		}
+		pageContent += TrustyUriUtils.getArtifactCode(np.getUri().toString()) + "\n";
+		setJournalField(pageName, pageContent);
+		nextNanopubNo++;
+		setJournalField("next-nanopub-no", "" + nextNanopubNo);
+		
 	}
 
 	public DBCollection getPeerCollection() {
@@ -131,6 +172,18 @@ public class NanopubDb {
 		if (!coll.find(dbObj).hasNext()) {
 			coll.insert(dbObj);
 		}
+	}
+
+	public long getJournalId() {
+		return journalId;
+	}
+
+	public synchronized long getNextNanopubNo() {
+		return nextNanopubNo;
+	}
+
+	public int getPageSize() {
+		return pageSize;
 	}
 
 }
