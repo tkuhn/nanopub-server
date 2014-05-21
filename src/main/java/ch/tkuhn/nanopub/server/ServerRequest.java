@@ -64,22 +64,4 @@ public class ServerRequest {
 		return null;
 	}
 
-	public boolean hasListQuery() {
-		return requestString.matches("[A-Za-z0-9\\-_]{0,45}\\+");
-	}
-
-	public String getListQueryRegex() {
-		if (hasListQuery()) {
-			return "^" + requestString.substring(0, requestString.length()-1);
-		}
-		return null;
-	}
-
-	public String getListQuerySequence() {
-		if (hasListQuery()) {
-			return requestString.substring(0, requestString.length()-1);
-		}
-		return null;
-	}
-
 }

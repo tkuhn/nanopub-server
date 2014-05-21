@@ -84,11 +84,15 @@ public class NanopubDb {
 		return mongo;
 	}
 
-	public DBCollection getNanopubCollection() {
+	private DBCollection getNanopubCollection() {
 		return db.getCollection("nanopubs");
 	}
 
-	public DBCollection getJournalCollection() {
+	public long getNanopubCount() {
+		return getNanopubCollection().count();
+	}
+
+	private DBCollection getJournalCollection() {
 		return db.getCollection("journal");
 	}
 
@@ -127,17 +131,31 @@ public class NanopubDb {
 	}
 
 	private void addToJournal(Nanopub np) {
-		long pageNo = nextNanopubNo / pageSize;
-		String pageName = "page" + pageNo;
-		String pageContent = "";
-		if (nextNanopubNo % pageSize > 0) {
-			pageContent = getJournalField(pageName);
-		}
-		pageContent += TrustyUriUtils.getArtifactCode(np.getUri().toString()) + "\n";
-		setJournalField(pageName, pageContent);
+		String pageContent = getCurrentPageContent();
+		pageContent += np.getUri() + "\n";
+		setJournalField(getCurrentPageName(), pageContent);
 		nextNanopubNo++;
 		setJournalField("next-nanopub-no", "" + nextNanopubNo);
-		
+	}
+
+	public long getCurrentPageNo() {
+		return nextNanopubNo / pageSize;
+	}
+
+	public String getCurrentPageName() {
+		return "page" + getCurrentPageNo();
+	}
+
+	public String getPageContent(long pageNo) {
+		String pageContent = "";
+		if (nextNanopubNo % pageSize > 0) {
+			pageContent = getJournalField(getCurrentPageName());
+		}
+		return pageContent;
+	}
+
+	public String getCurrentPageContent() {
+		return getPageContent(getCurrentPageNo());
 	}
 
 	public DBCollection getPeerCollection() {

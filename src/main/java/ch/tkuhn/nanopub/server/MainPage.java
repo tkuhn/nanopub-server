@@ -48,8 +48,8 @@ public class MainPage extends Page {
 			println("<p>Administrator: " + admin + "</p>");
 			println("<p>Content:");
 			println("<ul>");
-			long npc = NanopubDb.get().getNanopubCollection().count();
-			println("<li><a href=\"+.html\">Nanopubs: " + npc + "</a></li>");
+			long npc = NanopubDb.get().getNanopubCount();
+			println("<li><a href=\"journal.html\">Nanopubs: " + npc + "</a></li>");
 			long peerc = NanopubDb.get().getPeerCollection().count();
 			println("<li><a href=\"peers.html\">Peers: " + peerc + "</a></li>");
 			println("</ul>");

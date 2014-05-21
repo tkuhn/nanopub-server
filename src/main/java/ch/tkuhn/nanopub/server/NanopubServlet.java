@@ -26,7 +26,7 @@ public class NanopubServlet extends HttpServlet {
 			MainPage.show(r, resp);
 		} else if (r.hasArtifactCode()) {
 			NanopubPage.show(r, resp);
-		} else if (r.hasListQuery()) {
+		} else if (r.getRequestString().equals("journal")) {
 			NanopubListPage.show(r, resp);
 		} else if (r.getRequestString().equals("peers")) {
 			PeerListPage.show(r, resp);

@@ -1,20 +1,14 @@
 package ch.tkuhn.nanopub.server;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
 import net.trustyuri.TrustyUriUtils;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-
 public class NanopubListPage extends Page {
 
 	private boolean asHtml;
-	private boolean hasContinuation = false;
 
 	public static void show(ServerRequest req, HttpServletResponse httpResp) throws IOException {
 		NanopubListPage obj = new NanopubListPage(req, httpResp);
@@ -33,23 +27,13 @@ public class NanopubListPage extends Page {
 	}
 
 	public void show() throws IOException {
-		DBCollection coll = NanopubDb.get().getNanopubCollection();
-		Pattern p = Pattern.compile(getReq().getListQueryRegex());
-		BasicDBObject query = new BasicDBObject("_id", p);
-		DBCursor cursor = coll.find(query);
-		int c = 0;
-		int maxListSize = 1000;
+		NanopubDb db = NanopubDb.get();
+		String pageContent = db.getCurrentPageContent();
 		printStart();
-		while (cursor.hasNext()) {
-			c++;
-			if (c > maxListSize) {
-				hasContinuation = true;
-				break;
-			}
-			printElement(cursor.next().get("uri").toString());
-		}
-		if (c == 0 && asHtml) {
-			println("<tr><td><em>(no nanopub with artifact code starting with '" + getReq().getListQuerySequence() + "')</em></tr></td>");
+		long n = db.getCurrentPageNo() * db.getPageSize();
+		for (String uri : pageContent.split("\\n")) {
+			printElement(n, uri);
+			n++;
 		}
 		printEnd();
 		if (asHtml) {
@@ -61,32 +45,30 @@ public class NanopubListPage extends Page {
 
 	private void printStart() throws IOException {
 		if (asHtml) {
-			String seq = getReq().getListQuerySequence();
-			printHtmlHeader("Nanopub Server: List of nanopubs " + seq);
-			print("<h3>List of stored nanopubs");
-			if (seq.length() > 0) {
-				print(" (with artifact code starting with '" + seq + "')");
-			}
-			println("</h3>");
+			long pageNo = NanopubDb.get().getCurrentPageNo();
+			printHtmlHeader("Nanopub Server: Nanopub Journal Page " + pageNo);
+			print("<h3>Nanopub Journal Page " + pageNo + "</h3>");
 			println("<p>[ <a href=\"" + getReq().getRequestString() + ".txt\">as plain text</a> | <a href=\".\">home</a> ]</p>");
 			println("<table><tbody>");
 		}
 	}
 
-	private void printElement(String npUri) throws IOException {
+	private void printElement(long n, String npUri) throws IOException {
+		String artifactCode = TrustyUriUtils.getArtifactCode(npUri);
 		if (asHtml) {
 			print("<tr>");
+			print("<td>" + n + "</td>");
 			print("<td>");
-			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + "\">get</a> (");
-			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + ".trig\">trig</a>,");
-			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + ".nq\">nq</a>,");
-			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + ".xml\">xml</a>)");
+			print("<a href=\"" + artifactCode + "\">get</a> (");
+			print("<a href=\"" + artifactCode + ".trig\">trig</a>,");
+			print("<a href=\"" + artifactCode + ".nq\">nq</a>,");
+			print("<a href=\"" + artifactCode + ".xml\">xml</a>)");
 			print("</td>");
 			print("<td>");
-			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + ".txt\">show</a> (");
-			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + ".trig.txt\">trig</a>,");
-			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + ".nq.txt\">nq</a>,");
-			print("<a href=\"" + TrustyUriUtils.getArtifactCode(npUri) + ".xml.txt\">xml</a>)");
+			print("<a href=\"" + artifactCode + ".txt\">show</a> (");
+			print("<a href=\"" + artifactCode + ".trig.txt\">trig</a>,");
+			print("<a href=\"" + artifactCode + ".nq.txt\">nq</a>,");
+			print("<a href=\"" + artifactCode + ".xml.txt\">xml</a>)");
 			print("</td>");
 			print("<td><span class=\"code\">" + npUri + "</span></td>");
 			println("</tr>");
@@ -98,18 +80,7 @@ public class NanopubListPage extends Page {
 	private void printEnd() throws IOException {
 		if (asHtml) {
 			println("</tbody></table>");
-			if (hasContinuation) {
-				println("<p><em>... and more:</em> ");
-				for (char ch : Utils.base64Alphabet.toCharArray()) {
-					println("<span class=\"code\"><a href=\"" + getReq().getListQuerySequence() + ch + "+.html\">" + ch + "</a></span>");
-				}
-				println("</p>");
-			}
 			printHtmlFooter();
-		} else {
-			if (hasContinuation) {
-				println("...");
-			}
 		}
 	}
 
