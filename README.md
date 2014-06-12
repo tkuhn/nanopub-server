@@ -73,20 +73,6 @@ browser, `.txt` can be appended:
 
     http://example.org/np/RA5AbXdpz5DcaYXCh9l3eI9ruBosiL5XDU3rxBbBaUO70.nq.txt
 
-The plus `+` operator can be used to request lists of stored nanopublications.
-The following request asks for all stored nanopubs:
-
-    http://example.org/np/+
-
-This returns a plain text file with one nanopub URI per line. There is an upper
-limit on how many nanopubs will be shown (1000 by default). If there are more
-nanopubs for your request, the last line will be `...`. You can make more
-specific requests by specifying the first characters of the artifact code:
-
-    http://example.org/np/RA5A+
-
-This will return all nanopubs whose artifact code starts with `RA5A`.
-
 
 License
 -------
