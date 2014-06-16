@@ -40,10 +40,14 @@ public class NanopubListPage extends Page {
 	public void show() throws IOException {
 		String pageContent = db.getPageContent(pageNo);
 		printStart();
-		long n = pageNo * pageSize;
+		long n = (pageNo-1) * pageSize;
 		for (String uri : pageContent.split("\\n")) {
+			if (uri.isEmpty()) continue;
 			printElement(n, uri);
 			n++;
+		}
+		if (asHtml && n == 0) {
+			println("<tr><td>*EMPTY*</td></tr>");
 		}
 		if (asHtml && n % pageSize > 0 && db.getNextNanopubNo() == n) {
 			println("<tr><td>*END*</td></tr>");
@@ -62,8 +66,8 @@ public class NanopubListPage extends Page {
 			printHtmlHeader(title);
 			print("<h3>" + title + "</h3>");
 			println("<p>[ <a href=\"" + getReq().getRequestString() + ".txt?page=" + pageNo + "\">as plain text</a> | <a href=\".\">home</a> |");
-			long pr = Math.max(0, pageNo-1);
-			println("<a href=\"journal.html?page=0\">&lt;&lt; first page</a> | <a href=\"journal.html?page=" + pr + "\">&lt; previous page</a> |");
+			long pr = Math.max(1, pageNo-1);
+			println("<a href=\"journal.html?page=1\">&lt;&lt; first page</a> | <a href=\"journal.html?page=" + pr + "\">&lt; previous page</a> |");
 			long nx = Math.min(lastPage, pageNo+1);
 			println("<a href=\"journal.html?page=" + nx + "\">next page &gt;</a> | <a href=\"journal.html?page=" + lastPage + "\">last page &gt;&gt;</a> ]</p>");
 			println("<table><tbody>");

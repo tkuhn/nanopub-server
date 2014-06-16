@@ -141,7 +141,7 @@ public class NanopubDb {
 	}
 
 	public long getCurrentPageNo() {
-		return getNextNanopubNo() / getPageSize();
+		return getNextNanopubNo()/getPageSize() + 1;
 	}
 
 	private void setPageContent(long pageNo, String pageContent) {
