@@ -43,6 +43,7 @@ public abstract class Page {
 		println("<!DOCTYPE HTML>");
 		println("<html><head>");
 		println("<title>" + title + "</title>");
+		println("<meta charset=\"utf-8\"/>");
 		println("<link rel=\"stylesheet\" href=\"style/plain.css\" type=\"text/css\" media=\"screen\" title=\"Stylesheet\" />");
 		println("<link rel=\"icon\" href=\"style/favicon.ico\" type=\"image/x-icon\" />");
 		println("</head><body>");

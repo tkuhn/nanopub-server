@@ -48,7 +48,7 @@ public class MainPage extends Page {
 			println("<p>Content:");
 			println("<ul>");
 			long npc = NanopubDb.get().getNanopubCount();
-			println("<li><a href=\"journal.html\">Nanopubs: " + npc + "</a></li>");
+			println("<li><a href=\"journal.html\" rel=\"contents\">Nanopubs: " + npc + "</a></li>");
 			long peerc = NanopubDb.get().getPeerCollection().count();
 			println("<li><a href=\"peers.html\">Peers: " + peerc + "</a></li>");
 			println("</ul>");
@@ -58,7 +58,7 @@ public class MainPage extends Page {
 			println("<li>Post nanopubs: <em>" + (i.isPostNanopubsEnabled() ? "" : "not") + " supported</em></li>");
 			println("<li>Post peers: <em>" + (i.isPostPeersEnabled() ? "" : "not") + " supported</em></li>");
 			println("</ul>");
-			println("<p>[ <a href=\".json\">json</a> ]</p>");
+			println("<p>[ <a href=\".json\" rel=\"alternate\" type=\"application/json\">json</a> ]</p>");
 			printHtmlFooter();
 		}
 		if (url != null && !url.isEmpty()) {

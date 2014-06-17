@@ -68,11 +68,22 @@ public class NanopubListPage extends Page {
 			String title = "Nanopub Server Journal Page " + pageNo + " of " + lastPage;
 			printHtmlHeader(title);
 			print("<h3>" + title + "</h3>");
-			println("<p>[ <a href=\"" + getReq().getRequestString() + ".txt?page=" + pageNo + "\">as plain text</a> | <a href=\".\">home</a> |");
-			long pr = Math.max(1, pageNo-1);
-			println("<a href=\"journal.html?page=1\">&lt;&lt; first page</a> | <a href=\"journal.html?page=" + pr + "\">&lt; previous page</a> |");
-			long nx = Math.min(lastPage, pageNo+1);
-			println("<a href=\"journal.html?page=" + nx + "\">next page &gt;</a> | <a href=\"journal.html?page=" + lastPage + "\">last page &gt;&gt;</a> ]</p>");
+			println("<p>[ ");
+			println("<a href=\"" + getReq().getRequestString() + ".txt?page=" + pageNo + "\" rel=\"alternate\" type=\"text/plain\">as plain text</a> | ");
+			println("<a href=\".\" rel=\"home\">home</a> |");
+			println("<a href=\"journal.html?page=1\" rel=\"start\">&lt;&lt; first page</a> | ");
+			if (pageNo == 1) {
+				println("&lt; previous page | ");
+			} else {
+				println("<a href=\"journal.html?page=" + (pageNo-1) + "\" rel=\"prev\">&lt; previous page</a> |");
+			}
+			if (pageNo == lastPage) {
+				println("next page &gt; | ");
+			} else {
+				println("<a href=\"journal.html?page=" + (pageNo+1) + "\" rel=\"next\">next page &gt;</a> | ");
+			}
+			println("<a href=\"journal.html?page=" + lastPage + "\">last page &gt;&gt;</a> ");
+			println("]</p>");
 			println("<table><tbody>");
 		}
 	}
@@ -84,15 +95,15 @@ public class NanopubListPage extends Page {
 			print("<td>" + n + "</td>");
 			print("<td>");
 			print("<a href=\"" + artifactCode + "\">get</a> (");
-			print("<a href=\"" + artifactCode + ".trig\">trig</a>,");
-			print("<a href=\"" + artifactCode + ".nq\">nq</a>,");
-			print("<a href=\"" + artifactCode + ".xml\">xml</a>)");
+			print("<a href=\"" + artifactCode + ".trig\" type=\"application/x-trig\">trig</a>,");
+			print("<a href=\"" + artifactCode + ".nq\" type=\"text/x-nquads\">nq</a>,");
+			print("<a href=\"" + artifactCode + ".xml\" type=\"application/trix\">xml</a>)");
 			print("</td>");
 			print("<td>");
-			print("<a href=\"" + artifactCode + ".txt\">show</a> (");
-			print("<a href=\"" + artifactCode + ".trig.txt\">trig</a>,");
-			print("<a href=\"" + artifactCode + ".nq.txt\">nq</a>,");
-			print("<a href=\"" + artifactCode + ".xml.txt\">xml</a>)");
+			print("<a href=\"" + artifactCode + ".txt\" type=\"text/plain\">show</a> (");
+			print("<a href=\"" + artifactCode + ".trig.txt\" type=\"text/plain\">trig</a>,");
+			print("<a href=\"" + artifactCode + ".nq.txt\" type=\"text/plain\">nq</a>,");
+			print("<a href=\"" + artifactCode + ".xml.txt\" type=\"text/plain\">xml</a>)");
 			print("</td>");
 			print("<td><span class=\"code\">" + npUri + "</span></td>");
 			println("</tr>");

@@ -54,7 +54,10 @@ public class PeerListPage extends Page {
 		if (asHtml) {
 			printHtmlHeader("Nanopub Server: List of peers");
 			println("<h3>List of peers</h3>");
-			println("<p>[ <a href=\"peers.txt\">as plain text</a> | <a href=\".\">home</a> ]</p>");
+			println("<p>");
+			println("[ <a href=\"peers.txt\" rel=\"alternate\" type=\"text/plain\">as plain text</a> | ");
+			println("<a href=\".\" rel=\"home\">home</a> ]");
+			println("</p>");
 			println("<ul>");
 		}
 	}
