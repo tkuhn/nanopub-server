@@ -23,7 +23,13 @@ public class ServerInfo {
 	private String admin;
 	private boolean postNanopubsEnabled;
 	private boolean postPeersEnabled;
+
+	@SuppressWarnings("unused")
 	private int pageSize = -1;
+	@SuppressWarnings("unused")
+	private long nextNanopubNo = -1;
+	@SuppressWarnings("unused")
+	private long journalId = -1;
 	private transient boolean loadFromDb = false;
 
 	public ServerInfo() {
@@ -45,11 +51,6 @@ public class ServerInfo {
 		return postPeersEnabled;
 	}
 
-	public int getPageSize() {
-		ensureLoadedFromDb();
-		return pageSize;
-	}
-
 	public String getPublicUrl() {
 		return publicUrl;
 	}
@@ -59,15 +60,13 @@ public class ServerInfo {
 	}
 
 	public String asJson() {
-		ensureLoadedFromDb();
-		return new Gson().toJson(this);
-	}
-
-	private void ensureLoadedFromDb() {
 		if (loadFromDb) {
-			pageSize = NanopubDb.get().getPageSize();
-			loadFromDb = false;
+			NanopubDb db = NanopubDb.get();
+			nextNanopubNo = db.getNextNanopubNo();
+			pageSize = db.getPageSize();
+			journalId = db.getJournalId();
 		}
+		return new Gson().toJson(this);
 	}
 
 }
