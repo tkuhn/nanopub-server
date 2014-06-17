@@ -8,7 +8,7 @@ import net.trustyuri.TrustyUriUtils;
 
 public class NanopubListPage extends Page {
 
-	public static final String PAGE_NAME = "journal";
+	public static final String PAGE_NAME = "nanopubs";
 
 	private boolean asHtml;
 
@@ -73,7 +73,7 @@ public class NanopubListPage extends Page {
 
 	private void printStart() throws IOException {
 		if (asHtml) {
-			String title = "Nanopub Server Journal Page " + pageNo + " of " + lastPage;
+			String title = "Nanopublications: Page " + pageNo + " of " + lastPage;
 			printHtmlHeader(title);
 			print("<h3>" + title + "</h3>");
 			println("<p>[ ");
