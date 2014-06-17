@@ -65,7 +65,7 @@ public class NanopubServlet extends HttpServlet {
 					resp.sendError(500, "Error storing nanopub: " + ex.getMessage());
 				}
 			}
-		} else if (r.getRequestString().equals("peers")) {
+		} else if (r.getRequestString().equals(PeerListPage.PAGE_NAME)) {
 			if (!ServerConf.getInfo().isPostPeersEnabled()) {
 				resp.sendError(405, "Posting peers is not supported by this nanopub server");
 				return;

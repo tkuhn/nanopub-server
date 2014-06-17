@@ -20,7 +20,7 @@ public class Utils {
 	private Utils() {}  // no instances allowed
 
 	public static List<String> loadPeerList(ServerInfo si) throws IOException {
-		return loadList(si.getPublicUrl() + "peers");
+		return loadList(si.getPublicUrl() + PeerListPage.PAGE_NAME);
 	}
 
 	public static List<String> loadNanopubUriList(ServerInfo si, String artifactCodeStart) throws IOException {
