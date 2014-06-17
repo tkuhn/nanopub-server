@@ -6,7 +6,7 @@ public class NanopubServer {
 		System.out.println("Nanopub Server");
 		System.out.println("==============");
 		System.out.println("");
-		long c = NanopubDb.get().getNanopubCount();
+		long c = ServerConf.getInfo().getNextNanopubNo();
 		System.out.println("Number of stored nanopubs: " + c);
 	}
 

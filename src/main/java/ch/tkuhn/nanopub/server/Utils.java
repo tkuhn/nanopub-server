@@ -24,7 +24,7 @@ public class Utils {
 	}
 
 	public static List<String> loadNanopubUriList(ServerInfo si, int page) throws IOException {
-		return loadList(si.getPublicUrl() + "?page=" + page);
+		return loadList(si.getPublicUrl() + NanopubListPage.PAGE_NAME + "?page=" + page);
 	}
 
 	public static List<String> loadList(String url) throws IOException {

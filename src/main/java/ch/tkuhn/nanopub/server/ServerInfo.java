@@ -57,32 +57,34 @@ public class ServerInfo {
 	}
 
 	public int getPageSize() {
-		ensureLoaded();
+		if (loadFromDb) {
+			pageSize = NanopubDb.get().getPageSize();
+		}
 		return pageSize;
 	}
 
 	public long getNextNanopubNo() {
-		ensureLoaded();
+		if (loadFromDb) {
+			nextNanopubNo = NanopubDb.get().getNextNanopubNo();
+		}
 		return nextNanopubNo;
 	}
 
 	public long getJournalId() {
-		ensureLoaded();
+		if (loadFromDb) {
+			journalId = NanopubDb.get().getJournalId();
+		}
 		return journalId;
 	}
 
 	public String asJson() {
-		ensureLoaded();
-		return new Gson().toJson(this);
-	}
-
-	private void ensureLoaded() {
 		if (loadFromDb) {
 			NanopubDb db = NanopubDb.get();
 			nextNanopubNo = db.getNextNanopubNo();
 			pageSize = db.getPageSize();
 			journalId = db.getJournalId();
 		}
+		return new Gson().toJson(this);
 	}
 
 }

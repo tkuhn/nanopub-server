@@ -91,10 +91,6 @@ public class NanopubDb {
 		return db.getCollection("nanopubs");
 	}
 
-	public long getNanopubCount() {
-		return getNanopubCollection().count();
-	}
-
 	private DBCollection getJournalCollection() {
 		return db.getCollection("journal");
 	}
@@ -197,11 +193,10 @@ public class NanopubDb {
 		}
 	}
 
-	public void updatePeerState(ServerInfo peerInfo) {
+	public void updatePeerState(ServerInfo peerInfo, long npno) {
 		String url = peerInfo.getPublicUrl();
 		BasicDBObject q = new BasicDBObject("_id", url);
 		long jid = peerInfo.getJournalId();
-		long npno = peerInfo.getNextNanopubNo();
 		BasicDBObject update = new BasicDBObject("_id", url).append("journalId", jid).append("nextNanopubNo", npno);
 		getPeerCollection().update(q, update);
 	}
