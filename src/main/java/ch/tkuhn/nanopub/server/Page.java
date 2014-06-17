@@ -56,4 +56,8 @@ public abstract class Page {
 		return StringEscapeUtils.escapeHtml(text);
 	}
 
+	public void setCanonicalLink(String url) {
+		httpResp.addHeader("Link", "<" + url + ">; rel=\"canonical\"");
+	}
+
 }

@@ -27,16 +27,15 @@ public class MainPage extends Page {
 			getResp().sendError(400, "Invalid request: " + getReq().getFullRequest());
 			return;
 		}
+		String url = ServerConf.getInfo().getPublicUrl();
 		if ("application/json".equals(format)) {
 			println(ServerConf.getInfo().asJson());
 		} else {
 			printHtmlHeader("Nanopub Server");
 			println("<h1>Nanopub Server</h1>");
-			String url = ServerConf.getInfo().getPublicUrl();
-			if (url == null || url.isEmpty()) {
-				url = "<em>(unknown)</em>";
-			} else {
-				url = "<a href=\"" + url + "\">" + url + "</a>";
+			String urlString = "<em>(unknown)</em>";
+			if (urlString != null && !urlString.isEmpty()) {
+				urlString = "<a href=\"" + url + "\">" + url + "</a>";
 			}
 			println("<p>Public URL: <span class=\"code\">" + url + "</span></p>");
 			String admin = ServerConf.getInfo().getAdmin();
@@ -61,6 +60,9 @@ public class MainPage extends Page {
 			println("</ul>");
 			println("<p>[ <a href=\".json\">json</a> ]</p>");
 			printHtmlFooter();
+		}
+		if (url != null && !url.isEmpty()) {
+			setCanonicalLink(url);
 		}
 		getResp().setContentType(format);
 	}

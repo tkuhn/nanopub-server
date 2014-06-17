@@ -8,6 +8,8 @@ import net.trustyuri.TrustyUriUtils;
 
 public class NanopubListPage extends Page {
 
+	public static final String PAGE_NAME = "journal";
+
 	private boolean asHtml;
 
 	public static void show(ServerRequest req, HttpServletResponse httpResp) throws IOException {
@@ -28,6 +30,7 @@ public class NanopubListPage extends Page {
 		} else {
 			pageNo = lastPage;
 		}
+		setCanonicalLink("/" + PAGE_NAME + "?page=" + pageNo);
 		String rf = getReq().getPresentationFormat();
 		if (rf == null) {
 			String suppFormats = "text/plain,text/html";

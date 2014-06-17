@@ -8,6 +8,8 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 public class PeerListPage extends Page {
+	
+	public static final String PAGE_NAME = "peers";
 
 	private boolean asHtml;
 
@@ -25,6 +27,7 @@ public class PeerListPage extends Page {
 		} else {
 			asHtml = "text/html".equals(getReq().getPresentationFormat());
 		}
+		setCanonicalLink("/" + PAGE_NAME);
 	}
 
 	public void show() throws IOException {

@@ -58,6 +58,7 @@ public class NanopubPage extends Page {
 		} else {
 			getResp().setContentType(format.getDefaultMIMEType());
 		}
+		setCanonicalLink("/" + ac);
 		try {
 			NanopubUtils.writeToStream(nanopub, getResp().getOutputStream(), format);
 		} catch (Exception ex) {
