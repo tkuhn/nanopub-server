@@ -31,6 +31,13 @@ public class NanopubListPage extends Page {
 			pageNo = lastPage;
 		}
 		setCanonicalLink("/" + PAGE_NAME + "?page=" + pageNo);
+		getResp().addHeader("Link", "<" + PAGE_NAME + "?page=1>; rel=\"start\"");
+		if (pageNo > 1) {
+			getResp().addHeader("Link", "<" + PAGE_NAME + "?page=" + (pageNo-1) + ">; rel=\"prev\"");
+		}
+		if (pageNo < lastPage) {
+			getResp().addHeader("Link", "<" + PAGE_NAME + "?page=" + (pageNo+1) + ">; rel=\"next\"");
+		}
 		String rf = getReq().getPresentationFormat();
 		if (rf == null) {
 			String suppFormats = "text/plain,text/html";
@@ -69,20 +76,20 @@ public class NanopubListPage extends Page {
 			printHtmlHeader(title);
 			print("<h3>" + title + "</h3>");
 			println("<p>[ ");
-			println("<a href=\"" + getReq().getRequestString() + ".txt?page=" + pageNo + "\" rel=\"alternate\" type=\"text/plain\">as plain text</a> | ");
+			println("<a href=\"" + PAGE_NAME + ".txt?page=" + pageNo + "\" rel=\"alternate\" type=\"text/plain\">as plain text</a> | ");
 			println("<a href=\".\" rel=\"home\">home</a> |");
-			println("<a href=\"journal.html?page=1\" rel=\"start\">&lt;&lt; first page</a> | ");
+			println("<a href=\"" + PAGE_NAME + ".html?page=1\" rel=\"start\">&lt;&lt; first page</a> | ");
 			if (pageNo == 1) {
 				println("&lt; previous page | ");
 			} else {
-				println("<a href=\"journal.html?page=" + (pageNo-1) + "\" rel=\"prev\">&lt; previous page</a> |");
+				println("<a href=\"" + PAGE_NAME + ".html?page=" + (pageNo-1) + "\" rel=\"prev\">&lt; previous page</a> |");
 			}
 			if (pageNo == lastPage) {
 				println("next page &gt; | ");
 			} else {
-				println("<a href=\"journal.html?page=" + (pageNo+1) + "\" rel=\"next\">next page &gt;</a> | ");
+				println("<a href=\"" + PAGE_NAME + ".html?page=" + (pageNo+1) + "\" rel=\"next\">next page &gt;</a> | ");
 			}
-			println("<a href=\"journal.html?page=" + lastPage + "\">last page &gt;&gt;</a> ");
+			println("<a href=\"" + PAGE_NAME + ".html?page=" + lastPage + "\">last page &gt;&gt;</a> ");
 			println("]</p>");
 			println("<table><tbody>");
 		}
