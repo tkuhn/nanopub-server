@@ -30,7 +30,6 @@ public class ScanPeers implements Runnable {
 			Thread.currentThread().interrupt();
 		}
 		collectAndContactPeers();
-		collectNanopubs();
 		running = null;
 	}
 
@@ -53,18 +52,17 @@ public class ScanPeers implements Runnable {
 					HttpResponse response = HttpClientBuilder.create().build().execute(post);
 					System.err.println("Introduced myself to " + peerUri + ": " + response.getStatusLine().getReasonPhrase());
 				}
+				collectNanopubs(si);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
 	}
 
-	private void collectNanopubs() {
+	private void collectNanopubs(ServerInfo si) {
 		if (!ServerConf.get().isCollectNanopubsEnabled()) return;
-		for (String peerUri : db.getPeerUris()) {
-			CollectNanopubs r = new CollectNanopubs(peerUri, "RA");
-			r.run();
-		}
+		CollectNanopubs r = new CollectNanopubs(si);
+		r.run();
 	}
 
 }

@@ -24,11 +24,8 @@ public class ServerInfo {
 	private boolean postNanopubsEnabled;
 	private boolean postPeersEnabled;
 
-	@SuppressWarnings("unused")
 	private int pageSize = -1;
-	@SuppressWarnings("unused")
 	private long nextNanopubNo = -1;
-	@SuppressWarnings("unused")
 	private long journalId = -1;
 	private transient boolean loadFromDb = false;
 
@@ -59,14 +56,33 @@ public class ServerInfo {
 		return admin;
 	}
 
+	public int getPageSize() {
+		ensureLoaded();
+		return pageSize;
+	}
+
+	public long getNextNanopubNo() {
+		ensureLoaded();
+		return nextNanopubNo;
+	}
+
+	public long getJournalId() {
+		ensureLoaded();
+		return journalId;
+	}
+
 	public String asJson() {
+		ensureLoaded();
+		return new Gson().toJson(this);
+	}
+
+	private void ensureLoaded() {
 		if (loadFromDb) {
 			NanopubDb db = NanopubDb.get();
 			nextNanopubNo = db.getNextNanopubNo();
 			pageSize = db.getPageSize();
 			journalId = db.getJournalId();
 		}
-		return new Gson().toJson(this);
 	}
 
 }

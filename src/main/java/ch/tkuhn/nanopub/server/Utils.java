@@ -23,8 +23,8 @@ public class Utils {
 		return loadList(si.getPublicUrl() + PeerListPage.PAGE_NAME);
 	}
 
-	public static List<String> loadNanopubUriList(ServerInfo si, String artifactCodeStart) throws IOException {
-		return loadList(si.getPublicUrl() + artifactCodeStart + "+");
+	public static List<String> loadNanopubUriList(ServerInfo si, int page) throws IOException {
+		return loadList(si.getPublicUrl() + "?page=" + page);
 	}
 
 	public static List<String> loadList(String url) throws IOException {
@@ -49,7 +49,5 @@ public class Utils {
 		} catch (Exception ex) {}
 		return mimeType;
 	}
-
-	public static final String base64Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 }

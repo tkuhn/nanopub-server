@@ -8,6 +8,7 @@ import java.util.Random;
 import net.trustyuri.TrustyUriUtils;
 import net.trustyuri.rdf.CheckNanopub;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.NanopubUtils;
@@ -17,6 +18,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 public class NanopubDb {
@@ -193,6 +195,26 @@ public class NanopubDb {
 		if (!coll.find(dbObj).hasNext()) {
 			coll.insert(dbObj);
 		}
+	}
+
+	public void updatePeerState(ServerInfo peerInfo) {
+		String url = peerInfo.getPublicUrl();
+		BasicDBObject q = new BasicDBObject("_id", url);
+		long jid = peerInfo.getJournalId();
+		long npno = peerInfo.getNextNanopubNo();
+		BasicDBObject update = new BasicDBObject("_id", url).append("journalId", jid).append("nextNanopubNo", npno);
+		getPeerCollection().update(q, update);
+	}
+
+	public Pair<Long,Long> getLastSeenPeerState(String peerUrl) {
+		BasicDBObject q = new BasicDBObject("_id", peerUrl);
+		Long journalId = null;
+		Long nextNanopubNo = null;
+		DBObject r = getPeerCollection().find(q).next();
+		if (r.containsField("journalId")) journalId = Long.parseLong(r.get("journalId").toString());
+		if (r.containsField("nextNanopubNo")) nextNanopubNo = Long.parseLong(r.get("nextNanopubNo").toString());
+		if (journalId == null || nextNanopubNo == null) return null;
+		return Pair.of(journalId, nextNanopubNo);
 	}
 
 	public long getJournalId() {

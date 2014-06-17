@@ -37,9 +37,7 @@ public class ServerConf {
 	}
 
 	public boolean isCollectNanopubsEnabled() {
-//		return Boolean.parseBoolean(conf.getProperty("collect-nanopubs-enabled"));
-		// Disable nanopub collection until new protocol is implemented
-		return false;
+		return Boolean.parseBoolean(conf.getProperty("collect-nanopubs-enabled"));
 	}
 
 	public String getMongoDbHost() {
