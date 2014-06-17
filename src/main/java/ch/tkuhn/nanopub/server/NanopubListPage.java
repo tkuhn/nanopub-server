@@ -24,6 +24,7 @@ public class NanopubListPage extends Page {
 
 	public NanopubListPage(ServerRequest req, HttpServletResponse httpResp) {
 		super(req, httpResp);
+		getResp().addHeader("ETag", "W/\"" + db.getJournalStateId() + "\"");
 		String[] paramValues = req.getHttpRequest().getParameterValues("page");
 		if (paramValues != null && paramValues.length > 0) {
 			pageNo = Integer.parseInt(paramValues[0]);

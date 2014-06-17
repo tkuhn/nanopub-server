@@ -59,7 +59,7 @@ public class NanopubDb {
 			}
 		}
 		if (!db.getCollectionNames().contains("journal")) {
-			setJournalField("journal-id", new Random().nextLong() + "");
+			setJournalField("journal-id", Math.abs(new Random().nextLong()) + "");
 			setJournalField("next-nanopub-no", "0");
 			setJournalField("page-size", ServerConf.getInfo().getInitPageSize() + "");
 		}
@@ -201,6 +201,10 @@ public class NanopubDb {
 
 	public synchronized long getNextNanopubNo() {
 		return Long.parseLong(getJournalField("next-nanopub-no"));
+	}
+
+	public String getJournalStateId() {
+		return getJournalId() + "/" + getNextNanopubNo();
 	}
 
 	public int getPageSize() {
