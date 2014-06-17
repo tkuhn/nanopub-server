@@ -60,4 +60,8 @@ public class ServerConf {
 		return s.split(" ");
 	}
 
+	public int getInitPageSize() {
+		return Integer.parseInt(conf.getProperty("init-page-size"));
+	}
+
 }

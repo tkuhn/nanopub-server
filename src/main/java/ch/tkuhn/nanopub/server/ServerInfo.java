@@ -23,7 +23,8 @@ public class ServerInfo {
 	private String admin;
 	private boolean postNanopubsEnabled;
 	private boolean postPeersEnabled;
-	private int initPageSize = 1000;
+	private int pageSize = -1;
+	private transient boolean loadFromDb = false;
 
 	public ServerInfo() {
 	}
@@ -33,7 +34,7 @@ public class ServerInfo {
 		admin = prop.getProperty("admin");
 		postNanopubsEnabled = Boolean.parseBoolean(prop.getProperty("post-nanopubs-enabled"));
 		postPeersEnabled = Boolean.parseBoolean(prop.getProperty("post-peers-enabled"));
-		initPageSize = Integer.parseInt(prop.getProperty("init-page-size"));
+		loadFromDb = true;
 	}
 
 	public boolean isPostNanopubsEnabled() {
@@ -44,8 +45,9 @@ public class ServerInfo {
 		return postPeersEnabled;
 	}
 
-	public int getInitPageSize() {
-		return initPageSize;
+	public int getPageSize() {
+		ensureLoadedFromDb();
+		return pageSize;
 	}
 
 	public String getPublicUrl() {
@@ -57,7 +59,15 @@ public class ServerInfo {
 	}
 
 	public String asJson() {
+		ensureLoadedFromDb();
 		return new Gson().toJson(this);
+	}
+
+	private void ensureLoadedFromDb() {
+		if (loadFromDb) {
+			pageSize = NanopubDb.get().getPageSize();
+			loadFromDb = false;
+		}
 	}
 
 }

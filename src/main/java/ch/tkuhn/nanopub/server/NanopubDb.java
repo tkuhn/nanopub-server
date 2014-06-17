@@ -29,7 +29,7 @@ public class NanopubDb {
 	public static NanopubDb get() {
 		if (obj == null) {
 			try {
-				obj= new NanopubDb();
+				obj = new NanopubDb();
 			} catch (UnknownHostException ex) {
 				ex.printStackTrace();
 				System.exit(1);
@@ -61,7 +61,7 @@ public class NanopubDb {
 		if (!db.getCollectionNames().contains("journal")) {
 			setJournalField("journal-id", Math.abs(new Random().nextLong()) + "");
 			setJournalField("next-nanopub-no", "0");
-			setJournalField("page-size", ServerConf.getInfo().getInitPageSize() + "");
+			setJournalField("page-size", ServerConf.get().getInitPageSize() + "");
 		}
 		pageSize = Integer.parseInt(getJournalField("page-size"));
 	}
