@@ -25,12 +25,15 @@ public class ScanPeers implements Runnable {
 	@Override
 	public void run() {
 		try {
-			Thread.sleep(10000);
-		} catch(InterruptedException ex) {
-			Thread.currentThread().interrupt();
+			try {
+				Thread.sleep(10000);
+			} catch(InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+			collectAndContactPeers();
+		} finally {
+			running = null;
 		}
-		collectAndContactPeers();
-		running = null;
 	}
 
 	private void collectAndContactPeers() {

@@ -17,19 +17,27 @@ public class NanopubListPage extends Page {
 		obj.show();
 	}
 
-	private NanopubDb db = NanopubDb.get();
-	private int pageSize = db.getPageSize();
-	private long lastPage = db.getCurrentPageNo();
-	private long pageNo;
+	private final int pageSize;
+	private final long lastPage;
+	private final long pageNo;
+	private final long nextNpNo;
+	private final String pageContent;
 
 	public NanopubListPage(ServerRequest req, HttpServletResponse httpResp) {
 		super(req, httpResp);
-		getResp().addHeader("ETag", "W/\"" + db.getJournalStateId() + "\"");
-		String[] paramValues = req.getHttpRequest().getParameterValues("page");
-		if (paramValues != null && paramValues.length > 0) {
-			pageNo = Integer.parseInt(paramValues[0]);
-		} else {
-			pageNo = lastPage;
+		NanopubDb db = NanopubDb.get();
+		synchronized(db) {
+			pageSize = db.getPageSize();
+			lastPage = db.getCurrentPageNo();
+			nextNpNo = db.getNextNanopubNo();
+			String[] paramValues = req.getHttpRequest().getParameterValues("page");
+			if (paramValues != null && paramValues.length > 0) {
+				pageNo = Integer.parseInt(paramValues[0]);
+			} else {
+				pageNo = lastPage;
+			}
+			pageContent = db.getPageContent(pageNo);
+			getResp().addHeader("ETag", "W/\"" + db.getJournalStateId() + "\"");
 		}
 		setCanonicalLink("/" + PAGE_NAME + "?page=" + pageNo);
 		getResp().addHeader("Link", "<" + PAGE_NAME + "?page=1>; rel=\"start\"");
@@ -49,7 +57,6 @@ public class NanopubListPage extends Page {
 	}
 
 	public void show() throws IOException {
-		String pageContent = db.getPageContent(pageNo);
 		printStart();
 		long n = (pageNo-1) * pageSize;
 		for (String uri : pageContent.split("\\n")) {
@@ -60,7 +67,7 @@ public class NanopubListPage extends Page {
 		if (asHtml && n == 0) {
 			println("<tr><td>*EMPTY*</td></tr>");
 		}
-		if (asHtml && n % pageSize > 0 && db.getNextNanopubNo() == n) {
+		if (asHtml && n % pageSize > 0 && nextNpNo == n) {
 			println("<tr><td>*END*</td></tr>");
 		}
 		printEnd();
