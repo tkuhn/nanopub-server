@@ -74,6 +74,19 @@ browser, `.txt` can be appended:
     http://example.org/np/RA5AbXdpz5DcaYXCh9l3eI9ruBosiL5XDU3rxBbBaUO70.nq.txt
 
 
+Statistics
+----------
+
+GeneRIF dataset (see http://arxiv.org/abs/1303.2446):
+
+- Number of nanopubs: 156,024
+- Total file size in N-Quads format: 783 244 024 Bytes (5 020 per nanopub)
+- Total file size in N-Quads format (zipped): 35 833 074 Bytes (230 per nanopub)
+- Total file size in TriG format: 257 748 456 Bytes (1 652 per nanopub)
+- Total file size in TriG format (zipped): 19 452 541 Bytes (125 per nanopub)
+- Used disk space when loaded in MongoDB: 1 023 410 176 Bytes (6559 per nanopub)
+
+
 License
 -------
 
