@@ -82,7 +82,7 @@ public class NanopubListPage extends Page {
 		if (asHtml) {
 			String title = "Nanopublications: Page " + pageNo + " of " + lastPage;
 			printHtmlHeader(title);
-			print("<h3>" + title + "</h3>");
+			print("<h1>" + title + "</h1>");
 			println("<p>[ ");
 			println("<a href=\"" + PAGE_NAME + ".txt?page=" + pageNo + "\" rel=\"alternate\" type=\"text/plain\">as plain text</a> | ");
 			println("<a href=\".\" rel=\"home\">home</a> |");
@@ -109,16 +109,9 @@ public class NanopubListPage extends Page {
 			print("<tr>");
 			print("<td>" + n + "</td>");
 			print("<td>");
-			print("<a href=\"" + artifactCode + "\">get</a> (");
-			print("<a href=\"" + artifactCode + ".trig\" type=\"application/x-trig\">trig</a>,");
-			print("<a href=\"" + artifactCode + ".nq\" type=\"text/x-nquads\">nq</a>,");
-			print("<a href=\"" + artifactCode + ".xml\" type=\"application/trix\">xml</a>)");
-			print("</td>");
-			print("<td>");
-			print("<a href=\"" + artifactCode + ".txt\" type=\"text/plain\">show</a> (");
-			print("<a href=\"" + artifactCode + ".trig.txt\" type=\"text/plain\">trig</a>,");
-			print("<a href=\"" + artifactCode + ".nq.txt\" type=\"text/plain\">nq</a>,");
-			print("<a href=\"" + artifactCode + ".xml.txt\" type=\"text/plain\">xml</a>)");
+			printGetLinks(artifactCode);
+			print("</td><td>");
+			printShowLinks(artifactCode);
 			print("</td>");
 			print("<td><span class=\"code\">" + npUri + "</span></td>");
 			println("</tr>");

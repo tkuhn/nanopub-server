@@ -10,6 +10,7 @@ import org.nanopub.Nanopub;
 import org.nanopub.NanopubWithNs;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.RDF;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -20,6 +21,7 @@ public class NanopubIndexImpl implements NanopubIndex, NanopubWithNs {
 	private final Set<URI> elementSet;
 	private final Set<URI> subIndexSet;
 	private final URI appendedIndex;
+	private boolean isIncompleteIndex = false;
 
 	protected NanopubIndexImpl(Nanopub npIndex) throws MalformedNanopubException {
 		this.np = npIndex;
@@ -49,6 +51,13 @@ public class NanopubIndexImpl implements NanopubIndex, NanopubWithNs {
 					throw new MalformedNanopubException("Sub-index has to be a URI");
 				}
 				subIndexSet.add((URI) st.getObject());
+			}
+		}
+		for (Statement st : np.getPubinfo()) {
+			if (!st.getSubject().equals(np.getUri())) continue;
+			if (!st.getPredicate().equals(RDF.TYPE)) continue;
+			if (st.getObject().equals(NanopubIndex.INCOMPLETE_INDEX_URI)) {
+				isIncompleteIndex = true;
 			}
 		}
 		this.appendedIndex = appendedIndex;
@@ -137,6 +146,11 @@ public class NanopubIndexImpl implements NanopubIndex, NanopubWithNs {
 	@Override
 	public URI getAppendedIndex() {
 		return appendedIndex;
+	}
+
+	@Override
+	public boolean isIncomplete() {
+		return isIncompleteIndex;
 	}
 
 	@Override

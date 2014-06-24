@@ -23,4 +23,6 @@ public interface NanopubIndex extends Nanopub {
 
 	public URI getAppendedIndex();
 
+	public boolean isIncomplete();
+
 }

@@ -86,41 +86,50 @@ public class NanopubPage extends Page {
 		try {
 			NanopubIndex npi = IndexUtils.castToIndex(np);
 			getResp().setContentType("text/html");
-			printHtmlHeader("Nanopub Index");
-			print("<h3>Nanopub Index</h3>");
+			String title = "Nanopub Index";
+			if (npi.isIncomplete()) title = "Part of " + title;
+			printHtmlHeader(title);
+			println("<h1>" + title + "</h1>");
+			println("<p>[ <a href=\".\" rel=\"home\">home</a> ]</p>");
+			println("<h3>This:</h3>");
 			println("<table><tbody>");
-			for (URI uri : npi.getSubIndexes()) {
-				printItem(uri, true);
-			}
-			for (URI uri : npi.getElements()) {
-				printItem(uri, false);
-			}
+			printItem(npi.getUri());
 			println("</tbody></table>");
+			if (npi.getAppendedIndex() != null) {
+				println("<h3>Appends:</h3>");
+				println("<table><tbody>");
+				printItem(npi.getAppendedIndex());
+				println("</tbody></table>");
+			}
+			if (!npi.getSubIndexes().isEmpty()) {
+				println("<h3>Includes as Sub-Indexes:</h3>");
+				println("<table><tbody>");
+				for (URI uri : npi.getSubIndexes()) {
+					printItem(uri);
+				}
+				println("</tbody></table>");
+			}
+			if (!npi.getElements().isEmpty()) {
+				println("<h3>Includes as Elements:</h3>");
+				println("<table><tbody>");
+				for (URI uri : npi.getElements()) {
+					printItem(uri);
+				}
+				println("</tbody></table>");
+			}
 			printHtmlFooter();
 		} catch (MalformedNanopubException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
-	private void printItem(URI uri, boolean isSubIndex) throws IOException {
+	private void printItem(URI uri) throws IOException {
 		String artifactCode = TrustyUriUtils.getArtifactCode(uri.toString());
 		print("<tr>");
-		if (isSubIndex) {
-			print("<td>Includes all:</td>");
-		} else {
-			print("<td>Includes:</td>");
-		}
 		print("<td>");
-		print("<a href=\"" + artifactCode + "\">get</a> (");
-		print("<a href=\"" + artifactCode + ".trig\" type=\"application/x-trig\">trig</a>,");
-		print("<a href=\"" + artifactCode + ".nq\" type=\"text/x-nquads\">nq</a>,");
-		print("<a href=\"" + artifactCode + ".xml\" type=\"application/trix\">xml</a>)");
-		print("</td>");
-		print("<td>");
-		print("<a href=\"" + artifactCode + ".txt\" type=\"text/plain\">show</a> (");
-		print("<a href=\"" + artifactCode + ".trig.txt\" type=\"text/plain\">trig</a>,");
-		print("<a href=\"" + artifactCode + ".nq.txt\" type=\"text/plain\">nq</a>,");
-		print("<a href=\"" + artifactCode + ".xml.txt\" type=\"text/plain\">xml</a>)");
+		printGetLinks(artifactCode);
+		print("</td><td>");
+		printShowLinks(artifactCode);
 		print("</td>");
 		print("<td><span class=\"code\">" + uri + "</span></td>");
 		println("</tr>");

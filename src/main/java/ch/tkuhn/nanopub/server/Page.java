@@ -53,6 +53,20 @@ public abstract class Page {
 		println("</body></html>");
 	}
 
+	public void printGetLinks(String artifactCode) throws IOException {
+		print("<a href=\"" + artifactCode + "\">get</a> (");
+		print("<a href=\"" + artifactCode + ".trig\" type=\"application/x-trig\">trig</a>,");
+		print("<a href=\"" + artifactCode + ".nq\" type=\"text/x-nquads\">nq</a>,");
+		print("<a href=\"" + artifactCode + ".xml\" type=\"application/trix\">xml</a>)");
+	}
+
+	public void printShowLinks(String artifactCode) throws IOException {
+		print("<a href=\"" + artifactCode + ".txt\" type=\"text/plain\">show</a> (");
+		print("<a href=\"" + artifactCode + ".trig.txt\" type=\"text/plain\">trig</a>,");
+		print("<a href=\"" + artifactCode + ".nq.txt\" type=\"text/plain\">nq</a>,");
+		print("<a href=\"" + artifactCode + ".xml.txt\" type=\"text/plain\">xml</a>)");
+	}
+
 	public String escapeHtml(String text) {
 		return StringEscapeUtils.escapeHtml(text);
 	}

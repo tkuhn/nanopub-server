@@ -53,7 +53,7 @@ public class PeerListPage extends Page {
 	private void printStart() throws IOException {
 		if (asHtml) {
 			printHtmlHeader("Nanopub Server: List of peers");
-			println("<h3>List of peers</h3>");
+			println("<h1>List of peers</h1>");
 			println("<p>");
 			println("[ <a href=\"peers.txt\" rel=\"alternate\" type=\"text/plain\">as plain text</a> | ");
 			println("<a href=\".\" rel=\"home\">home</a> ]");
