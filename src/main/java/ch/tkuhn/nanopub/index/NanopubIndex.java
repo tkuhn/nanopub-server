@@ -19,7 +19,7 @@ public interface NanopubIndex extends Nanopub {
 
 	public Set<URI> getElements();
 
-	public Set<URI> getSubIndex();
+	public Set<URI> getSubIndexes();
 
 	public URI getAppendedIndex();
 

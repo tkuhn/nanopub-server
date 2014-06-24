@@ -130,7 +130,7 @@ public class NanopubIndexImpl implements NanopubIndex, NanopubWithNs {
 	}
 
 	@Override
-	public Set<URI> getSubIndex() {
+	public Set<URI> getSubIndexes() {
 		return subIndexSet;
 	}
 
