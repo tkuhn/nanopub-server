@@ -40,6 +40,7 @@ public class NanopubPage extends Page {
 			getResp().sendError(404, "Nanopub not found: " + ac);
 			return;
 		}
+		setCanonicalLink("/" + ac);
 		boolean isIndexNanopub = IndexUtils.isIndex(nanopub);
 		String ext = getReq().getExtension();
 		String rf = getReq().getPresentationFormat();
@@ -71,8 +72,8 @@ public class NanopubPage extends Page {
 			getResp().setContentType(rf);
 		} else {
 			getResp().setContentType(format.getDefaultMIMEType());
+			getResp().addHeader("Content-Disposition", "filename=\"" + ac + "." + format.getDefaultFileExtension() + "\"");
 		}
-		setCanonicalLink("/" + ac);
 		try {
 			NanopubUtils.writeToStream(nanopub, getResp().getOutputStream(), format);
 		} catch (Exception ex) {
