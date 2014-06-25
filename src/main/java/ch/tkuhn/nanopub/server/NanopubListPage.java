@@ -109,9 +109,7 @@ public class NanopubListPage extends Page {
 			print("<tr>");
 			print("<td>" + n + "</td>");
 			print("<td>");
-			printGetLinks(artifactCode);
-			print("</td><td>");
-			printShowLinks(artifactCode);
+			printAltLinks(artifactCode);
 			print("</td>");
 			print("<td><span class=\"code\">" + npUri + "</span></td>");
 			println("</tr>");

@@ -56,13 +56,21 @@ public class NanopubPage extends Page {
 			}
 		} else if (rf == null) {
 			String suppFormats = "application/x-trig,text/x-nquads,application/trix";
-			if (isIndexNanopub) suppFormats += ",text/html";
+			if (isIndexNanopub) {
+				suppFormats += ",text/html";
+			} else {
+				suppFormats += ",text/plain";
+			}
 			String mimeType = Utils.getMimeType(getHttpReq(), suppFormats);
 			if (isIndexNanopub && "text/html".equals(mimeType)) {
 				showIndex(nanopub);
 				return;
 			}
-			format = RDFFormat.forMIMEType(mimeType);
+			if ("text/plain".equals(mimeType)) {
+				rf = "text/plain";
+			} else {
+				format = RDFFormat.forMIMEType(mimeType);
+			}
 		}
 		if (format == null) {
 			format = RDFFormat.TRIG;
@@ -167,9 +175,7 @@ public class NanopubPage extends Page {
 		String artifactCode = TrustyUriUtils.getArtifactCode(uri.toString());
 		print("<tr>");
 		print("<td>");
-		printGetLinks(artifactCode);
-		print("</td><td>");
-		printShowLinks(artifactCode);
+		printAltLinks(artifactCode);
 		print("</td>");
 		print("<td><span class=\"code\">" + uri + "</span></td>");
 		println("</tr>");

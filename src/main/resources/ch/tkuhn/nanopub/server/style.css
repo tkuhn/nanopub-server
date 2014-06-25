@@ -43,6 +43,11 @@ span.code {
 	font-family: "Lucida Console", Monaco, monospace;
 }
 
+span.small {
+	font-size: 8pt;
+	margin-left: 5pt;
+}
+
 ul {
 	padding-left: 15px;
 }​
