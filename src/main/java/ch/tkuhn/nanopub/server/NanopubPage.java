@@ -130,7 +130,7 @@ public class NanopubPage extends Page {
 					println("<h3>Creators:</h3>");
 					println("<ul>");
 					for (URI uri : npi.getCreators()) {
-						println("<li><a href=\"" + uri + "\">" + uri + "</a></li>");
+						println("<li><a href=\"" + uri + "\" rel=\"nofollow\">" + uri + "</a></li>");
 					}
 					println("</ul>");
 				}
