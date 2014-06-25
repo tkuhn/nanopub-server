@@ -126,14 +126,6 @@ public class NanopubPage extends Page {
 					println("<h3>Creation Time:</h3>");
 					println("<p>" + SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(npi.getCreationTime().getTime()) + "</p>");
 				}
-				if (!npi.getAuthors().isEmpty()) {
-					println("<h3>Authors:</h3>");
-					println("<ul>");
-					for (URI uri : npi.getAuthors()) {
-						println("<li><a href=\"" + uri + "\">" + uri + "</a></li>");
-					}
-					println("</ul>");
-				}
 				if (!npi.getCreators().isEmpty()) {
 					println("<h3>Creators:</h3>");
 					println("<ul>");

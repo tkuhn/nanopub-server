@@ -29,9 +29,6 @@ public class LoadNanopubs {
 	@com.beust.jcommander.Parameter(names = "-id", description = "Description of index (only with -i)")
 	private String iDesc;
 
-	@com.beust.jcommander.Parameter(names = "-ia", description = "Author of index (only with -i)")
-	private List<String> iAuthors = new ArrayList<>();
-
 	@com.beust.jcommander.Parameter(names = "-ic", description = "Creator of index (only with -i)")
 	private List<String> iCreators = new ArrayList<>();
 
@@ -96,6 +93,7 @@ public class LoadNanopubs {
 
 			@Override
 			public void handleCompleteIndex(NanopubIndex npc) {
+				System.out.println("Index URI: " + npc.getUri());
 				try {
 					NanopubDb.get().loadNanopub(npc);
 				} catch (Exception ex) {
@@ -113,9 +111,6 @@ public class LoadNanopubs {
 		}
 		if (iDesc != null) {
 			indexCreator.setDescription(iDesc);
-		}
-		for (String author : iAuthors) {
-			indexCreator.addAuthor(author);
 		}
 		for (String creator : iCreators) {
 			indexCreator.addCreator(creator);
