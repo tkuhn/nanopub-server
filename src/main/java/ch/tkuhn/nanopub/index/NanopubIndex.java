@@ -25,4 +25,8 @@ public interface NanopubIndex extends Nanopub {
 
 	public boolean isIncomplete();
 
+	public String getName();
+
+	public String getDescription();
+
 }

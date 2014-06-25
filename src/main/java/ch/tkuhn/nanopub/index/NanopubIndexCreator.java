@@ -20,7 +20,6 @@ public abstract class NanopubIndexCreator {
 	private int elementNsCount;
 
 	public NanopubIndexCreator() {
-		newNpCreator();
 	}
 
 	public void addElement(Nanopub np) {
@@ -29,7 +28,7 @@ public abstract class NanopubIndexCreator {
 
 	public void addElement(URI npUri) {
 		if (finalized) throw new RuntimeException("Already finalized");
-		if (itemCount >= NanopubIndex.MAX_SIZE) {
+		if (npCreator == null || itemCount >= NanopubIndex.MAX_SIZE) {
 			newNpCreator();
 		}
 		itemCount++;
@@ -51,7 +50,7 @@ public abstract class NanopubIndexCreator {
 
 	public void addSubIndex(URI npcUri) {
 		if (finalized) throw new RuntimeException("Already finalized");
-		if (itemCount >= NanopubIndex.MAX_SIZE) {
+		if (npCreator == null || itemCount >= NanopubIndex.MAX_SIZE) {
 			newNpCreator();
 		}
 		itemCount++;

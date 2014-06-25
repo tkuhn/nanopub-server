@@ -1,11 +1,14 @@
 package ch.tkuhn.nanopub.server;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import javax.servlet.http.HttpServletResponse;
 
 import net.trustyuri.TrustyUriUtils;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.nanopub.MalformedNanopubException;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubUtils;
@@ -86,15 +89,60 @@ public class NanopubPage extends Page {
 		try {
 			NanopubIndex npi = IndexUtils.castToIndex(np);
 			getResp().setContentType("text/html");
-			String title = "Nanopub Index";
-			if (npi.isIncomplete()) title = "Part of " + title;
-			printHtmlHeader(title);
+			String title, headerTitle;
+			if (npi.getName() == null) {
+				if (npi.isIncomplete()) {
+					headerTitle = "Part of Unnamed Index";
+					title = "<em>Part of Unnamed Index</em>";
+				} else {
+					headerTitle = "Unnamed Index";
+					title = "<em>Unnamed Index</em>";
+				}
+			} else {
+				String escapedName = StringEscapeUtils.escapeHtml(npi.getName());
+				if (npi.isIncomplete()) {
+					headerTitle = "Part of Index '" + escapedName + "'";
+					title = "<em>Part of Index</em> '" + escapedName + "'";
+				} else {
+					headerTitle = escapedName + " (Nanopub Index)";
+					title = escapedName + " <em>(Nanopub Index)</em>";
+				}
+			}
+			printHtmlHeader(headerTitle);
 			println("<h1>" + title + "</h1>");
 			println("<p>[ <a href=\".\" rel=\"home\">home</a> ]</p>");
 			println("<h3>This:</h3>");
 			println("<table><tbody>");
 			printItem(npi.getUri());
 			println("</tbody></table>");
+			if (!npi.isIncomplete()) {
+			if (npi.getDescription() != null) {
+					println("<h3>Description:</h3>");
+					println("<p>");
+					println(StringEscapeUtils.escapeHtml(npi.getDescription()));
+					println("</p>");
+				}
+				if (npi.getCreationTime() != null) {
+					println("<h3>Creation Time:</h3>");
+					println("<p>" + SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(npi.getCreationTime().getTime()) + "</p>");
+				}
+				if (!npi.getAuthors().isEmpty()) {
+					println("<h3>Authors:</h3>");
+					println("<ul>");
+					for (URI uri : npi.getAuthors()) {
+						println("<li><a href=\"" + uri + "\">" + uri + "</a></li>");
+					}
+					println("</ul>");
+				}
+				if (!npi.getCreators().isEmpty()) {
+					println("<h3>Creators:</h3>");
+					println("<ul>");
+					for (URI uri : npi.getCreators()) {
+						println("<li><a href=\"" + uri + "\">" + uri + "</a></li>");
+					}
+					println("</ul>");
+				}
+			}
 			if (npi.getAppendedIndex() != null) {
 				println("<h3>Appends:</h3>");
 				println("<table><tbody>");

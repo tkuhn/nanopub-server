@@ -8,8 +8,11 @@ import java.util.Set;
 import org.nanopub.MalformedNanopubException;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubWithNs;
+import org.openrdf.model.Literal;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
+import org.openrdf.model.vocabulary.DC;
+import org.openrdf.model.vocabulary.DCTERMS;
 import org.openrdf.model.vocabulary.RDF;
 
 import com.google.common.collect.ImmutableList;
@@ -169,6 +172,28 @@ public class NanopubIndexImpl implements NanopubIndex, NanopubWithNs {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public String getName() {
+		for (Statement st : np.getPubinfo()) {
+			if (!st.getSubject().equals(np.getUri())) continue;
+			if (!st.getPredicate().equals(DC.TITLE) || st.getPredicate().equals(DCTERMS.TITLE)) continue;
+			if (!(st.getObject() instanceof Literal)) continue;
+			return ((Literal) st.getObject()).getLabel();
+		}
+		return null;
+	}
+
+	@Override
+	public String getDescription() {
+		for (Statement st : np.getPubinfo()) {
+			if (!st.getSubject().equals(np.getUri())) continue;
+			if (!st.getPredicate().equals(DC.DESCRIPTION) || st.getPredicate().equals(DCTERMS.DESCRIPTION)) continue;
+			if (!(st.getObject() instanceof Literal)) continue;
+			return ((Literal) st.getObject()).getLabel();
+		}
+		return null;
 	}
 
 }

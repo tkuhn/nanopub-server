@@ -5,13 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.nanopub.MultiNanopubRdfHandler;
-import org.nanopub.NanopubCreator;
 import org.nanopub.MultiNanopubRdfHandler.NanopubHandler;
 import org.nanopub.Nanopub;
 import org.openrdf.rio.RDFFormat;
 
 import ch.tkuhn.nanopub.index.NanopubIndex;
-import ch.tkuhn.nanopub.index.NanopubIndexCreator;
+import ch.tkuhn.nanopub.index.SimpleIndexCreator;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
@@ -23,6 +22,18 @@ public class LoadNanopubs {
 
 	@com.beust.jcommander.Parameter(names = "-i", description = "Make index; load index and nanopubs")
 	private boolean makeIndex;
+
+	@com.beust.jcommander.Parameter(names = "-it", description = "Title of index (only with -i)")
+	private String iTitle;
+
+	@com.beust.jcommander.Parameter(names = "-id", description = "Description of index (only with -i)")
+	private String iDesc;
+
+	@com.beust.jcommander.Parameter(names = "-ia", description = "Author of index (only with -i)")
+	private List<String> iAuthors = new ArrayList<>();
+
+	@com.beust.jcommander.Parameter(names = "-ic", description = "Creator of index (only with -i)")
+	private List<String> iCreators = new ArrayList<>();
 
 	public static void main(String[] args) {
 		LoadNanopubs obj = new LoadNanopubs();
@@ -41,7 +52,7 @@ public class LoadNanopubs {
 		}
 	}
 
-	private NanopubIndexCreator indexCreator = null;
+	private SimpleIndexCreator indexCreator = null;
 
 	private LoadNanopubs() {
 	}
@@ -72,23 +83,7 @@ public class LoadNanopubs {
 	}
 
 	private void initIndexCreator() {
-		indexCreator = new NanopubIndexCreator() {
-
-			@Override
-			public String getBaseUri() {
-				String s = ServerConf.getInfo().getPublicUrl();
-				if (s == null || s.isEmpty()) {
-					return "http://tkuhn.ch/nanopub-server/index/";
-				} else {
-					return s;
-				}
-			}
-
-			@Override
-			public void enrichIncompleteIndex(NanopubCreator npCreator) {}
-
-			@Override
-			public void enrichCompleteIndex(NanopubCreator npCreator) {}
+		indexCreator = new SimpleIndexCreator() {
 
 			@Override
 			public void handleIncompleteIndex(NanopubIndex npc) {
@@ -109,6 +104,22 @@ public class LoadNanopubs {
 			}
 
 		};
+		String url = ServerConf.getInfo().getPublicUrl();
+		if (url != null && !url.isEmpty()) {
+			indexCreator.setBaseUri(url);
+		}
+		if (iTitle != null) {
+			indexCreator.setTitle(iTitle);
+		}
+		if (iDesc != null) {
+			indexCreator.setDescription(iDesc);
+		}
+		for (String author : iAuthors) {
+			indexCreator.addAuthor(author);
+		}
+		for (String creator : iCreators) {
+			indexCreator.addCreator(creator);
+		}
 	}
 
 }
