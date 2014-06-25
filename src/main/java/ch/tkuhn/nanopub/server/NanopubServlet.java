@@ -61,7 +61,10 @@ public class NanopubServlet extends HttpServlet {
 					if (NanopubDb.get().getNanopub(code) == null) {
 						NanopubDb.get().loadNanopub(np);
 					}
+					resp.setHeader("Location", TrustyUriUtils.getArtifactCode(np.getUri().toString()));
+					resp.setStatus(201);
 				} catch (Exception ex) {
+					// TODO distinguish between client (4xx) and server (5xx) errors
 					resp.sendError(500, "Error storing nanopub: " + ex.getMessage());
 				}
 			}
@@ -74,7 +77,9 @@ public class NanopubServlet extends HttpServlet {
 				StringWriter sw = new StringWriter();
 				IOUtils.copy(req.getInputStream(), sw);
 				NanopubDb.get().addPeer(sw.toString().trim());
+				resp.setStatus(201);
 			} catch (Exception ex) {
+				// TODO distinguish between client (4xx) and server (5xx) errors
 				resp.sendError(500, "Error adding peer: " + ex.getMessage());
 			}
 		} else {
