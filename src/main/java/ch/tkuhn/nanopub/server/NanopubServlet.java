@@ -14,10 +14,14 @@ import org.apache.commons.io.IOUtils;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.openrdf.rio.RDFFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NanopubServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -4542560440919522982L;
+
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -90,6 +94,7 @@ public class NanopubServlet extends HttpServlet {
 
 	@Override
 	public void init() throws ServletException {
+		logger.info("Init");
 		check();
 	}
 

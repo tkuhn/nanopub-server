@@ -9,13 +9,20 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.nanopub.NanopubImpl;
 import org.openrdf.rio.RDFFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CollectNanopubs implements Runnable {
 
+	private static final int processPagesPerRun = 1;
+
 	private static NanopubDb db = NanopubDb.get();
+
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private ServerInfo peerInfo;
 	private int peerPageSize;
+	private boolean isFinished = false;
 
 	public CollectNanopubs(ServerInfo peerInfo) {
 		this.peerInfo = peerInfo;
@@ -24,7 +31,7 @@ public class CollectNanopubs implements Runnable {
 	@Override
 	public void run() {
 		try {
-			System.err.println("Checking if there are new nanopubs at " + peerInfo.getPublicUrl());
+			logger.info("Checking if there are new nanopubs at " + peerInfo.getPublicUrl());
 			int startFromPage = 1;
 			long startFromNp = 0;
 			long newNanopubsCount;
@@ -37,34 +44,52 @@ public class CollectNanopubs implements Runnable {
 				newNanopubsCount = peerNanopubNo - startFromNp;
 				if (lastSeenPeerState.getLeft() == peerJid) {
 					if (startFromNp == peerNanopubNo) {
-						System.err.println("Already up-to-date");
+						logger.info("Already up-to-date");
+						isFinished = true;
 						return;
 					}
 					startFromPage = (int) (startFromNp/peerPageSize + 1);
-					System.err.println("Fetching " + newNanopubsCount + " new nanopubs");
+					logger.info(newNanopubsCount + " new nanopubs");
 				} else {
-					System.err.println("Fetching all " + newNanopubsCount + " nanopubs (unknown journal)");
+					logger.info(newNanopubsCount + " nanopubs in total (unknown journal)");
 				}
 			} else {
 				newNanopubsCount = peerNanopubNo;
-				System.err.println("Fetching all " + newNanopubsCount + " nanopubs (unknown peer state)");
+				logger.info(newNanopubsCount + " nanopubs in total (unknown peer state)");
 			}
 			int lastPage = (int) (peerNanopubNo/peerPageSize + 1);
 			long ignoreBeforePos = startFromNp;
-			System.err.println("Fetching nanopubs from journal pages " + startFromPage + " to " + lastPage);
+			logger.info("Starting from page " + startFromPage + " of " + lastPage);
+			int pageCountThisRun = 0;
+			boolean interrupted = false;
 			for (int p = startFromPage ; p <= lastPage ; p++) {
+				pageCountThisRun++;
+				if (pageCountThisRun > processPagesPerRun) {
+					interrupted = true;
+					break;
+				}
 				processPage(p, ignoreBeforePos);
 				ignoreBeforePos = 0;
 			}
-			System.err.println("Done");
+			if (interrupted) {
+				logger.info("To be continued (see if other peers have new nanopubs)");
+			} else {
+				logger.info("Done");
+				isFinished = true;
+			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
 
-	private void processPage(int startFromPage, long ignoreBeforePos) throws Exception {
-		long processNp = (startFromPage-1) * peerPageSize;
-		for (String nanopubUri : Utils.loadNanopubUriList(peerInfo, startFromPage)) {
+	public boolean isFinished() {
+		return isFinished;
+	}
+
+	private void processPage(int page, long ignoreBeforePos) throws Exception {
+		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl());
+		long processNp = (page-1) * peerPageSize;
+		for (String nanopubUri : Utils.loadNanopubUriList(peerInfo, page)) {
 			if (processNp >= ignoreBeforePos) {
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
 				if (ac != null && !db.hasNanopub(ac)) {

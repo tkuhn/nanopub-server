@@ -4,11 +4,17 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class ScanPeers implements Runnable {
 
+	private static final int waitMsBetweenChecks = 60000;  // check every minute
+
 	private static ScanPeers running;
+
+	private static NanopubDb db = NanopubDb.get();
 
 	public static void check() {
 		if (running != null) return;
@@ -17,44 +23,39 @@ public class ScanPeers implements Runnable {
 		new Thread(running).start();
 	}
 
-	private static NanopubDb db = NanopubDb.get();
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	private boolean peerListsChecked = false;
+	private boolean isFinished = false;
 
 	private ScanPeers() {
 	}
 
 	@Override
 	public void run() {
+		logger.info("Start peer scanning thread");
 		try {
 			try {
-				Thread.sleep(10000);
+				logger.info("Wait " + waitMsBetweenChecks + "ms...");
+				Thread.sleep(waitMsBetweenChecks);
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
-			collectAndContactPeers();
+			while (!isFinished) {
+				collectAndContactPeers();
+			}
 		} finally {
 			running = null;
 		}
 	}
 
 	private void collectAndContactPeers() {
+		logger.info("Collect and contact peers...");
+		isFinished = true;
 		for (String peerUri : db.getPeerUris()) {
 			try {
 				ServerInfo si = ServerInfo.load(peerUri);
-				String myUrl = ServerConf.getInfo().getPublicUrl();
-				boolean knowsMe = false;
-				for (String peerFromPeer : Utils.loadPeerList(si)) {
-					if (myUrl.equals(peerFromPeer)) {
-						knowsMe = true;
-					} else {
-						db.addPeer(peerFromPeer);
-					}
-				}
-				if (!myUrl.isEmpty() && !knowsMe && si.isPostPeersEnabled()) {
-					HttpPost post = new HttpPost(peerUri + PeerListPage.PAGE_NAME);
-					post.setEntity(new StringEntity(myUrl));
-					HttpResponse response = HttpClientBuilder.create().build().execute(post);
-					System.err.println("Introduced myself to " + peerUri + ": " + response.getStatusLine().getReasonPhrase());
-				}
+				checkPeerLists(si);
 				collectNanopubs(si);
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -62,10 +63,40 @@ public class ScanPeers implements Runnable {
 		}
 	}
 
+	private void checkPeerLists(ServerInfo si) throws Exception {
+		if (peerListsChecked) return;
+		logger.info("Check peer lists...");
+
+		String myUrl = ServerConf.getInfo().getPublicUrl();
+		boolean knowsMe = false;
+		for (String peerFromPeer : Utils.loadPeerList(si)) {
+			if (myUrl.equals(peerFromPeer)) {
+				knowsMe = true;
+			} else {
+				db.addPeer(peerFromPeer);
+			}
+		}
+		if (!myUrl.isEmpty() && !knowsMe && si.isPostPeersEnabled()) {
+			HttpPost post = new HttpPost(si.getPublicUrl() + PeerListPage.PAGE_NAME);
+			post.setEntity(new StringEntity(myUrl));
+			HttpResponse response = HttpClientBuilder.create().build().execute(post);
+			logger.info("Introduced myself to " + si.getPublicUrl() + ": " + response.getStatusLine().getReasonPhrase());
+		}
+
+		peerListsChecked = true;
+	}
+
 	private void collectNanopubs(ServerInfo si) {
-		if (!ServerConf.get().isCollectNanopubsEnabled()) return;
+		if (!ServerConf.get().isCollectNanopubsEnabled()) {
+			isFinished = true;
+			return;
+		}
+		logger.info("Collecting nanopubs...");
 		CollectNanopubs r = new CollectNanopubs(si);
 		r.run();
+		if (!r.isFinished()) {
+			isFinished = false;
+		}
 	}
 
 }
