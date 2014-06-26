@@ -88,6 +88,11 @@ public class NanopubServlet extends HttpServlet {
 		check();
 	}
 
+	@Override
+	public void init() throws ServletException {
+		check();
+	}
+
 	private void check() {
 		ScanPeers.check();
 	}

@@ -8,6 +8,7 @@
   <servlet>
     <servlet-name>nanopub-server</servlet-name>
     <servlet-class>ch.tkuhn.nanopub.server.NanopubServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
   </servlet>
 
   <servlet-mapping>
