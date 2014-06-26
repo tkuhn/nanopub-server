@@ -29,6 +29,15 @@ public class ServerConf {
 			ex.printStackTrace();
 			System.exit(1);
 		}
+		in = ServerConf.class.getResourceAsStream("local.conf.properties");
+		if (in != null) {
+			try {
+				conf.load(in);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+				System.exit(1);
+			}
+		}
 		info = new ServerInfo(conf);
 	}
 
