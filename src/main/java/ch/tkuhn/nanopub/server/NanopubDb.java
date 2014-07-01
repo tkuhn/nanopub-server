@@ -116,7 +116,7 @@ public class NanopubDb {
 
 	public synchronized void loadNanopub(Nanopub np) throws Exception {
 		if (!CheckNanopub.isValid(np)) {
-			throw new Exception("Nanopub doesn't have a valid trusty URI");
+			throw new Exception("Nanopub doesn't have a valid trusty URI: " + np.getUri());
 		}
 		String artifactCode = TrustyUriUtils.getArtifactCode(np.getUri().toString());
 		String npString = NanopubUtils.writeToString(np, internalFormat);
