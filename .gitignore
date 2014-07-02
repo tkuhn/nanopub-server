@@ -4,3 +4,4 @@
 /bin
 /scratch
 local.*
+/classpath.txt
