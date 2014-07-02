@@ -105,6 +105,8 @@ public class LoadNanopubs {
 		String url = ServerConf.getInfo().getPublicUrl();
 		if (url != null && !url.isEmpty()) {
 			indexCreator.setBaseUri(url);
+		} else {
+			indexCreator.setBaseUri("http://tkuhn.ch/nanopub-server/index/");
 		}
 		if (iTitle != null) {
 			indexCreator.setTitle(iTitle);

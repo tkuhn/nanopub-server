@@ -10,12 +10,16 @@ import org.openrdf.model.vocabulary.DC;
 
 public abstract class SimpleIndexCreator extends NanopubIndexCreator {
 
-	private String baseUri = "http://tkuhn.ch/nanopub-server/index/";
+	private String baseUri;
 	private String title;
 	private String description;
 	private List<String> creators = new ArrayList<>();
 
 	public SimpleIndexCreator() {
+	}
+
+	public SimpleIndexCreator(String baseUri) {
+		this.baseUri = baseUri;
 	}
 
 	public void setBaseUri(String baseUri) {
@@ -45,7 +49,8 @@ public abstract class SimpleIndexCreator extends NanopubIndexCreator {
 		for (String creator : creators) {
 			if (creator.indexOf("://") > 0) {
 				npCreator.addCreator(new URIImpl(creator));
-			} else if (creator.matches("[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}")) {
+			} else if (creator.matches("[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}")) {
+				// TODO Check format of ORCID IDs
 				npCreator.addCreator(creator);
 			} else {
 				throw new IllegalArgumentException("Author has to be URI or ORCID: " + creator);
