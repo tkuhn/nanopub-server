@@ -6,14 +6,12 @@
 # The environment variable JAVA_OPTS can be used to set Java command line options.
 #
 
-CLASS=$1
-shift
-
 WORKINGDIR=`pwd`
+
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 cd ..
-PROJECTDIR=`pwd`
 
+PROJECTDIR=`pwd`
 # for Cygwin:
 PROJECTDIR=${PROJECTDIR#/cygdrive/?}
 
@@ -25,5 +23,8 @@ fi
 CP=$PROJECTDIR/target/classes:$(cat classpath.txt)
 
 cd $WORKINGDIR
+
+CLASS=$1
+shift
 
 java -cp $CP $JAVA_OPTS $CLASS "$@"
