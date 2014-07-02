@@ -7,10 +7,9 @@ import java.util.List;
 import org.nanopub.MultiNanopubRdfHandler;
 import org.nanopub.MultiNanopubRdfHandler.NanopubHandler;
 import org.nanopub.Nanopub;
+import org.nanopub.extra.index.NanopubIndex;
+import org.nanopub.extra.index.SimpleIndexCreator;
 import org.openrdf.rio.RDFFormat;
-
-import ch.tkuhn.nanopub.index.NanopubIndex;
-import ch.tkuhn.nanopub.index.SimpleIndexCreator;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;

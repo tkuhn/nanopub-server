@@ -12,11 +12,10 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.nanopub.MalformedNanopubException;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubUtils;
+import org.nanopub.extra.index.IndexUtils;
+import org.nanopub.extra.index.NanopubIndex;
 import org.openrdf.model.URI;
 import org.openrdf.rio.RDFFormat;
-
-import ch.tkuhn.nanopub.index.IndexUtils;
-import ch.tkuhn.nanopub.index.NanopubIndex;
 
 public class NanopubPage extends Page {
 
