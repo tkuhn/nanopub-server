@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Random;
 
 import net.trustyuri.TrustyUriUtils;
-import net.trustyuri.rdf.CheckNanopub;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.NanopubUtils;
+import org.nanopub.trusty.CheckNanopub;
 import org.openrdf.rio.RDFFormat;
 
 import com.mongodb.BasicDBObject;
