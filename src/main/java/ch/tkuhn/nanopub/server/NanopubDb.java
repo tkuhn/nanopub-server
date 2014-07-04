@@ -11,7 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.NanopubUtils;
-import org.nanopub.trusty.CheckTrustyNanopub;
+import org.nanopub.trusty.TrustyNanopubUtils;
 import org.openrdf.rio.RDFFormat;
 
 import com.mongodb.BasicDBObject;
@@ -103,7 +103,7 @@ public class NanopubDb {
 		}
 		String nanopubString = cursor.next().get("nanopub").toString();
 		Nanopub np = new NanopubImpl(nanopubString, internalFormat);
-		if (!CheckTrustyNanopub.isValid(np)) {
+		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
 			throw new Exception("Nanopub verification failed");
 		}
 		return np;
@@ -115,7 +115,7 @@ public class NanopubDb {
 	}
 
 	public synchronized void loadNanopub(Nanopub np) throws Exception {
-		if (!CheckTrustyNanopub.isValid(np)) {
+		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
 			throw new Exception("Nanopub doesn't have a valid trusty URI: " + np.getUri());
 		}
 		String artifactCode = TrustyUriUtils.getArtifactCode(np.getUri().toString());

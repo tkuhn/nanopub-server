@@ -10,7 +10,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.google.gson.Gson;
 
-public class ServerInfo {
+public class ServerInfo extends org.nanopub.extra.server.ServerInfo {
 
 	public static ServerInfo load(String serverUrl) throws IOException {
 		HttpGet get = new HttpGet(serverUrl);
@@ -19,14 +19,6 @@ public class ServerInfo {
 		return new Gson().fromJson(new InputStreamReader(in), ServerInfo.class);
 	}
 
-	private String publicUrl;
-	private String admin;
-	private boolean postNanopubsEnabled;
-	private boolean postPeersEnabled;
-
-	private int pageSize = -1;
-	private long nextNanopubNo = -1;
-	private long journalId = -1;
 	private transient boolean loadFromDb = false;
 
 	public ServerInfo() {
@@ -40,43 +32,31 @@ public class ServerInfo {
 		loadFromDb = true;
 	}
 
-	public boolean isPostNanopubsEnabled() {
-		return postNanopubsEnabled;
-	}
-
-	public boolean isPostPeersEnabled() {
-		return postPeersEnabled;
-	}
-
-	public String getPublicUrl() {
-		return publicUrl;
-	}
-
-	public String getAdmin() {
-		return admin;
-	}
-
+	@Override
 	public int getPageSize() {
 		if (loadFromDb) {
 			pageSize = NanopubDb.get().getPageSize();
 		}
-		return pageSize;
+		return super.getPageSize();
 	}
 
+	@Override
 	public long getNextNanopubNo() {
 		if (loadFromDb) {
 			nextNanopubNo = NanopubDb.get().getNextNanopubNo();
 		}
-		return nextNanopubNo;
+		return super.getNextNanopubNo();
 	}
 
+	@Override
 	public long getJournalId() {
 		if (loadFromDb) {
 			journalId = NanopubDb.get().getJournalId();
 		}
-		return journalId;
+		return super.getJournalId();
 	}
 
+	@Override
 	public String asJson() {
 		if (loadFromDb) {
 			NanopubDb db = NanopubDb.get();
@@ -84,7 +64,7 @@ public class ServerInfo {
 			pageSize = db.getPageSize();
 			journalId = db.getJournalId();
 		}
-		return new Gson().toJson(this);
+		return super.asJson();
 	}
 
 }
