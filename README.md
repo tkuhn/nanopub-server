@@ -8,37 +8,48 @@ This is a simple server to publish nanopublications that have a
 No queries. No triple store involved. MongoDB is used to store the nanopubs.
 
 
-Compilation
------------
+Compilation and Deployment
+--------------------------
 
-Maven has to be installed, and the packages nanopub-java and trustyuri-java
-have to be installed manually.
+Requirements:
 
-Installation of nanopub-java:
+- Java 1.7 or higher
+- Access to a MongoDB instance
+- Disk space of up to around 10kB per nanopublication
+
+In addition, we assume here that Git and Maven are installed.
+
+Currently, the nanopub server also depends on the latest snapshots of the
+packages nanopub-java and trustyuri-java:
 
     $ git clone git@github.com:Nanopublication/nanopub-java.git
     $ cd nanopub-java
     $ mvn install
 
-Installation of trustyuri-java:
-
     $ git clone git@github.com:trustyuri/trustyuri-java.git
     $ cd trustyuri-java
     $ mvn install
 
-Then compile and package with Maven:
+Now you can fetch the code for the nanopub server:
 
-    $ mvn clean package
+    $ git clone git@github.com:tkuhn/nanopub-server.git
 
+To configure the server, make a copy of the configuration file with the prefix
+`local.`, which overrides the main configuration file:
 
-Deployment
-----------
+    $ cd src/main/resources/ch/tkuhn/nanopub/server/
+    $ cp conf.properties local.conf.properties
 
-Running the server using Maven's Jetty plugin:
+Edit the file `local.conf.properties` to configure your instance of the server,
+and then compile it:
+
+    $ mvn package
+
+Then you can run the nanopub server using Maven's Jetty plugin:
 
     $ mvn jetty:run
 
-Then you should be able to locally access the server from your browser:
+Now you should be able to locally access the server from your browser:
 
     http://0.0.0.0:8080/nanopub-server/
 
@@ -48,13 +59,15 @@ server to map a public URL to the nanopub server, for example:
 
     http://example.org/np/ > http://0.0.0.0:8080/nanopub-server/
 
+Add this public URL to the line `public-url=` of the configuration file.
+
 
 Usage
 -----
 
 To retrieve a nanopub like
 
-    http://nanopub.org/mynanopub/RA5AbXdpz5DcaYXCh9l3eI9ruBosiL5XDU3rxBbBaUO70
+    http://example.org/mynanopubs/RA5AbXdpz5DcaYXCh9l3eI9ruBosiL5XDU3rxBbBaUO70
 
 the artifact code (last 45 characters) has to be given to the nanopub server
 like this:
