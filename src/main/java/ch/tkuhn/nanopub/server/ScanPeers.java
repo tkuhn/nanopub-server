@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 
 public class ScanPeers implements Runnable {
 
-	private static final int waitMsBetweenChecks = 60000;  // check every minute
-
 	private static ScanPeers running;
 
 	private static NanopubDb db = NanopubDb.get();
@@ -36,8 +34,9 @@ public class ScanPeers implements Runnable {
 		logger.info("Start peer scanning thread");
 		try {
 			try {
-				logger.info("Wait " + waitMsBetweenChecks + "ms...");
-				Thread.sleep(waitMsBetweenChecks);
+				int ms = ServerConf.get().getWaitMsBeforePeerScan();
+				logger.info("Wait " + ms + "ms...");
+				Thread.sleep(ms);
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}

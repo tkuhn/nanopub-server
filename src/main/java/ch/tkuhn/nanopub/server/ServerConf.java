@@ -71,4 +71,8 @@ public class ServerConf {
 		return Integer.parseInt(conf.getProperty("init-page-size"));
 	}
 
+	public int getWaitMsBeforePeerScan() {
+		return Integer.parseInt(conf.getProperty("wait-ms-before-peer-scan"));
+	}
+
 }
