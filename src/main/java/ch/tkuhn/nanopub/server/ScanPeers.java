@@ -4,6 +4,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.nanopub.extra.server.NanopubServerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,7 @@ public class ScanPeers implements Runnable {
 
 		String myUrl = ServerConf.getInfo().getPublicUrl();
 		boolean knowsMe = false;
-		for (String peerFromPeer : Utils.loadPeerList(si)) {
+		for (String peerFromPeer : NanopubServerUtils.loadPeerList(si)) {
 			if (myUrl.equals(peerFromPeer)) {
 				knowsMe = true;
 			} else {

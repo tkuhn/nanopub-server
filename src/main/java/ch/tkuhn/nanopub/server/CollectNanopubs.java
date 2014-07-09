@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.nanopub.NanopubImpl;
+import org.nanopub.extra.server.NanopubServerUtils;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ public class CollectNanopubs implements Runnable {
 	private void processPage(int page, long ignoreBeforePos) throws Exception {
 		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl());
 		long processNp = (page-1) * peerPageSize;
-		for (String nanopubUri : Utils.loadNanopubUriList(peerInfo, page)) {
+		for (String nanopubUri : NanopubServerUtils.loadNanopubUriList(peerInfo, page)) {
 			if (processNp >= ignoreBeforePos) {
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
 				if (ac != null && !db.hasNanopub(ac)) {
