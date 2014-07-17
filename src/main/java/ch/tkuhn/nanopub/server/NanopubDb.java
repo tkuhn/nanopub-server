@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.NanopubUtils;
+import org.nanopub.NanopubWithNs;
 import org.nanopub.trusty.TrustyNanopubUtils;
 import org.openrdf.rio.RDFFormat;
 
@@ -115,6 +116,9 @@ public class NanopubDb {
 	}
 
 	public synchronized void loadNanopub(Nanopub np) throws Exception {
+		if (np instanceof NanopubWithNs) {
+			((NanopubWithNs) np).removeUnusedPrefixes();
+		}
 		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
 			throw new Exception("Nanopub doesn't have a valid trusty URI: " + np.getUri());
 		}
