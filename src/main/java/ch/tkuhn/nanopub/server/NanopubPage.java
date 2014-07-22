@@ -123,7 +123,7 @@ public class NanopubPage extends Page {
 			printItem(npi.getUri());
 			println("</tbody></table>");
 			if (!npi.isIncomplete()) {
-			if (npi.getDescription() != null) {
+				if (npi.getDescription() != null) {
 					println("<h3>Description:</h3>");
 					println("<p>");
 					println(StringEscapeUtils.escapeHtml(npi.getDescription()));
@@ -141,6 +141,14 @@ public class NanopubPage extends Page {
 					}
 					println("</ul>");
 				}
+			}
+			if (!npi.getSeeAlsoUris().isEmpty()) {
+				println("<h3>See Also:</h3>");
+				println("<ul>");
+				for (URI uri : npi.getSeeAlsoUris()) {
+					println("<li><a href=\"" + uri + "\" rel=\"nofollow\">" + uri + "</a></li>");
+				}
+				println("</ul>");
 			}
 			if (npi.getAppendedIndex() != null) {
 				println("<h3>Appends:</h3>");
