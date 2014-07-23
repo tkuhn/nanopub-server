@@ -8,12 +8,15 @@ import java.util.Random;
 import net.trustyuri.TrustyUriUtils;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.nanopub.MalformedNanopubException;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.NanopubUtils;
 import org.nanopub.NanopubWithNs;
 import org.nanopub.trusty.TrustyNanopubUtils;
+import org.openrdf.OpenRDFException;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFHandlerException;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -23,6 +26,16 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
 public class NanopubDb {
+
+	public static class NotTrustyNanopubException extends Exception {
+
+		private static final long serialVersionUID = -3782872539656552144L;
+
+		public NotTrustyNanopubException(Nanopub np) {
+			super(np.getUri().toString());
+		}
+
+	}
 
 	// Use trig internally to keep namespaces:
 	private static RDFFormat internalFormat = RDFFormat.TRIG;
@@ -96,31 +109,36 @@ public class NanopubDb {
 		return db.getCollection("journal");
 	}
 
-	public Nanopub getNanopub(String artifactCode) throws Exception {
+	public Nanopub getNanopub(String artifactCode) throws OpenRDFException {
 		BasicDBObject query = new BasicDBObject("_id", artifactCode);
 		DBCursor cursor = getNanopubCollection().find(query);
 		if (!cursor.hasNext()) {
 			return null;
 		}
 		String nanopubString = cursor.next().get("nanopub").toString();
-		Nanopub np = new NanopubImpl(nanopubString, internalFormat);
+		Nanopub np = null;
+		try {
+			np = new NanopubImpl(nanopubString, internalFormat);
+		} catch (MalformedNanopubException ex) {
+			throw new RuntimeException("Stored nanopub is not wellformed (this shouldn't happen)", ex);
+		}
 		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
-			throw new Exception("Nanopub verification failed");
+			throw new RuntimeException("Stored nanopub is not trusty (this shouldn't happen)");
 		}
 		return np;
 	}
 
-	public boolean hasNanopub(String artifactCode) throws Exception {
+	public boolean hasNanopub(String artifactCode) {
 		BasicDBObject query = new BasicDBObject("_id", artifactCode);
 		return getNanopubCollection().find(query).hasNext();
 	}
 
-	public synchronized void loadNanopub(Nanopub np) throws Exception {
+	public synchronized void loadNanopub(Nanopub np) throws NotTrustyNanopubException, RDFHandlerException {
 		if (np instanceof NanopubWithNs) {
 			((NanopubWithNs) np).removeUnusedPrefixes();
 		}
 		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
-			throw new Exception("Nanopub doesn't have a valid trusty URI: " + np.getUri());
+			throw new NotTrustyNanopubException(np);
 		}
 		String artifactCode = TrustyUriUtils.getArtifactCode(np.getUri().toString());
 		String npString = NanopubUtils.writeToString(np, internalFormat);
