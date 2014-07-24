@@ -13,9 +13,12 @@ import net.trustyuri.TrustyUriUtils;
 import org.apache.commons.io.IOUtils;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
+import org.nanopub.extra.server.ServerInfo.ServerInfoException;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ch.tkuhn.nanopub.server.NanopubDb.NotTrustyNanopubException;
 
 public class NanopubServlet extends HttpServlet {
 
@@ -67,8 +70,9 @@ public class NanopubServlet extends HttpServlet {
 					}
 					resp.setHeader("Location", TrustyUriUtils.getArtifactCode(np.getUri().toString()));
 					resp.setStatus(201);
+				} catch (NotTrustyNanopubException ex) {
+					resp.sendError(400, "Nanopub is not trusty: " + ex.getMessage());
 				} catch (Exception ex) {
-					// TODO distinguish between client (4xx) and server (5xx) errors
 					resp.sendError(500, "Error storing nanopub: " + ex.getMessage());
 				}
 			}
@@ -82,8 +86,9 @@ public class NanopubServlet extends HttpServlet {
 				IOUtils.copy(req.getInputStream(), sw);
 				NanopubDb.get().addPeer(sw.toString().trim());
 				resp.setStatus(201);
-			} catch (Exception ex) {
-				// TODO distinguish between client (4xx) and server (5xx) errors
+			} catch (ServerInfoException ex) {
+				resp.sendError(400, "Invalid peer URL: " + ex.getMessage());
+			} catch (IOException ex) {
 				resp.sendError(500, "Error adding peer: " + ex.getMessage());
 			}
 		} else {

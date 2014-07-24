@@ -13,6 +13,7 @@ import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.NanopubUtils;
 import org.nanopub.NanopubWithNs;
+import org.nanopub.extra.server.ServerInfo.ServerInfoException;
 import org.nanopub.trusty.TrustyNanopubUtils;
 import org.openrdf.OpenRDFException;
 import org.openrdf.rio.RDFFormat;
@@ -68,11 +69,7 @@ public class NanopubDb {
 
 	private void init() {
 		for (String s : conf.getInitialPeers()) {
-			try {
-				addPeer(s, false);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
+			addPeerToCollection(s);
 		}
 		if (!db.getCollectionNames().contains("journal")) {
 			setJournalField("journal-id", Math.abs(new Random().nextLong()) + "");
@@ -109,7 +106,7 @@ public class NanopubDb {
 		return db.getCollection("journal");
 	}
 
-	public Nanopub getNanopub(String artifactCode) throws OpenRDFException {
+	public Nanopub getNanopub(String artifactCode) {
 		BasicDBObject query = new BasicDBObject("_id", artifactCode);
 		DBCursor cursor = getNanopubCollection().find(query);
 		if (!cursor.hasNext()) {
@@ -121,6 +118,8 @@ public class NanopubDb {
 			np = new NanopubImpl(nanopubString, internalFormat);
 		} catch (MalformedNanopubException ex) {
 			throw new RuntimeException("Stored nanopub is not wellformed (this shouldn't happen)", ex);
+		} catch (OpenRDFException ex) {
+			throw new RuntimeException("Stored nanopub is corrupted (this shouldn't happen)", ex);
 		}
 		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
 			throw new RuntimeException("Stored nanopub is not trusty (this shouldn't happen)");
@@ -133,7 +132,7 @@ public class NanopubDb {
 		return getNanopubCollection().find(query).hasNext();
 	}
 
-	public synchronized void loadNanopub(Nanopub np) throws NotTrustyNanopubException, RDFHandlerException {
+	public synchronized void loadNanopub(Nanopub np) throws NotTrustyNanopubException {
 		if (np instanceof NanopubWithNs) {
 			((NanopubWithNs) np).removeUnusedPrefixes();
 		}
@@ -141,7 +140,12 @@ public class NanopubDb {
 			throw new NotTrustyNanopubException(np);
 		}
 		String artifactCode = TrustyUriUtils.getArtifactCode(np.getUri().toString());
-		String npString = NanopubUtils.writeToString(np, internalFormat);
+		String npString = null;
+		try {
+			npString = NanopubUtils.writeToString(np, internalFormat);
+		} catch (RDFHandlerException ex) {
+			throw new RuntimeException("Unexpected exception when processing nanopub", ex);
+		}
 		BasicDBObject id = new BasicDBObject("_id", artifactCode);
 		BasicDBObject dbObj = new BasicDBObject("_id", artifactCode).append("nanopub", npString).append("uri", np.getUri().toString());
 		DBCollection coll = getNanopubCollection();
@@ -194,19 +198,14 @@ public class NanopubDb {
 		return peers;
 	}
 
-	public void addPeer(String peerUrl) throws Exception {
-		addPeer(peerUrl, true);
+	public void addPeer(String peerUrl) throws ServerInfoException {
+		ServerInfo.load(peerUrl);  // throw exception if something is wrong
+		addPeerToCollection(peerUrl);
 	}
 
-	private void addPeer(String peerUrl, boolean check) throws Exception {
+	private void addPeerToCollection(String peerUrl) {
 		if (peerUrl.equals(ServerConf.getInfo().getPublicUrl())) {
 			return;
-		}
-		if (check) {
-			ServerInfo info = ServerInfo.load(peerUrl);
-			if (!info.getPublicUrl().equals(peerUrl)) {
-				throw new Exception("Peer URL does not match its declared public URL");
-			}
 		}
 		DBCollection coll = getPeerCollection();
 		BasicDBObject dbObj = new BasicDBObject("_id", peerUrl);

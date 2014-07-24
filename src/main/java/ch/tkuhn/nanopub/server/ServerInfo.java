@@ -1,22 +1,11 @@
 package ch.tkuhn.nanopub.server;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Properties;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-
-import com.google.gson.Gson;
 
 public class ServerInfo extends org.nanopub.extra.server.ServerInfo {
 
-	public static ServerInfo load(String serverUrl) throws IOException {
-		HttpGet get = new HttpGet(serverUrl);
-		get.setHeader("Content-Type", "application/json");
-	    InputStream in = HttpClientBuilder.create().build().execute(get).getEntity().getContent();
-		return new Gson().fromJson(new InputStreamReader(in), ServerInfo.class);
+	public static ServerInfo load(String serverUrl) throws ServerInfoException {
+		return (ServerInfo) load(serverUrl, ServerInfo.class);
 	}
 
 	private transient boolean loadFromDb = false;
