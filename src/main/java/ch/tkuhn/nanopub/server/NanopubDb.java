@@ -26,6 +26,12 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 
+/**
+ * Class that connects to MongoDB. Each nanopub server instance needs its own DB (but this is not
+ * checked).
+ *
+ * @author Tobias Kuhn
+ */
 public class NanopubDb {
 
 	public static class NotTrustyNanopubException extends Exception {
@@ -58,7 +64,9 @@ public class NanopubDb {
 	private ServerConf conf;
 	private MongoClient mongo;
 	private DB db;
+	private long journalId;
 	private int pageSize;
+	private long nextNanopubNo;
 
 	private NanopubDb() throws UnknownHostException {
 		conf = ServerConf.get();
@@ -76,7 +84,9 @@ public class NanopubDb {
 			setJournalField("next-nanopub-no", "0");
 			setJournalField("page-size", ServerConf.get().getInitPageSize() + "");
 		}
+		journalId = Long.parseLong(getJournalField("journal-id"));
 		pageSize = Integer.parseInt(getJournalField("page-size"));
+		nextNanopubNo = Long.parseLong(getJournalField("next-nanopub-no"));
 	}
 
 	private String getJournalField(String field) {
@@ -160,7 +170,7 @@ public class NanopubDb {
 		String pageContent = getPageContent(currentPageNo);
 		pageContent += np.getUri() + "\n";
 		setPageContent(currentPageNo, pageContent);
-		long nextNanopubNo = getNextNanopubNo() + 1;
+		nextNanopubNo++;
 		setJournalField("next-nanopub-no", "" + nextNanopubNo);
 	}
 
@@ -234,11 +244,11 @@ public class NanopubDb {
 	}
 
 	public long getJournalId() {
-		return Long.parseLong(getJournalField("journal-id"));
+		return journalId;
 	}
 
 	public synchronized long getNextNanopubNo() {
-		return Long.parseLong(getJournalField("next-nanopub-no"));
+		return nextNanopubNo;
 	}
 
 	public String getJournalStateId() {
