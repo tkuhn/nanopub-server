@@ -1,5 +1,7 @@
 package ch.tkuhn.nanopub.server;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +27,9 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
 
 /**
  * Class that connects to MongoDB. Each nanopub server instance needs its own DB (but this is not
@@ -64,6 +69,7 @@ public class NanopubDb {
 	private ServerConf conf;
 	private MongoClient mongo;
 	private DB db;
+	private GridFS packageGridFs;
 	private long journalId;
 	private int pageSize;
 	private long nextNanopubNo;
@@ -72,6 +78,7 @@ public class NanopubDb {
 		conf = ServerConf.get();
 		mongo = new MongoClient(conf.getMongoDbHost(), conf.getMongoDbPort());
 		db = mongo.getDB(conf.getMongoDbName());
+		packageGridFs = new GridFS(db, "packages");
 		init();
 	}
 
@@ -241,6 +248,34 @@ public class NanopubDb {
 		if (r.containsField("nextNanopubNo")) nextNanopubNo = Long.parseLong(r.get("nextNanopubNo").toString());
 		if (journalId == null || nextNanopubNo == null) return null;
 		return Pair.of(journalId, nextNanopubNo);
+	}
+
+	public void writePackageToStream(long pageNo, OutputStream out) throws IOException {
+		if (pageNo < 1 || pageNo >= getCurrentPageNo()) {
+			throw new IllegalArgumentException("Not a complete page: " + pageNo);
+		}
+		GridFSDBFile f = packageGridFs.findOne(pageNo + "");
+		if (f == null) {
+			String packageString = "";
+			String pageContent = getPageContent(pageNo);
+			for (String uri : pageContent.split("\\n")) {
+				Nanopub np = getNanopub(TrustyUriUtils.getArtifactCode(uri));
+				String s;
+				try {
+					s = NanopubUtils.writeToString(np, RDFFormat.TRIG);
+				} catch (RDFHandlerException ex) {
+					throw new RuntimeException("Unexpected RDF handler exception", ex);
+				}
+				out.write(s.getBytes());
+				packageString += s + "\n";
+			}
+			GridFSInputFile i = packageGridFs.createFile(packageString.getBytes());
+			i.setFilename(pageNo + "");
+			i.save();
+		} else {
+			f.writeTo(out);
+		}
+		out.close();
 	}
 
 	public long getJournalId() {

@@ -85,6 +85,9 @@ public class NanopubListPage extends Page {
 			print("<h1>" + title + "</h1>");
 			println("<p>[ ");
 			println("<a href=\"" + PAGE_NAME + ".txt?page=" + pageNo + "\" rel=\"alternate\" type=\"text/plain\">as plain text</a> | ");
+			if (pageNo < lastPage) {
+				println("<a href=\"" + PackagePage.PAGE_NAME + ".trig?page=" + pageNo + "\" type=\"application/trig\">as package</a> | ");
+			}
 			println("<a href=\".\" rel=\"home\">home</a> |");
 			println("<a href=\"" + PAGE_NAME + ".html?page=1\" rel=\"start\">&lt;&lt; first page</a> | ");
 			if (pageNo == 1) {

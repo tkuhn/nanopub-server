@@ -1,13 +1,19 @@
 package ch.tkuhn.nanopub.server;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.trustyuri.TrustyUriUtils;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.nanopub.MultiNanopubRdfHandler;
+import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
+import org.nanopub.MultiNanopubRdfHandler.NanopubHandler;
 import org.nanopub.extra.server.NanopubServerUtils;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
@@ -69,7 +75,7 @@ public class CollectNanopubs implements Runnable {
 					interrupted = true;
 					break;
 				}
-				processPage(p, ignoreBeforePos);
+				processPage(p, p == lastPage, ignoreBeforePos);
 				ignoreBeforePos = 0;
 			}
 			if (interrupted) {
@@ -87,22 +93,63 @@ public class CollectNanopubs implements Runnable {
 		return isFinished;
 	}
 
-	private void processPage(int page, long ignoreBeforePos) throws Exception {
+	private void processPage(int page, boolean isLastPage, long ignoreBeforePos) throws Exception {
 		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl());
 		long processNp = (page-1) * peerPageSize;
+		List<String> toLoad = new ArrayList<>();
+		boolean downloadAsPackage = false;
 		for (String nanopubUri : NanopubServerUtils.loadNanopubUriList(peerInfo, page)) {
 			if (processNp >= ignoreBeforePos) {
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
 				if (ac != null && !db.hasNanopub(ac)) {
-					HttpGet get = new HttpGet(peerInfo.getPublicUrl() + ac);
-					get.setHeader("Content-Type", "application/trig");
-					InputStream in = HttpClientBuilder.create().build().execute(get).getEntity().getContent();
-					db.loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
+					toLoad.add(ac);
+					if (!isLastPage && toLoad.size() > 0.1 * db.getPageSize()) {
+						// Download entire package if at least 10% of nanopubs are new
+						downloadAsPackage = true;
+						break;
+					}
 				}
 			}
 			processNp++;
 		}
+		if (downloadAsPackage) {
+			logger.info("Download page " + page + " as package");
+			HttpGet get = new HttpGet(peerInfo.getPublicUrl() + "package?page=" + page);
+			get.setHeader("Accept", "application/trig");
+			HttpResponse resp = HttpClientBuilder.create().build().execute(get);
+			if (!wasSuccessful(resp)) {
+				throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
+			}
+			InputStream in = resp.getEntity().getContent();
+			MultiNanopubRdfHandler.process(RDFFormat.TRIG, in, new NanopubHandler() {
+				@Override
+				public void handleNanopub(Nanopub np) {
+					try {
+						db.loadNanopub(np);
+					} catch (Exception ex) {
+						throw new RuntimeException(ex);
+					}
+				}
+			});
+		} else {
+			logger.info("Download " + toLoad.size() + " nanopubs individually");
+			for (String ac : toLoad) {
+				HttpGet get = new HttpGet(peerInfo.getPublicUrl() + ac);
+				get.setHeader("Accept", "application/trig");
+				HttpResponse resp = HttpClientBuilder.create().build().execute(get);
+				if (!wasSuccessful(resp)) {
+					throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
+				}
+				InputStream in = resp.getEntity().getContent();
+				db.loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
+			}
+		}
 		db.updatePeerState(peerInfo, processNp);
+	}
+
+	private boolean wasSuccessful(HttpResponse resp) {
+		int c = resp.getStatusLine().getStatusCode();
+		return c >= 200 && c < 300;
 	}
 
 }
