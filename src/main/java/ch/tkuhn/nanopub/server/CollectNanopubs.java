@@ -113,7 +113,7 @@ public class CollectNanopubs implements Runnable {
 			processNp++;
 		}
 		if (downloadAsPackage) {
-			logger.info("Download page " + page + " as package");
+			logger.info("Download page " + page + " as package...");
 			HttpGet get = new HttpGet(peerInfo.getPublicUrl() + "package?page=" + page);
 			get.setHeader("Accept", "application/trig");
 			HttpResponse resp = HttpClientBuilder.create().build().execute(get);
@@ -125,14 +125,15 @@ public class CollectNanopubs implements Runnable {
 				@Override
 				public void handleNanopub(Nanopub np) {
 					try {
-						db.loadNanopub(np);
+						loadNanopub(np);
 					} catch (Exception ex) {
 						throw new RuntimeException(ex);
 					}
 				}
 			});
+			logger.info("Done");
 		} else {
-			logger.info("Download " + toLoad.size() + " nanopubs individually");
+			logger.info("Download " + toLoad.size() + " nanopubs individually...");
 			for (String ac : toLoad) {
 				HttpGet get = new HttpGet(peerInfo.getPublicUrl() + ac);
 				get.setHeader("Accept", "application/trig");
@@ -141,8 +142,9 @@ public class CollectNanopubs implements Runnable {
 					throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
 				}
 				InputStream in = resp.getEntity().getContent();
-				db.loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
+				loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
 			}
+			logger.info("Done");
 		}
 		db.updatePeerState(peerInfo, processNp);
 	}
@@ -150,6 +152,11 @@ public class CollectNanopubs implements Runnable {
 	private boolean wasSuccessful(HttpResponse resp) {
 		int c = resp.getStatusLine().getStatusCode();
 		return c >= 200 && c < 300;
+	}
+
+	private void loadNanopub(Nanopub np) throws Exception {
+		db.loadNanopub(np);
+		logger.debug("Nanopub loaded: " + np.getUri());
 	}
 
 }
