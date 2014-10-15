@@ -4,6 +4,8 @@ import java.util.Properties;
 
 public class ServerInfo extends org.nanopub.extra.server.ServerInfo {
 
+	private static final long serialVersionUID = 3460590224836603269L;
+
 	public static ServerInfo load(String serverUrl) throws ServerInfoException {
 		return (ServerInfo) load(serverUrl, ServerInfo.class);
 	}
