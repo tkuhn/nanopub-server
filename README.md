@@ -22,26 +22,28 @@ In addition, we assume here that Git and Maven are installed.
 Currently, the nanopub server also depends on the latest snapshots of the
 packages nanopub-java and trustyuri-java:
 
-    $ git clone git@github.com:Nanopublication/nanopub-java.git
+    $ git clone https://github.com/Nanopublication/nanopub-java.git
     $ cd nanopub-java
     $ mvn install
+    $ cd ..
 
-    $ git clone git@github.com:trustyuri/trustyuri-java.git
+    $ git clone https://github.com/trustyuri/trustyuri-java.git
     $ cd trustyuri-java
     $ mvn install
+    $ cd ..
 
 Now you can fetch the code for the nanopub server:
 
-    $ git clone git@github.com:tkuhn/nanopub-server.git
+    $ git clone https://github.com/tkuhn/nanopub-server.git
 
 To configure the server, make a copy of the configuration file with the prefix
 `local.`, which overrides the main configuration file:
 
-    $ cd src/main/resources/ch/tkuhn/nanopub/server/
+    $ cd nanopub-server/src/main/resources/ch/tkuhn/nanopub/server/
     $ cp conf.properties local.conf.properties
 
 Edit the file `local.conf.properties` to configure your instance of the server,
-and then compile it:
+and then compile it (run in the top `nanopub-server` directory):
 
     $ mvn package
 
