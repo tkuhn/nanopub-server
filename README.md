@@ -17,7 +17,8 @@ Requirements:
 - Access to a MongoDB instance
 - Disk space of up to around 10kB per nanopublication
 
-In addition, we assume here that Git and Maven are installed.
+In addition, we assume here that Git and Maven are installed (tested with
+Maven version 3; version 2.0.9 might work too).
 
 Currently, the nanopub server also depends on the latest snapshots of the
 packages nanopub-java and trustyuri-java:
