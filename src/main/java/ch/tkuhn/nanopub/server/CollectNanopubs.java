@@ -24,6 +24,7 @@ public class CollectNanopubs implements Runnable {
 	private static final int processPagesPerRun = 1;
 
 	private static NanopubDb db = NanopubDb.get();
+	private static final boolean logNanopubLoading = ServerConf.get().isLogNanopubLoadingEnabled();
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -156,7 +157,9 @@ public class CollectNanopubs implements Runnable {
 
 	private void loadNanopub(Nanopub np) throws Exception {
 		db.loadNanopub(np);
-		logger.debug("Nanopub loaded: " + np.getUri());
+		if (logNanopubLoading) {
+			logger.info("Nanopub loaded: " + np.getUri());
+		}
 	}
 
 }

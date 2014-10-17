@@ -75,4 +75,9 @@ public class ServerConf {
 		return Integer.parseInt(conf.getProperty("wait-ms-before-peer-scan"));
 	}
 
+	public boolean isLogNanopubLoadingEnabled() {
+		return Boolean.parseBoolean(conf.getProperty("log-nanopub-loading"));
+		
+	}
+
 }
