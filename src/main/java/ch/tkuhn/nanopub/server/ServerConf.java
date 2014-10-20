@@ -77,7 +77,6 @@ public class ServerConf {
 
 	public boolean isLogNanopubLoadingEnabled() {
 		return Boolean.parseBoolean(conf.getProperty("log-nanopub-loading"));
-		
 	}
 
 }
