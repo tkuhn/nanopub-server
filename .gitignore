@@ -6,4 +6,4 @@
 /classpath.txt
 *.log
 local.*
-src/main/resources/log4j.properties
+/src/main/resources/log4j.properties
