@@ -4,8 +4,9 @@ Nanopub Server
 _(work in progress)_
 
 This is a simple server to publish nanopublications that have a
-[trusty URI](http://arxiv.org/abs/1401.5775). It only returns single nanopubs.
-No queries. No triple store involved. MongoDB is used to store the nanopubs.
+[trusty URI](http://arxiv.org/abs/1401.5775). It only returns entire nanopubs.
+No queries supported; no triple store involved. The current implementation uses
+MongoDB to store the nanopubs.
 
 
 Compilation and Deployment
