@@ -132,7 +132,6 @@ public class CollectNanopubs implements Runnable {
 					}
 				}
 			});
-			logger.info("Done");
 		} else {
 			logger.info("Download " + toLoad.size() + " nanopubs individually...");
 			for (String ac : toLoad) {
@@ -145,7 +144,6 @@ public class CollectNanopubs implements Runnable {
 				InputStream in = resp.getEntity().getContent();
 				loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
 			}
-			logger.info("Done");
 		}
 		db.updatePeerState(peerInfo, processNp);
 	}
