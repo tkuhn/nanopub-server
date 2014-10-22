@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.openrdf.rio.RDFFormat;
-
 public class PackagePage extends Page {
 
 	public static final String PAGE_NAME = "package";
@@ -34,9 +32,19 @@ public class PackagePage extends Page {
 
 	public void show() throws IOException {
 		try {
-			NanopubDb.get().writePackageToStream(pageNo, getResp().getOutputStream());
-			getResp().setContentType(RDFFormat.TRIG.getDefaultMIMEType());
-			getResp().addHeader("Content-Disposition", "attachment; filename=\"package" + pageNo + ".trig\"");
+			boolean gzipped;
+			String suppFormats = "application/x-gzip,application/trig,text/plain";
+			String mimeType = Utils.getMimeType(getHttpReq(), suppFormats);
+			if ("application/x-gzip".equals(getReq().getPresentationFormat()) || "application/x-gzip".equals(mimeType)) {
+				getResp().setContentType("application/x-gzip");
+				getResp().addHeader("Content-Disposition", "attachment; filename=\"package" + pageNo + ".trig.gz\"");
+				gzipped = true;
+			} else {
+				getResp().setContentType("application/trig");
+				getResp().addHeader("Content-Disposition", "attachment; filename=\"package" + pageNo + ".trig\"");
+				gzipped = false;
+			}
+			NanopubDb.get().writePackageToStream(pageNo, gzipped, getResp().getOutputStream());
 		} catch (IllegalArgumentException ex) {
 			getResp().sendError(400, "Invalid argument: " + ex.getMessage());
 		}

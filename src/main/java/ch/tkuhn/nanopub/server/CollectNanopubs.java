@@ -3,6 +3,7 @@ package ch.tkuhn.nanopub.server;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import net.trustyuri.TrustyUriUtils;
 
@@ -104,8 +105,8 @@ public class CollectNanopubs implements Runnable {
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
 				if (ac != null && !db.hasNanopub(ac)) {
 					toLoad.add(ac);
-					if (!isLastPage && toLoad.size() > 0.1 * db.getPageSize()) {
-						// Download entire package if at least 10% of nanopubs are new
+					if (!isLastPage && toLoad.size() > 0.05 * db.getPageSize()) {
+						// Download entire package if at least 5% of nanopubs are new
 						downloadAsPackage = true;
 						break;
 					}
@@ -114,14 +115,24 @@ public class CollectNanopubs implements Runnable {
 			processNp++;
 		}
 		if (downloadAsPackage) {
-			logger.info("Download page " + page + " as package...");
-			HttpGet get = new HttpGet(peerInfo.getPublicUrl() + "package?page=" + page);
-			get.setHeader("Accept", "application/trig");
+			logger.info("Download page " + page + " as compressed package...");
+			HttpGet get = new HttpGet(peerInfo.getPublicUrl() + "package.gz?page=" + page);
+			get.setHeader("Accept", "application/x-gzip");
 			HttpResponse resp = HttpClientBuilder.create().build().execute(get);
-			if (!wasSuccessful(resp)) {
-				throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
+			InputStream in;
+			if (wasSuccessful(resp)) {
+				in = new GZIPInputStream(resp.getEntity().getContent());
+			} else {
+				logger.info("Failed. Trying uncompressed package...");
+				// This is for compability with older versions; to be removed at some point...
+				get = new HttpGet(peerInfo.getPublicUrl() + "package?page=" + page);
+				get.setHeader("Accept", "application/trig");
+				resp = HttpClientBuilder.create().build().execute(get);
+				if (!wasSuccessful(resp)) {
+					throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
+				}
+				in = resp.getEntity().getContent();
 			}
-			InputStream in = resp.getEntity().getContent();
 			MultiNanopubRdfHandler.process(RDFFormat.TRIG, in, new NanopubHandler() {
 				@Override
 				public void handleNanopub(Nanopub np) {

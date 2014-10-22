@@ -1,11 +1,16 @@
 package ch.tkuhn.nanopub.server;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import net.trustyuri.TrustyUriUtils;
 
@@ -79,7 +84,7 @@ public class NanopubDb {
 		conf = ServerConf.get();
 		mongo = new MongoClient(conf.getMongoDbHost(), conf.getMongoDbPort());
 		db = mongo.getDB(conf.getMongoDbName());
-		packageGridFs = new GridFS(db, "packages");
+		packageGridFs = new GridFS(db, "packages_gzipped");
 		init();
 	}
 
@@ -263,13 +268,17 @@ public class NanopubDb {
 		return Pair.of(journalId, nextNanopubNo);
 	}
 
-	public void writePackageToStream(long pageNo, OutputStream out) throws IOException {
+	public void writePackageToStream(long pageNo, boolean gzipped, OutputStream out) throws IOException {
 		if (pageNo < 1 || pageNo >= getCurrentPageNo()) {
 			throw new IllegalArgumentException("Not a complete page: " + pageNo);
 		}
 		GridFSDBFile f = packageGridFs.findOne(pageNo + "");
 		if (f == null) {
-			String packageString = "";
+			if (gzipped) {
+				out = new GZIPOutputStream(out);
+			}
+			ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+			OutputStream packageOut = new GZIPOutputStream(bOut);
 			String pageContent = getPageContent(pageNo);
 			for (String uri : pageContent.split("\\n")) {
 				Nanopub np = getNanopub(TrustyUriUtils.getArtifactCode(uri));
@@ -279,14 +288,27 @@ public class NanopubDb {
 				} catch (RDFHandlerException ex) {
 					throw new RuntimeException("Unexpected RDF handler exception", ex);
 				}
-				out.write(s.getBytes());
-				packageString += s + "\n";
+				byte[] bytes = (s + "\n").getBytes();
+				out.write(bytes);
+				packageOut.write(bytes);
 			}
-			GridFSInputFile i = packageGridFs.createFile(packageString.getBytes());
+			packageOut.close();
+			InputStream packageAsStream = new ByteArrayInputStream(bOut.toByteArray());
+			GridFSInputFile i = packageGridFs.createFile(packageAsStream);
 			i.setFilename(pageNo + "");
 			i.save();
 		} else {
-			f.writeTo(out);
+			if (gzipped) {
+				f.writeTo(out);
+			} else {
+				GZIPInputStream in = new GZIPInputStream(f.getInputStream());
+				byte[] buffer = new byte[1024];
+				int len;
+				while ((len = in.read(buffer)) > 0) {
+					out.write(buffer, 0, len);
+				}
+				in.close();
+			}
 		}
 		out.close();
 	}

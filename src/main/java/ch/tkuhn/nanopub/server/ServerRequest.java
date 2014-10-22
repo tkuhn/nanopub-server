@@ -22,6 +22,9 @@ public class ServerRequest {
 		} else if (r.endsWith(".html")) {
 			presentationFormat = "text/html";
 			r = r.replaceFirst("\\.html$", "");
+		} else if (r.endsWith(".gz")) {
+			presentationFormat = "application/x-gzip";
+			r = r.replaceFirst("\\.gz$", "");
 		}
 		if (r.matches(".*\\.[a-z]{1,10}")) {
 			extension = r.replaceFirst("^.*\\.([a-z]{1,10})$", "$1");
