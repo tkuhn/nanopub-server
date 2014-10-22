@@ -73,7 +73,11 @@ public class ScanPeers implements Runnable {
 			if (myUrl.equals(peerFromPeer)) {
 				knowsMe = true;
 			} else {
-				db.addPeer(peerFromPeer);
+				try {
+					db.addPeer(peerFromPeer);
+				} catch (Exception ex) {
+					logger.error("Failed adding peer: " + peerFromPeer, ex);
+				}
 			}
 		}
 		if (!myUrl.isEmpty() && !knowsMe && si.isPostPeersEnabled()) {
