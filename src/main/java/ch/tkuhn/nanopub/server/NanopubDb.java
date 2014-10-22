@@ -163,22 +163,34 @@ public class NanopubDb {
 		} catch (RDFHandlerException ex) {
 			throw new RuntimeException("Unexpected exception when processing nanopub", ex);
 		}
-		BasicDBObject id = new BasicDBObject("_id", artifactCode);
-		BasicDBObject dbObj = new BasicDBObject("_id", artifactCode).append("nanopub", npString).append("uri", np.getUri().toString());
-		DBCollection coll = getNanopubCollection();
-		if (!coll.find(id).hasNext()) {
-			coll.insert(dbObj);
-			addToJournal(np);
+		db.requestStart();
+		try {
+			db.requestEnsureConnection();
+			BasicDBObject id = new BasicDBObject("_id", artifactCode);
+			BasicDBObject dbObj = new BasicDBObject("_id", artifactCode).append("nanopub", npString).append("uri", np.getUri().toString());
+			DBCollection coll = getNanopubCollection();
+			if (!coll.find(id).hasNext()) {
+				readNextNanopubNo();
+				long currentPageNo = getCurrentPageNo();
+				String pageContent = getPageContent(currentPageNo);
+				pageContent += np.getUri() + "\n";
+				nextNanopubNo++;
+				// TODO Implement proper transactions, rollback, etc.
+				// The following three lines of code are critical. If Java gets interrupted
+				// in between, the data will remain in a slightly inconsistent state (but, I
+				// think, without serious consequences).
+				setJournalField("next-nanopub-no", "" + nextNanopubNo);
+				// If interrupted here, the current page of the journal will miss one entry
+				// (e.g. contain only 999 instead of 1000 entries).
+				setPageContent(currentPageNo, pageContent);
+				// If interrupted here, journal will contain an entry that cannot be found in
+				// the database. This entry might be loaded later and then appear twice in the
+				// journal.
+				coll.insert(dbObj);
+			}
+		} finally {
+			db.requestDone();
 		}
-	}
-
-	private void addToJournal(Nanopub np) {
-		long currentPageNo = getCurrentPageNo();
-		String pageContent = getPageContent(currentPageNo);
-		pageContent += np.getUri() + "\n";
-		setPageContent(currentPageNo, pageContent);
-		nextNanopubNo++;
-		setJournalField("next-nanopub-no", "" + nextNanopubNo);
 	}
 
 	public long getCurrentPageNo() {
@@ -284,6 +296,14 @@ public class NanopubDb {
 
 	public synchronized long getNextNanopubNo() {
 		return nextNanopubNo;
+	}
+
+	public synchronized void readNextNanopubNo() {
+		long loadedNextNanopubNo = Long.parseLong(getJournalField("next-nanopub-no"));
+		if (loadedNextNanopubNo != nextNanopubNo) {
+			nextNanopubNo = loadedNextNanopubNo;
+			throw new RuntimeException("ERROR. Mismatch of nanopub count from MongoDB: several parallel processes?");
+		}
 	}
 
 	public String getJournalStateId() {
