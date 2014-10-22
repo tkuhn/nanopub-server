@@ -16,8 +16,12 @@ import org.nanopub.extra.index.IndexUtils;
 import org.nanopub.extra.index.NanopubIndex;
 import org.openrdf.model.URI;
 import org.openrdf.rio.RDFFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NanopubPage extends Page {
+
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public static void show(ServerRequest req, HttpServletResponse httpResp) throws IOException {
 		NanopubPage obj = new NanopubPage(req, httpResp);
@@ -35,7 +39,7 @@ public class NanopubPage extends Page {
 			nanopub = NanopubDb.get().getNanopub(ac);
 		} catch (Exception ex) {
 			getResp().sendError(500, "Internal error: " + ex.getMessage());
-			ex.printStackTrace();
+			logger.error(ex.getMessage(), ex);
 			return;
 		}
 		if (nanopub == null) {
@@ -88,7 +92,7 @@ public class NanopubPage extends Page {
 			NanopubUtils.writeToStream(nanopub, getResp().getOutputStream(), format);
 		} catch (Exception ex) {
 			getResp().sendError(500, "Internal error: " + ex.getMessage());
-			ex.printStackTrace();
+			logger.error(ex.getMessage(), ex);
 		}
 	}
 

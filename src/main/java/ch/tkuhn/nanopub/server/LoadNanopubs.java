@@ -8,6 +8,7 @@ import org.nanopub.MultiNanopubRdfHandler;
 import org.nanopub.MultiNanopubRdfHandler.NanopubHandler;
 import org.nanopub.Nanopub;
 import org.openrdf.rio.RDFFormat;
+import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
@@ -29,7 +30,7 @@ public class LoadNanopubs {
 		try {
 			obj.run();
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			LoggerFactory.getLogger(LoadNanopubs.class).error(ex.getMessage(), ex);
 			System.exit(1);
 		}
 	}

@@ -20,6 +20,7 @@ import org.nanopub.trusty.TrustyNanopubUtils;
 import org.openrdf.OpenRDFException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
+import org.slf4j.LoggerFactory;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -59,7 +60,7 @@ public class NanopubDb {
 			try {
 				obj = new NanopubDb();
 			} catch (UnknownHostException ex) {
-				ex.printStackTrace();
+				LoggerFactory.getLogger(NanopubDb.class).error(ex.getMessage(), ex);
 				System.exit(1);
 			}
 		}

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.slf4j.LoggerFactory;
+
 
 public class ServerConf {
 
@@ -26,7 +28,7 @@ public class ServerConf {
 		try {
 			conf.load(in);
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			LoggerFactory.getLogger(NanopubDb.class).error(ex.getMessage(), ex);
 			System.exit(1);
 		}
 		in = ServerConf.class.getResourceAsStream("local.conf.properties");
@@ -34,7 +36,7 @@ public class ServerConf {
 			try {
 				conf.load(in);
 			} catch (IOException ex) {
-				ex.printStackTrace();
+				LoggerFactory.getLogger(NanopubDb.class).error(ex.getMessage(), ex);
 				System.exit(1);
 			}
 		}

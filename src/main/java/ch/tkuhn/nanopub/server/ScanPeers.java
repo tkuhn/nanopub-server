@@ -58,7 +58,7 @@ public class ScanPeers implements Runnable {
 				checkPeerLists(si);
 				collectNanopubs(si);
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				logger.error(ex.getMessage(), ex);
 			}
 		}
 	}
