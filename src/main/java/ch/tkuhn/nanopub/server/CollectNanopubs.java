@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class CollectNanopubs implements Runnable {
 
-	private static final int processPagesPerRun = 1;
+	private static final int processPagesPerRun = 10;
 
 	private static NanopubDb db = NanopubDb.get();
 	private static final boolean logNanopubLoading = ServerConf.get().isLogNanopubLoadingEnabled();

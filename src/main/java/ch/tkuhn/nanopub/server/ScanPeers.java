@@ -1,5 +1,9 @@
 package ch.tkuhn.nanopub.server;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -7,7 +11,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.nanopub.extra.server.NanopubServerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 public class ScanPeers implements Runnable {
 
@@ -52,7 +55,9 @@ public class ScanPeers implements Runnable {
 	private void collectAndContactPeers() {
 		logger.info("Collect and contact peers...");
 		isFinished = true;
-		for (String peerUri : db.getPeerUris()) {
+		List<String> peerUris = new ArrayList<>(db.getPeerUris());
+		Collections.shuffle(peerUris);
+		for (String peerUri : peerUris) {
 			try {
 				ServerInfo si = ServerInfo.load(peerUri);
 				checkPeerLists(si);
