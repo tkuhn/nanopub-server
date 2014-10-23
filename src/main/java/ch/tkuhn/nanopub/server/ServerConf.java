@@ -77,8 +77,18 @@ public class ServerConf {
 		return Integer.parseInt(conf.getProperty("wait-ms-before-peer-scan"));
 	}
 
+	public int getWaitMsBeforeFileLoad() {
+		return Integer.parseInt(conf.getProperty("wait-ms-before-file-load"));
+	}
+
 	public boolean isLogNanopubLoadingEnabled() {
 		return Boolean.parseBoolean(conf.getProperty("log-nanopub-loading"));
+	}
+
+	public String getLoadDir() {
+		String loadDir = conf.getProperty("load-dir");
+		if (loadDir != null && loadDir.isEmpty()) loadDir = null;
+		return loadDir;
 	}
 
 }

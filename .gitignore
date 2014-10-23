@@ -3,6 +3,7 @@
 /target
 /bin
 /scratch
+/load
 /classpath.txt
 *.log
 local.*

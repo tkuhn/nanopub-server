@@ -18,7 +18,7 @@ public class ScanPeers implements Runnable {
 
 	private static NanopubDb db = NanopubDb.get();
 
-	public static void check() {
+	public static synchronized void check() {
 		if (running != null) return;
 		if (!ServerConf.get().isPeerScanEnabled()) return;
 		running = new ScanPeers();

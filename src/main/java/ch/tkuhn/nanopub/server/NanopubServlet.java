@@ -107,6 +107,7 @@ public class NanopubServlet extends HttpServlet {
 
 	private void check() {
 		ScanPeers.check();
+		LoadFiles.check();
 	}
 
 }

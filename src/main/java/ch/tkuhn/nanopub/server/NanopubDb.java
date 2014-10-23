@@ -25,6 +25,7 @@ import org.nanopub.trusty.TrustyNanopubUtils;
 import org.openrdf.OpenRDFException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mongodb.BasicDBObject;
@@ -55,6 +56,8 @@ public class NanopubDb {
 
 	}
 
+	private static final boolean logNanopubLoading = ServerConf.get().isLogNanopubLoadingEnabled();
+
 	// Use trig internally to keep namespaces:
 	private static RDFFormat internalFormat = RDFFormat.TRIG;
 
@@ -71,6 +74,8 @@ public class NanopubDb {
 		}
 		return obj;
 	}
+
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private ServerConf conf;
 	private MongoClient mongo;
@@ -196,6 +201,9 @@ public class NanopubDb {
 			}
 		} finally {
 			db.requestDone();
+		}
+		if (logNanopubLoading) {
+			logger.info("Nanopub loaded: " + np.getUri());
 		}
 	}
 
