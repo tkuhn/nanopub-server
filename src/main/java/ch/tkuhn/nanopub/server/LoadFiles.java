@@ -69,13 +69,13 @@ public class LoadFiles implements Runnable {
 					public void handleNanopub(Nanopub np) {
 						try {
 							db.loadNanopub(np);
-							logger.info("File loaded: " + processingFile);
 						} catch (Exception ex) {
 							throw new RuntimeException(ex);
 						}
 					}
 				});
 				processingFile.renameTo(new File(doneDir, f.getName()));
+				logger.info("File loaded: " + processingFile);
 			} catch (Exception ex) {
 				logger.error("Failed to load file: " + f, ex);
 			}
