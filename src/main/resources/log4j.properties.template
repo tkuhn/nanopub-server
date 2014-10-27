@@ -14,5 +14,5 @@ log4j.appender.file.layout=org.apache.log4j.PatternLayout
 log4j.appender.file.layout.ConversionPattern=[%p] %d{yyyy-MM-dd'T'HH:mm:ss.SSSZZZZ} %c - %m%n
 
 # Uncomment to log up to 5GB of log data:
-#log4j.appender.DefaultLog.MaxFileSize=50MB
-#log4j.appender.DefaultLog.MaxBackupIndex=100
+#log4j.appender.file.MaxFileSize=50MB
+#log4j.appender.file.MaxBackupIndex=100
