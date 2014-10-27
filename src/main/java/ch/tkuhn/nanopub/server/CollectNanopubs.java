@@ -87,6 +87,7 @@ public class CollectNanopubs implements Runnable {
 			}
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
+			isFinished = true;
 		}
 	}
 
