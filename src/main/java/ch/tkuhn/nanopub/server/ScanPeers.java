@@ -32,7 +32,7 @@ public class ScanPeers implements Runnable {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	private Random random = new Random();
 
-	protected static Map<String,Long> lastTimeMeasureMap = new HashMap<String,Long>();
+	protected static Map<String,Float> lastTimeMeasureMap = new HashMap<String,Float>();
 
 	private boolean peerListsChecked = false;
 	private boolean isFinished = false;
@@ -80,7 +80,7 @@ public class ScanPeers implements Runnable {
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 				if (si != null) {
-					lastTimeMeasureMap.put(si.getPublicUrl(), Long.MAX_VALUE);
+					lastTimeMeasureMap.put(si.getPublicUrl(), Float.MAX_VALUE);
 				}
 				isFinished = true;
 			}
@@ -135,11 +135,11 @@ public class ScanPeers implements Runnable {
 
 		@Override
 		public int compare(String s1, String s2) {
-			Long l1 = lastTimeMeasureMap.get(s1);
+			Float l1 = lastTimeMeasureMap.get(s1);
 			if (l1 == null) return -1;
-			Long l2 = lastTimeMeasureMap.get(s2);
+			Float l2 = lastTimeMeasureMap.get(s2);
 			if (l2 == null) return 1;
-			return (int) (l1 - l2);
+			return (int) ((l1*1000) - (l2*1000));
 		}
 
 	}

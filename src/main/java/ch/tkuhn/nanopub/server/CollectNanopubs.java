@@ -32,6 +32,7 @@ public class CollectNanopubs {
 	private ServerInfo peerInfo;
 	private int peerPageSize;
 	private boolean isFinished = false;
+	private int loaded;
 
 	public CollectNanopubs(ServerInfo peerInfo) {
 		this.peerInfo = peerInfo;
@@ -56,7 +57,7 @@ public class CollectNanopubs {
 						isFinished = true;
 						return;
 					}
-					startFromPage = (int) (startFromNp/peerPageSize + 1);
+					startFromPage = (int) (startFromNp/peerPageSize) + 1;
 					logger.info(newNanopubsCount + " new nanopubs");
 				} else {
 					logger.info(newNanopubsCount + " nanopubs in total (unknown journal)");
@@ -88,7 +89,7 @@ public class CollectNanopubs {
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 			isFinished = true;
-			ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), Long.MAX_VALUE);
+			ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), Float.MAX_VALUE);
 		}
 	}
 
@@ -98,6 +99,7 @@ public class CollectNanopubs {
 
 	private void processPage(int page, boolean isLastPage, long ignoreBeforePos) throws Exception {
 		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl());
+		loaded = 0;
 		long processNp = (page-1) * peerPageSize;
 		List<String> toLoad = new ArrayList<>();
 		boolean downloadAsPackage = false;
@@ -109,16 +111,17 @@ public class CollectNanopubs {
 					if (!isLastPage && toLoad.size() > 0.05 * db.getPageSize()) {
 						// Download entire package if at least 5% of nanopubs are new
 						downloadAsPackage = true;
+						processNp++;
 						break;
 					}
 				}
 			}
 			processNp++;
 		}
+		StopWatch watch = new StopWatch();
+		watch.start();
 		if (downloadAsPackage) {
 			logger.info("Download page " + page + " as compressed package...");
-			StopWatch watch = new StopWatch();
-			watch.start();
 			HttpGet get = new HttpGet(peerInfo.getPublicUrl() + "package.gz?page=" + page);
 			get.setHeader("Accept", "application/x-gzip");
 			HttpResponse resp = HttpClientBuilder.create().build().execute(get);
@@ -146,9 +149,6 @@ public class CollectNanopubs {
 					}
 				}
 			});
-			watch.stop();
-			ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), watch.getTime());
-			logger.info("Time measurement: " + watch.getTime());
 		} else {
 			logger.info("Download " + toLoad.size() + " nanopubs individually...");
 			for (String ac : toLoad) {
@@ -162,6 +162,13 @@ public class CollectNanopubs {
 				loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
 			}
 		}
+		watch.stop();
+		Float avg = null;
+		if (loaded > 0) {
+			avg = (float) watch.getTime() / loaded;
+			ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), avg);
+		}
+		logger.info("Time measurement: " + watch.getTime() + " for " + loaded + " nanopubs (average: " + avg + ")");
 		db.updatePeerState(peerInfo, processNp);
 	}
 
@@ -172,6 +179,7 @@ public class CollectNanopubs {
 
 	private void loadNanopub(Nanopub np) throws Exception {
 		db.loadNanopub(np);
+		loaded++;
 	}
 
 }
