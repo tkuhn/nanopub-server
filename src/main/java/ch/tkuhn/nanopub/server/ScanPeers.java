@@ -2,7 +2,11 @@ package ch.tkuhn.nanopub.server;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -26,6 +30,9 @@ public class ScanPeers implements Runnable {
 	}
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Random random = new Random();
+
+	protected static Map<String,Long> lastTimeMeasureMap = new HashMap<String,Long>();
 
 	private boolean peerListsChecked = false;
 	private boolean isFinished = false;
@@ -53,18 +60,31 @@ public class ScanPeers implements Runnable {
 	}
 
 	private void collectAndContactPeers() {
-		logger.info("Collect and contact peers...");
 		isFinished = true;
 		List<String> peerUris = new ArrayList<>(db.getPeerUris());
-		Collections.shuffle(peerUris);
+		if (random.nextFloat() < 0.1) {
+			// Use random ordering with 10% chance
+			logger.info("Collect and contact peers (random ordering)...");
+			Collections.shuffle(peerUris);
+		} else {
+			// Use fast-first ordering with 90% chance
+			logger.info("Collect and contact peers (fast-first ordering)...");
+			Collections.sort(peerUris, fastFirstSorter);
+		}
 		for (String peerUri : peerUris) {
+			ServerInfo si = null;
 			try {
-				ServerInfo si = ServerInfo.load(peerUri);
+				si = ServerInfo.load(peerUri);
 				checkPeerLists(si);
 				collectNanopubs(si);
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
+				if (si != null) {
+					lastTimeMeasureMap.put(si.getPublicUrl(), Long.MAX_VALUE);
+				}
+				isFinished = true;
 			}
+			if (!isFinished) break; // start over again
 		}
 	}
 
@@ -106,6 +126,22 @@ public class ScanPeers implements Runnable {
 		if (!r.isFinished()) {
 			isFinished = false;
 		}
+	}
+
+
+	private static final FastFirstSorter fastFirstSorter = new FastFirstSorter();
+
+	private static class FastFirstSorter implements Comparator<String> {
+
+		@Override
+		public int compare(String s1, String s2) {
+			Long l1 = lastTimeMeasureMap.get(s1);
+			if (l1 == null) return -1;
+			Long l2 = lastTimeMeasureMap.get(s2);
+			if (l2 == null) return 1;
+			return (int) (l1 - l2);
+		}
+
 	}
 
 }

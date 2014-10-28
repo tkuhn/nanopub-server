@@ -7,20 +7,21 @@ import java.util.zip.GZIPInputStream;
 
 import net.trustyuri.TrustyUriUtils;
 
+import org.apache.commons.lang.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.nanopub.MultiNanopubRdfHandler;
+import org.nanopub.MultiNanopubRdfHandler.NanopubHandler;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
-import org.nanopub.MultiNanopubRdfHandler.NanopubHandler;
 import org.nanopub.extra.server.NanopubServerUtils;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CollectNanopubs implements Runnable {
+public class CollectNanopubs {
 
 	private static final int processPagesPerRun = 10;
 
@@ -36,7 +37,6 @@ public class CollectNanopubs implements Runnable {
 		this.peerInfo = peerInfo;
 	}
 
-	@Override
 	public void run() {
 		try {
 			logger.info("Checking if there are new nanopubs at " + peerInfo.getPublicUrl());
@@ -76,8 +76,13 @@ public class CollectNanopubs implements Runnable {
 					interrupted = true;
 					break;
 				}
+				StopWatch watch = new StopWatch();
+				watch.start();
 				processPage(p, p == lastPage, ignoreBeforePos);
+				watch.stop();
+				ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), watch.getTime());
 				ignoreBeforePos = 0;
+				logger.info("Time measurement: " + watch.getTime());
 			}
 			if (interrupted) {
 				logger.info("To be continued (see if other peers have new nanopubs)");
@@ -88,6 +93,7 @@ public class CollectNanopubs implements Runnable {
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 			isFinished = true;
+			ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), Long.MAX_VALUE);
 		}
 	}
 
