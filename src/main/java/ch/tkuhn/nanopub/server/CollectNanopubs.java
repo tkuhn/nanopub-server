@@ -108,8 +108,8 @@ public class CollectNanopubs {
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
 				if (ac != null && !db.hasNanopub(ac)) {
 					toLoad.add(ac);
-					if (!isLastPage && toLoad.size() > 0.05 * db.getPageSize()) {
-						// Download entire package if at least 5% of nanopubs are new
+					if (!isLastPage && toLoad.size() > 5) {
+						// Download entire package if more than 5 nanopubs are new
 						downloadAsPackage = true;
 						processNp++;
 						break;
