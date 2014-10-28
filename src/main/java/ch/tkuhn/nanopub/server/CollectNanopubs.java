@@ -76,13 +76,8 @@ public class CollectNanopubs {
 					interrupted = true;
 					break;
 				}
-				StopWatch watch = new StopWatch();
-				watch.start();
 				processPage(p, p == lastPage, ignoreBeforePos);
-				watch.stop();
-				ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), watch.getTime());
 				ignoreBeforePos = 0;
-				logger.info("Time measurement: " + watch.getTime());
 			}
 			if (interrupted) {
 				logger.info("To be continued (see if other peers have new nanopubs)");
@@ -122,6 +117,8 @@ public class CollectNanopubs {
 		}
 		if (downloadAsPackage) {
 			logger.info("Download page " + page + " as compressed package...");
+			StopWatch watch = new StopWatch();
+			watch.start();
 			HttpGet get = new HttpGet(peerInfo.getPublicUrl() + "package.gz?page=" + page);
 			get.setHeader("Accept", "application/x-gzip");
 			HttpResponse resp = HttpClientBuilder.create().build().execute(get);
@@ -149,6 +146,9 @@ public class CollectNanopubs {
 					}
 				}
 			});
+			watch.stop();
+			ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), watch.getTime());
+			logger.info("Time measurement: " + watch.getTime());
 		} else {
 			logger.info("Download " + toLoad.size() + " nanopubs individually...");
 			for (String ac : toLoad) {
