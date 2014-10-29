@@ -10,6 +10,8 @@ import net.trustyuri.TrustyUriUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.nanopub.MultiNanopubRdfHandler;
@@ -33,6 +35,7 @@ public class CollectNanopubs {
 	private int peerPageSize;
 	private boolean isFinished = false;
 	private int loaded;
+	private StopWatch watch;
 
 	public CollectNanopubs(ServerInfo peerInfo) {
 		this.peerInfo = peerInfo;
@@ -118,13 +121,15 @@ public class CollectNanopubs {
 			}
 			processNp++;
 		}
-		StopWatch watch = new StopWatch();
+		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(5 * 1000).build();
+		HttpClient c = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
+		watch = new StopWatch();
 		watch.start();
 		if (downloadAsPackage) {
 			logger.info("Download page " + page + " as compressed package...");
 			HttpGet get = new HttpGet(peerInfo.getPublicUrl() + "package.gz?page=" + page);
 			get.setHeader("Accept", "application/x-gzip");
-			HttpResponse resp = HttpClientBuilder.create().build().execute(get);
+			HttpResponse resp = c.execute(get);
 			InputStream in;
 			if (wasSuccessful(resp)) {
 				in = new GZIPInputStream(resp.getEntity().getContent());
@@ -133,8 +138,10 @@ public class CollectNanopubs {
 				// This is for compability with older versions; to be removed at some point...
 				get = new HttpGet(peerInfo.getPublicUrl() + "package?page=" + page);
 				get.setHeader("Accept", "application/trig");
-				resp = HttpClientBuilder.create().build().execute(get);
+				resp = c.execute(get);
 				if (!wasSuccessful(resp)) {
+					logger.error("HTTP request failed: " + resp.getStatusLine().getReasonPhrase());
+					recordTime();
 					throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
 				}
 				in = resp.getEntity().getContent();
@@ -142,6 +149,12 @@ public class CollectNanopubs {
 			MultiNanopubRdfHandler.process(RDFFormat.TRIG, in, new NanopubHandler() {
 				@Override
 				public void handleNanopub(Nanopub np) {
+					if (watch.getTime() > 30000) {
+						// Downloading the whole package shouldn't take more than 30 seconds.
+						logger.error("Downloading package took too long; interrupting");
+						recordTime();
+						throw new RuntimeException("Downloading package took too long; interrupting");
+					}
 					try {
 						loadNanopub(np);
 					} catch (Exception ex) {
@@ -154,14 +167,21 @@ public class CollectNanopubs {
 			for (String ac : toLoad) {
 				HttpGet get = new HttpGet(peerInfo.getPublicUrl() + ac);
 				get.setHeader("Accept", "application/trig");
-				HttpResponse resp = HttpClientBuilder.create().build().execute(get);
+				HttpResponse resp = c.execute(get);
 				if (!wasSuccessful(resp)) {
+					logger.error("HTTP request failed: " + resp.getStatusLine().getReasonPhrase());
+					recordTime();
 					throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
 				}
 				InputStream in = resp.getEntity().getContent();
 				loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
 			}
 		}
+		recordTime();
+		db.updatePeerState(peerInfo, processNp);
+	}
+
+	private void recordTime() {
 		watch.stop();
 		Float avg = null;
 		if (loaded > 0) {
@@ -169,7 +189,6 @@ public class CollectNanopubs {
 			ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), avg);
 		}
 		logger.info("Time measurement: " + watch.getTime() + " for " + loaded + " nanopubs (average: " + avg + ")");
-		db.updatePeerState(peerInfo, processNp);
 	}
 
 	private boolean wasSuccessful(HttpResponse resp) {
