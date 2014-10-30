@@ -149,8 +149,8 @@ public class CollectNanopubs {
 			MultiNanopubRdfHandler.process(RDFFormat.TRIG, in, new NanopubHandler() {
 				@Override
 				public void handleNanopub(Nanopub np) {
-					if (watch.getTime() > 30000) {
-						// Downloading the whole package shouldn't take more than 30 seconds.
+					if (watch.getTime() >  5 * 60 * 1000) {
+						// Downloading the whole package should never take more than 5 minutes.
 						logger.error("Downloading package took too long; interrupting");
 						recordTime();
 						throw new RuntimeException("Downloading package took too long; interrupting");
@@ -182,13 +182,17 @@ public class CollectNanopubs {
 	}
 
 	private void recordTime() {
-		watch.stop();
-		Float avg = null;
-		if (loaded > 0) {
-			avg = (float) watch.getTime() / loaded;
-			ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), avg);
+		try {
+			watch.stop();
+			Float avg = null;
+			if (loaded > 0) {
+				avg = (float) watch.getTime() / loaded;
+				ScanPeers.lastTimeMeasureMap.put(peerInfo.getPublicUrl(), avg);
+			}
+			logger.info("Time measurement: " + watch.getTime() + " for " + loaded + " nanopubs (average: " + avg + ")");
+		} catch (Exception ex) {
+			// ignore
 		}
-		logger.info("Time measurement: " + watch.getTime() + " for " + loaded + " nanopubs (average: " + avg + ")");
 	}
 
 	private boolean wasSuccessful(HttpResponse resp) {
