@@ -104,24 +104,24 @@ public class CollectNanopubs {
 	private void processPage(int page, boolean isLastPage, long ignoreBeforePos) throws Exception {
 		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl());
 		loaded = 0;
-		long processNp = (page-1) * peerPageSize;
+		nextNp = (page-1) * peerPageSize;
 		List<String> toLoad = new ArrayList<>();
 		boolean downloadAsPackage = false;
 		for (String nanopubUri : NanopubServerUtils.loadNanopubUriList(peerInfo, page)) {
-			if (processNp >= ignoreBeforePos) {
+			if (nextNp >= ignoreBeforePos) {
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
 				if (ac != null && !db.hasNanopub(ac)) {
 					toLoad.add(ac);
 					if (!isLastPage && toLoad.size() > 5) {
 						// Download entire package if more than 5 nanopubs are new
 						downloadAsPackage = true;
+						nextNp = ignoreBeforePos;
 						break;
 					}
 				}
 			}
-			processNp++;
+			nextNp++;
 		}
-		nextNp = ignoreBeforePos;
 		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(5 * 1000).build();
 		HttpClient c = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 		watch = new StopWatch();
@@ -167,7 +167,6 @@ public class CollectNanopubs {
 		} else {
 			logger.info("Download " + toLoad.size() + " nanopubs individually...");
 			for (String ac : toLoad) {
-				nextNp++;
 				HttpGet get = new HttpGet(peerInfo.getPublicUrl() + ac);
 				get.setHeader("Accept", "application/trig");
 				HttpResponse resp = c.execute(get);
