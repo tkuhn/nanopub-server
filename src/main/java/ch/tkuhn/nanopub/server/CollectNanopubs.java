@@ -102,7 +102,8 @@ public class CollectNanopubs {
 	}
 
 	private void processPage(int page, boolean isLastPage, long ignoreBeforePos) throws Exception {
-		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl());
+		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl() +
+				" (position " + ignoreBeforePos + "; page size " + peerPageSize + ")");
 		loaded = 0;
 		nextNp = (page-1) * peerPageSize;
 		List<String> toLoad = new ArrayList<>();
