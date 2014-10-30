@@ -70,7 +70,7 @@ public class CollectNanopubs {
 				newNanopubsCount = peerNanopubNo;
 				logger.info(newNanopubsCount + " nanopubs in total (unknown peer state)");
 			}
-			int lastPage = (int) (peerNanopubNo/peerPageSize + 1);
+			int lastPage = (int) (peerNanopubNo/peerPageSize) + 1;
 			long ignoreBeforePos = startFromNp;
 			logger.info("Starting from page " + startFromPage + " of " + lastPage);
 			int pageCountThisRun = 0;
@@ -102,8 +102,7 @@ public class CollectNanopubs {
 	}
 
 	private void processPage(int page, boolean isLastPage, long ignoreBeforePos) throws Exception {
-		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl() +
-				" (position " + ignoreBeforePos + "; page size " + peerPageSize + ")");
+		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl());
 		loaded = 0;
 		nextNp = (page-1) * peerPageSize;
 		List<String> toLoad = new ArrayList<>();
@@ -116,7 +115,7 @@ public class CollectNanopubs {
 					if (!isLastPage && toLoad.size() > 5) {
 						// Download entire package if more than 5 nanopubs are new
 						downloadAsPackage = true;
-						nextNp = ignoreBeforePos;
+						nextNp = (page-1) * peerPageSize;
 						break;
 					}
 				}
