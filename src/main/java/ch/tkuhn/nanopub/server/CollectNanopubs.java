@@ -180,6 +180,7 @@ public class CollectNanopubs {
 			}
 		}
 		recordTime();
+		logger.info("Update peer state: " + peerInfo.getPublicUrl() + " at position " + nextNp);
 		db.updatePeerState(peerInfo, nextNp);
 	}
 
