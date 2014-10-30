@@ -36,6 +36,7 @@ public class CollectNanopubs {
 	private boolean isFinished = false;
 	private int loaded;
 	private StopWatch watch;
+	private long nextNp;
 
 	public CollectNanopubs(ServerInfo peerInfo) {
 		this.peerInfo = peerInfo;
@@ -114,13 +115,13 @@ public class CollectNanopubs {
 					if (!isLastPage && toLoad.size() > 5) {
 						// Download entire package if more than 5 nanopubs are new
 						downloadAsPackage = true;
-						processNp++;
 						break;
 					}
 				}
 			}
 			processNp++;
 		}
+		nextNp = ignoreBeforePos;
 		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(5 * 1000).build();
 		HttpClient c = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig).build();
 		watch = new StopWatch();
@@ -149,6 +150,7 @@ public class CollectNanopubs {
 			MultiNanopubRdfHandler.process(RDFFormat.TRIG, in, new NanopubHandler() {
 				@Override
 				public void handleNanopub(Nanopub np) {
+					nextNp++;
 					if (watch.getTime() >  5 * 60 * 1000) {
 						// Downloading the whole package should never take more than 5 minutes.
 						logger.error("Downloading package took too long; interrupting");
@@ -165,6 +167,7 @@ public class CollectNanopubs {
 		} else {
 			logger.info("Download " + toLoad.size() + " nanopubs individually...");
 			for (String ac : toLoad) {
+				nextNp++;
 				HttpGet get = new HttpGet(peerInfo.getPublicUrl() + ac);
 				get.setHeader("Accept", "application/trig");
 				HttpResponse resp = c.execute(get);
@@ -178,7 +181,7 @@ public class CollectNanopubs {
 			}
 		}
 		recordTime();
-		db.updatePeerState(peerInfo, processNp);
+		db.updatePeerState(peerInfo, nextNp);
 	}
 
 	private void recordTime() {
