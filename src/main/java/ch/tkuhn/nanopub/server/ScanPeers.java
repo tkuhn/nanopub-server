@@ -44,16 +44,14 @@ public class ScanPeers implements Runnable {
 	public void run() {
 		logger.info("Start peer scanning thread");
 		try {
-			try {
-				int ms = ServerConf.get().getWaitMsBeforePeerScan();
-				logger.info("Wait " + ms + "ms...");
-				Thread.sleep(ms);
-			} catch(InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
+			int ms = ServerConf.get().getWaitMsBeforePeerScan();
+			logger.info("Wait " + ms + "ms...");
+			Thread.sleep(ms);
 			while (!isFinished) {
 				collectAndContactPeers();
 			}
+		} catch (InterruptedException ex) {
+			throw new RuntimeException(ex);
 		} finally {
 			running = null;
 		}
