@@ -32,17 +32,21 @@ public class CollectNanopubs {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private ServerInfo peerInfo;
+	private ScanPeers parent;
 	private int peerPageSize;
 	private boolean isFinished = false;
 	private int loaded;
 	private StopWatch watch;
 	private long nextNp;
 
-	public CollectNanopubs(ServerInfo peerInfo) {
+	public CollectNanopubs(ServerInfo peerInfo, ScanPeers parent) {
 		this.peerInfo = peerInfo;
+		this.parent = parent;
+		parent.stillAlive();
 	}
 
 	public void run() {
+		parent.stillAlive();
 		try {
 			logger.info("Checking if there are new nanopubs at " + peerInfo.getPublicUrl());
 			int startFromPage = 1;
@@ -102,12 +106,14 @@ public class CollectNanopubs {
 	}
 
 	private void processPage(int page, boolean isLastPage, long ignoreBeforePos) throws Exception {
+		parent.stillAlive();
 		logger.info("Process page " + page + " from " + peerInfo.getPublicUrl());
 		loaded = 0;
 		nextNp = (page-1) * peerPageSize;
 		List<String> toLoad = new ArrayList<>();
 		boolean downloadAsPackage = false;
 		for (String nanopubUri : NanopubServerUtils.loadNanopubUriList(peerInfo, page)) {
+			parent.stillAlive();
 			if (nextNp >= ignoreBeforePos) {
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
 				if (ac != null && !db.hasNanopub(ac)) {
@@ -167,6 +173,7 @@ public class CollectNanopubs {
 		} else {
 			logger.info("Download " + toLoad.size() + " nanopubs individually...");
 			for (String ac : toLoad) {
+				parent.stillAlive();
 				HttpGet get = new HttpGet(peerInfo.getPublicUrl() + ac);
 				get.setHeader("Accept", "application/trig");
 				HttpResponse resp = c.execute(get);

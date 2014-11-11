@@ -19,14 +19,25 @@ import org.slf4j.LoggerFactory;
 public class ScanPeers implements Runnable {
 
 	private static ScanPeers running;
+	private static Thread thread;
 
 	private static NanopubDb db = NanopubDb.get();
 
 	public static synchronized void check() {
-		if (running != null) return;
+		if (running != null) {
+			if (running.aliveAtTime + 60 * 60 * 1000 < System.currentTimeMillis()) {
+				running.logger.info("No sign of life of the daemon for 60 minutes. Starting new one.");
+				running = null;
+				thread.interrupt();
+			} else {
+				return;
+			}
+		}
 		if (!ServerConf.get().isPeerScanEnabled()) return;
 		running = new ScanPeers();
-		new Thread(running).start();
+		thread = new Thread(running);
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -36,12 +47,15 @@ public class ScanPeers implements Runnable {
 
 	private boolean peerListsChecked = false;
 	private boolean isFinished = false;
+	private long aliveAtTime;
 
 	private ScanPeers() {
+		stillAlive();
 	}
 
 	@Override
 	public void run() {
+		stillAlive();
 		logger.info("Start peer scanning thread");
 		try {
 			int ms = ServerConf.get().getWaitMsBeforePeerScan();
@@ -58,6 +72,7 @@ public class ScanPeers implements Runnable {
 	}
 
 	private void collectAndContactPeers() {
+		stillAlive();
 		isFinished = true;
 		List<String> peerUris = new ArrayList<>(db.getPeerUris());
 		if (random.nextFloat() < 0.1) {
@@ -87,12 +102,14 @@ public class ScanPeers implements Runnable {
 	}
 
 	private void checkPeerLists(ServerInfo si) throws Exception {
+		stillAlive();
 		if (peerListsChecked) return;
 		logger.info("Check peer lists...");
 
 		String myUrl = ServerConf.getInfo().getPublicUrl();
 		boolean knowsMe = false;
 		for (String peerFromPeer : NanopubServerUtils.loadPeerList(si)) {
+			stillAlive();
 			if (myUrl.equals(peerFromPeer)) {
 				knowsMe = true;
 			} else {
@@ -114,16 +131,21 @@ public class ScanPeers implements Runnable {
 	}
 
 	private void collectNanopubs(ServerInfo si) {
+		stillAlive();
 		if (!ServerConf.get().isCollectNanopubsEnabled()) {
 			isFinished = true;
 			return;
 		}
 		logger.info("Collecting nanopubs...");
-		CollectNanopubs r = new CollectNanopubs(si);
+		CollectNanopubs r = new CollectNanopubs(si, this);
 		r.run();
 		if (!r.isFinished()) {
 			isFinished = false;
 		}
+	}
+
+	protected void stillAlive() {
+		aliveAtTime = System.currentTimeMillis();
 	}
 
 

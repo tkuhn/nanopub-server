@@ -12,25 +12,38 @@ import org.slf4j.LoggerFactory;
 public class LoadFiles implements Runnable {
 
 	private static LoadFiles running;
+	private static Thread thread;
 
 	private static NanopubDb db = NanopubDb.get();
 
 	public static synchronized void check() {
-		if (running != null) return;
+		if (running != null) {
+			if (running.aliveAtTime + 60 * 60 * 1000 < System.currentTimeMillis()) {
+				running.logger.info("No sign of life of the daemon for 60 minutes. Starting new one.");
+				running = null;
+				thread.interrupt();
+			} else {
+				return;
+			}
+		}
 		if (ServerConf.get().getLoadDir() == null) return;
 		try {
 			running = new LoadFiles();
-			new Thread(running).start();
+			thread = new Thread(running);
+			thread.setDaemon(true);
+			thread.start();
 		} catch (Exception ex) {
 			LoggerFactory.getLogger(LoadFiles.class).error(ex.getMessage(), ex);
 		}
 	}
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private long aliveAtTime;
 
 	private final File loadDir, processingDir, doneDir;
 
 	private LoadFiles() {
+		stillAlive();
 		loadDir = new File(ServerConf.get().getLoadDir());
 		processingDir = new File(loadDir, "processing");
 		if (!processingDir.exists()) processingDir.mkdir();
@@ -40,6 +53,7 @@ public class LoadFiles implements Runnable {
 
 	@Override
 	public void run() {
+		stillAlive();
 		logger.info("Start file loading thread");
 		try {
 			try {
@@ -58,6 +72,7 @@ public class LoadFiles implements Runnable {
 	private void checkFilesToLoad() {
 		logger.info("Check whether there are files to load...");
 		for (File f : loadDir.listFiles()) {
+			stillAlive();
 			if (f.isDirectory()) continue;
 			logger.info("Try to load file: " + f);
 			try {
@@ -72,6 +87,7 @@ public class LoadFiles implements Runnable {
 						} catch (Exception ex) {
 							throw new RuntimeException(ex);
 						}
+						stillAlive();
 					}
 				});
 				processingFile.renameTo(new File(doneDir, f.getName()));
@@ -80,6 +96,10 @@ public class LoadFiles implements Runnable {
 				logger.error("Failed to load file: " + f, ex);
 			}
 		}
+	}
+
+	private void stillAlive() {
+		aliveAtTime = System.currentTimeMillis();
 	}
 
 }
