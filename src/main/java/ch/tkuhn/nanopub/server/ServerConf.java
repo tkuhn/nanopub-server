@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 public class ServerConf {
+
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private static ServerConf obj = new ServerConf();
 
@@ -24,23 +27,39 @@ public class ServerConf {
 
 	private ServerConf() {
 		conf = new Properties();
-		InputStream in = ServerConf.class.getResourceAsStream("conf.properties");
+		InputStream in1 = null;
+		InputStream in2 = null;
 		try {
-			conf.load(in);
-		} catch (IOException ex) {
-			LoggerFactory.getLogger(NanopubDb.class).error(ex.getMessage(), ex);
-			System.exit(1);
-		}
-		in = ServerConf.class.getResourceAsStream("local.conf.properties");
-		if (in != null) {
+			in1 = ServerConf.class.getResourceAsStream("conf.properties");
 			try {
-				conf.load(in);
+				conf.load(in1);
 			} catch (IOException ex) {
 				LoggerFactory.getLogger(NanopubDb.class).error(ex.getMessage(), ex);
 				System.exit(1);
 			}
+			in2 = ServerConf.class.getResourceAsStream("local.conf.properties");
+			if (in2 != null) {
+				try {
+					conf.load(in2);
+				} catch (IOException ex) {
+					LoggerFactory.getLogger(NanopubDb.class).error(ex.getMessage(), ex);
+					System.exit(1);
+				}
+			}
+			info = new ServerInfo(conf);
+		} finally {
+			close(in1);
+			close(in2);
 		}
-		info = new ServerInfo(conf);
+	}
+
+	private void close(InputStream st) {
+		if (st == null) return;
+		try {
+			st.close();
+		} catch (IOException ex) {
+			logger.error(ex.getMessage(), ex);
+		}
 	}
 
 	public boolean isPeerScanEnabled() {

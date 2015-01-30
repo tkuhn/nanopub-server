@@ -281,44 +281,50 @@ public class NanopubDb {
 			throw new IllegalArgumentException("Not a complete page: " + pageNo);
 		}
 		GridFSDBFile f = packageGridFs.findOne(pageNo + "");
-		if (f == null) {
-			if (gzipped) {
-				out = new GZIPOutputStream(out);
-			}
-			ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-			OutputStream packageOut = new GZIPOutputStream(bOut);
-			String pageContent = getPageContent(pageNo);
-			for (String uri : pageContent.split("\\n")) {
-				Nanopub np = getNanopub(TrustyUriUtils.getArtifactCode(uri));
-				String s;
-				try {
-					s = NanopubUtils.writeToString(np, RDFFormat.TRIG);
-				} catch (RDFHandlerException ex) {
-					throw new RuntimeException("Unexpected RDF handler exception", ex);
+		OutputStream packageOut = null;
+		InputStream packageAsStream = null;
+		try {
+			if (f == null) {
+				if (gzipped) {
+					out = new GZIPOutputStream(out);
 				}
-				byte[] bytes = (s + "\n").getBytes();
-				out.write(bytes);
-				packageOut.write(bytes);
-			}
-			packageOut.close();
-			InputStream packageAsStream = new ByteArrayInputStream(bOut.toByteArray());
-			GridFSInputFile i = packageGridFs.createFile(packageAsStream);
-			i.setFilename(pageNo + "");
-			i.save();
-		} else {
-			if (gzipped) {
-				f.writeTo(out);
+				ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+				packageOut = new GZIPOutputStream(bOut);
+				String pageContent = getPageContent(pageNo);
+				for (String uri : pageContent.split("\\n")) {
+					Nanopub np = getNanopub(TrustyUriUtils.getArtifactCode(uri));
+					String s;
+					try {
+						s = NanopubUtils.writeToString(np, RDFFormat.TRIG);
+					} catch (RDFHandlerException ex) {
+						throw new RuntimeException("Unexpected RDF handler exception", ex);
+					}
+					byte[] bytes = (s + "\n").getBytes();
+					out.write(bytes);
+					packageOut.write(bytes);
+				}
+				packageAsStream = new ByteArrayInputStream(bOut.toByteArray());
+				GridFSInputFile i = packageGridFs.createFile(packageAsStream);
+				i.setFilename(pageNo + "");
+				i.save();
 			} else {
-				GZIPInputStream in = new GZIPInputStream(f.getInputStream());
-				byte[] buffer = new byte[1024];
-				int len;
-				while ((len = in.read(buffer)) > 0) {
-					out.write(buffer, 0, len);
+				if (gzipped) {
+					f.writeTo(out);
+				} else {
+					GZIPInputStream in = new GZIPInputStream(f.getInputStream());
+					byte[] buffer = new byte[1024];
+					int len;
+					while ((len = in.read(buffer)) > 0) {
+						out.write(buffer, 0, len);
+					}
+					in.close();
 				}
-				in.close();
 			}
+		} finally {
+			if (out != null) out.close();
+			if (packageOut != null) packageOut.close();
+			if (packageAsStream != null) packageAsStream.close();
 		}
-		out.close();
 	}
 
 	public long getJournalId() {

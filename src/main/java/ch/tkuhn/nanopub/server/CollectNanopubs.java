@@ -137,39 +137,43 @@ public class CollectNanopubs {
 			HttpGet get = new HttpGet(peerInfo.getPublicUrl() + "package.gz?page=" + page);
 			get.setHeader("Accept", "application/x-gzip");
 			HttpResponse resp = c.execute(get);
-			InputStream in;
-			if (wasSuccessful(resp)) {
-				in = new GZIPInputStream(resp.getEntity().getContent());
-			} else {
-				logger.info("Failed. Trying uncompressed package...");
-				// This is for compability with older versions; to be removed at some point...
-				get = new HttpGet(peerInfo.getPublicUrl() + "package?page=" + page);
-				get.setHeader("Accept", "application/trig");
-				resp = c.execute(get);
-				if (!wasSuccessful(resp)) {
-					logger.error("HTTP request failed: " + resp.getStatusLine().getReasonPhrase());
-					recordTime();
-					throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
-				}
-				in = resp.getEntity().getContent();
-			}
-			MultiNanopubRdfHandler.process(RDFFormat.TRIG, in, new NanopubHandler() {
-				@Override
-				public void handleNanopub(Nanopub np) {
-					nextNp++;
-					if (watch.getTime() >  5 * 60 * 1000) {
-						// Downloading the whole package should never take more than 5 minutes.
-						logger.error("Downloading package took too long; interrupting");
+			InputStream in = null;
+			try {
+				if (wasSuccessful(resp)) {
+					in = new GZIPInputStream(resp.getEntity().getContent());
+				} else {
+					logger.info("Failed. Trying uncompressed package...");
+					// This is for compability with older versions; to be removed at some point...
+					get = new HttpGet(peerInfo.getPublicUrl() + "package?page=" + page);
+					get.setHeader("Accept", "application/trig");
+					resp = c.execute(get);
+					if (!wasSuccessful(resp)) {
+						logger.error("HTTP request failed: " + resp.getStatusLine().getReasonPhrase());
 						recordTime();
-						throw new RuntimeException("Downloading package took too long; interrupting");
+						throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
 					}
-					try {
-						loadNanopub(np);
-					} catch (Exception ex) {
-						throw new RuntimeException(ex);
-					}
+					in = resp.getEntity().getContent();
 				}
-			});
+				MultiNanopubRdfHandler.process(RDFFormat.TRIG, in, new NanopubHandler() {
+					@Override
+					public void handleNanopub(Nanopub np) {
+						nextNp++;
+						if (watch.getTime() >  5 * 60 * 1000) {
+							// Downloading the whole package should never take more than 5 minutes.
+							logger.error("Downloading package took too long; interrupting");
+							recordTime();
+							throw new RuntimeException("Downloading package took too long; interrupting");
+						}
+						try {
+							loadNanopub(np);
+						} catch (Exception ex) {
+							throw new RuntimeException(ex);
+						}
+					}
+				});
+			} finally {
+				if (in != null) in.close();
+			}
 		} else {
 			logger.info("Download " + toLoad.size() + " nanopubs individually...");
 			for (String ac : toLoad) {
@@ -182,8 +186,13 @@ public class CollectNanopubs {
 					recordTime();
 					throw new RuntimeException(resp.getStatusLine().getReasonPhrase());
 				}
-				InputStream in = resp.getEntity().getContent();
-				loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
+				InputStream in = null;
+				try {
+					in = resp.getEntity().getContent();
+					loadNanopub(new NanopubImpl(in, RDFFormat.TRIG));
+				} finally {
+					if (in != null) in.close();
+				}
 			}
 		}
 		recordTime();

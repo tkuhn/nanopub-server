@@ -1,6 +1,7 @@
 package ch.tkuhn.nanopub.server;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -88,11 +89,15 @@ public class NanopubPage extends Page {
 			getResp().setContentType(format.getDefaultMIMEType());
 			getResp().addHeader("Content-Disposition", "filename=\"" + ac + "." + format.getDefaultFileExtension() + "\"");
 		}
+		OutputStream out = null;
 		try {
-			NanopubUtils.writeToStream(nanopub, getResp().getOutputStream(), format);
+			out = getResp().getOutputStream();
+			NanopubUtils.writeToStream(nanopub, out, format);
 		} catch (Exception ex) {
 			getResp().sendError(500, "Internal error: " + ex.getMessage());
 			logger.error(ex.getMessage(), ex);
+		} finally {
+			if (out != null) out.close();
 		}
 	}
 

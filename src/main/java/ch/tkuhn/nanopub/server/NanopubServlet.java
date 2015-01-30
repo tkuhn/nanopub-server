@@ -28,73 +28,82 @@ public class NanopubServlet extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ServerRequest r = new ServerRequest(req);
-		if (r.isEmpty()) {
-			MainPage.show(r, resp);
-		} else if (r.hasArtifactCode()) {
-			NanopubPage.show(r, resp);
-		} else if (r.getRequestString().equals(NanopubListPage.PAGE_NAME)) {
-			NanopubListPage.show(r, resp);
-		} else if (r.getRequestString().equals(PeerListPage.PAGE_NAME)) {
-			PeerListPage.show(r, resp);
-		} else if (r.getRequestString().equals(PackagePage.PAGE_NAME)) {
-			PackagePage.show(r, resp);
-		} else if (r.getFullRequest().equals("/style/plain.css")) {
-			ResourcePage.show(r, resp, "style.css", "text/css");
-		} else if (r.getFullRequest().equals("/style/favicon.ico")) {
-			ResourcePage.show(r, resp, "favicon.ico", "image/x-icon");
-		} else {
-			resp.sendError(400, "Invalid GET request: " + r.getFullRequest());
+		try {
+			ServerRequest r = new ServerRequest(req);
+			if (r.isEmpty()) {
+				MainPage.show(r, resp);
+			} else if (r.hasArtifactCode()) {
+				NanopubPage.show(r, resp);
+			} else if (r.getRequestString().equals(NanopubListPage.PAGE_NAME)) {
+				NanopubListPage.show(r, resp);
+			} else if (r.getRequestString().equals(PeerListPage.PAGE_NAME)) {
+				PeerListPage.show(r, resp);
+			} else if (r.getRequestString().equals(PackagePage.PAGE_NAME)) {
+				PackagePage.show(r, resp);
+			} else if (r.getFullRequest().equals("/style/plain.css")) {
+				ResourcePage.show(r, resp, "style.css", "text/css");
+			} else if (r.getFullRequest().equals("/style/favicon.ico")) {
+				ResourcePage.show(r, resp, "favicon.ico", "image/x-icon");
+			} else {
+				resp.sendError(400, "Invalid GET request: " + r.getFullRequest());
+			}
+		} finally {
+			resp.getOutputStream().close();
+			req.getInputStream().close();
 		}
-		resp.getOutputStream().close();
 		check();
 	}
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ServerRequest r = new ServerRequest(req);
-		if (r.isEmpty()) {
-			if (!ServerConf.getInfo().isPostNanopubsEnabled()) {
-				resp.sendError(405, "Posting nanopubs is not supported by this nanopub server");
-				return;
-			}
-			Nanopub np = null;
-			try {
-				np = new NanopubImpl(req.getInputStream(), RDFFormat.forMIMEType(req.getContentType(), RDFFormat.TRIG));
-			} catch (Exception ex) {
-				resp.sendError(400, "Error reading nanopub: " + ex.getMessage());
-			}
-			if (np != null) {
-				String code = TrustyUriUtils.getArtifactCode(np.getUri().toString());
-				try {
-					if (NanopubDb.get().getNanopub(code) == null) {
-						NanopubDb.get().loadNanopub(np);
-					}
-					resp.setHeader("Location", TrustyUriUtils.getArtifactCode(np.getUri().toString()));
-					resp.setStatus(201);
-				} catch (NotTrustyNanopubException ex) {
-					resp.sendError(400, "Nanopub is not trusty: " + ex.getMessage());
-				} catch (Exception ex) {
-					resp.sendError(500, "Error storing nanopub: " + ex.getMessage());
+		try {
+			ServerRequest r = new ServerRequest(req);
+			if (r.isEmpty()) {
+				if (!ServerConf.getInfo().isPostNanopubsEnabled()) {
+					resp.sendError(405, "Posting nanopubs is not supported by this nanopub server");
+					return;
 				}
+				Nanopub np = null;
+				try {
+					np = new NanopubImpl(req.getInputStream(), RDFFormat.forMIMEType(req.getContentType(), RDFFormat.TRIG));
+				} catch (Exception ex) {
+					resp.sendError(400, "Error reading nanopub: " + ex.getMessage());
+				}
+				if (np != null) {
+					String code = TrustyUriUtils.getArtifactCode(np.getUri().toString());
+					try {
+						if (NanopubDb.get().getNanopub(code) == null) {
+							NanopubDb.get().loadNanopub(np);
+						}
+						resp.setHeader("Location", TrustyUriUtils.getArtifactCode(np.getUri().toString()));
+						resp.setStatus(201);
+					} catch (NotTrustyNanopubException ex) {
+						resp.sendError(400, "Nanopub is not trusty: " + ex.getMessage());
+					} catch (Exception ex) {
+						resp.sendError(500, "Error storing nanopub: " + ex.getMessage());
+					}
+				}
+			} else if (r.getRequestString().equals(PeerListPage.PAGE_NAME)) {
+				if (!ServerConf.getInfo().isPostPeersEnabled()) {
+					resp.sendError(405, "Posting peers is not supported by this nanopub server");
+					return;
+				}
+				try {
+					StringWriter sw = new StringWriter();
+					IOUtils.copy(req.getInputStream(), sw);
+					NanopubDb.get().addPeer(sw.toString().trim());
+					resp.setStatus(201);
+				} catch (ServerInfoException ex) {
+					resp.sendError(400, "Invalid peer URL: " + ex.getMessage());
+				} catch (IOException ex) {
+					resp.sendError(500, "Error adding peer: " + ex.getMessage());
+				}
+			} else {
+				resp.sendError(400, "Invalid POST request: " + r.getFullRequest());
 			}
-		} else if (r.getRequestString().equals(PeerListPage.PAGE_NAME)) {
-			if (!ServerConf.getInfo().isPostPeersEnabled()) {
-				resp.sendError(405, "Posting peers is not supported by this nanopub server");
-				return;
-			}
-			try {
-				StringWriter sw = new StringWriter();
-				IOUtils.copy(req.getInputStream(), sw);
-				NanopubDb.get().addPeer(sw.toString().trim());
-				resp.setStatus(201);
-			} catch (ServerInfoException ex) {
-				resp.sendError(400, "Invalid peer URL: " + ex.getMessage());
-			} catch (IOException ex) {
-				resp.sendError(500, "Error adding peer: " + ex.getMessage());
-			}
-		} else {
-			resp.sendError(400, "Invalid POST request: " + r.getFullRequest());
+		} finally {
+			resp.getOutputStream().close();
+			req.getInputStream().close();
 		}
 		check();
 	}

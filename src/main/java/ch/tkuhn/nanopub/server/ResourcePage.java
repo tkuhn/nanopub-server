@@ -26,11 +26,16 @@ public class ResourcePage extends Page {
 	}
 
 	public void show() throws IOException {
-		InputStream in = NanopubServlet.class.getResourceAsStream(resourceName);
-		OutputStream out = getResp().getOutputStream();
-		IOUtils.copy(in, out);
-		in.close();
-		out.close();
+		InputStream in = null;
+		OutputStream out = null;
+		try {
+			in = NanopubServlet.class.getResourceAsStream(resourceName);
+			out = getResp().getOutputStream();
+			IOUtils.copy(in, out);
+		} finally {
+			if (in != null) in.close();
+			if (out != null) out.close();
+		}
 		getResp().setContentType(resourceType);
 	}
 
