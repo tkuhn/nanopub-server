@@ -149,7 +149,7 @@ public class NanopubDb {
 		} catch (OpenRDFException ex) {
 			throw new RuntimeException("Stored nanopub is corrupted (this shouldn't happen)", ex);
 		}
-		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
+		if (ServerConf.get().isCheckNanopubsOnGetEnabled() && !TrustyNanopubUtils.isValidTrustyNanopub(np)) {
 			throw new RuntimeException("Stored nanopub is not trusty (this shouldn't happen)");
 		}
 		return np;

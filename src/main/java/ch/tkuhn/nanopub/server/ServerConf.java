@@ -70,6 +70,10 @@ public class ServerConf {
 		return Boolean.parseBoolean(conf.getProperty("collect-nanopubs-enabled"));
 	}
 
+	public boolean isCheckNanopubsOnGetEnabled() {
+		return Boolean.parseBoolean(conf.getProperty("check-nanopubs-on-get"));
+	}
+
 	public String getMongoDbHost() {
 		return conf.getProperty("mongodb.host");
 	}
