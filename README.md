@@ -16,7 +16,8 @@ Requirements:
 
 - Java 1.7 or higher
 - Access to a MongoDB instance
-- Disk space of up to around 10kB per nanopublication
+- Disk space of up to around 10kB per nanopublication (5kB is average so far,
+  but this value might change)
 
 In addition, we assume here that Git and Maven are installed (tested with
 Maven version 3; version 2.0.9 might work too).
@@ -89,19 +90,6 @@ or you might have to download them. In order to view them directly in the
 browser, `.txt` can be appended:
 
     http://example.org/np/RA5AbXdpz5DcaYXCh9l3eI9ruBosiL5XDU3rxBbBaUO70.nq.txt
-
-
-Statistics
-----------
-
-GeneRIF dataset (see http://arxiv.org/abs/1303.2446):
-
-- Number of nanopubs: 156 024
-- Total file size in N-Quads format: 783 244 024 Bytes (5 020 per nanopub)
-- Total file size in N-Quads format (zipped): 35 833 074 Bytes (230 per nanopub)
-- Total file size in TriG format: 257 748 456 Bytes (1 652 per nanopub)
-- Total file size in TriG format (zipped): 19 452 541 Bytes (125 per nanopub)
-- Used disk space when loaded in MongoDB: 1 023 410 176 Bytes (6 559 per nanopub)
 
 
 License
