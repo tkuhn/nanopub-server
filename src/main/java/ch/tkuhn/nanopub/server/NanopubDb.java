@@ -56,6 +56,26 @@ public class NanopubDb {
 
 	}
 
+	public static class OversizedNanopubException extends Exception {
+
+		private static final long serialVersionUID = -8828914376012234462L;
+
+		public OversizedNanopubException(Nanopub np) {
+			super(np.getUri().toString());
+		}
+
+	}
+
+	public static class NanopubDbException extends Exception {
+
+		private static final long serialVersionUID = 162796031985052353L;
+
+		public NanopubDbException(String message) {
+			super(message);
+		}
+
+	}
+
 	private static final boolean logNanopubLoading = ServerConf.get().isLogNanopubLoadingEnabled();
 
 	// Use trig internally to keep namespaces:
@@ -160,12 +180,23 @@ public class NanopubDb {
 		return getNanopubCollection().find(query).hasNext();
 	}
 
-	public synchronized void loadNanopub(Nanopub np) throws NotTrustyNanopubException {
+	public synchronized void loadNanopub(Nanopub np) throws NotTrustyNanopubException,
+			OversizedNanopubException, NanopubDbException {
 		if (np instanceof NanopubWithNs) {
 			((NanopubWithNs) np).removeUnusedPrefixes();
 		}
 		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
 			throw new NotTrustyNanopubException(np);
+		}
+		ServerInfo info = ServerConf.getInfo();
+		if (info.getMaxNanopubTriples() != null && np.getTripleCount() > info.getMaxNanopubTriples()) {
+			throw new OversizedNanopubException(np);
+		}
+		if (info.getMaxNanopubBytes() != null && np.getByteCount() > info.getMaxNanopubBytes()) {
+			throw new OversizedNanopubException(np);
+		}
+		if (info.getMaxNanopubs() != null && nextNanopubNo > info.getMaxNanopubs()) {
+			throw new NanopubDbException("Server is full (maximum number of nanopubs reached)");
 		}
 		String artifactCode = TrustyUriUtils.getArtifactCode(np.getUri().toString());
 		String npString = null;

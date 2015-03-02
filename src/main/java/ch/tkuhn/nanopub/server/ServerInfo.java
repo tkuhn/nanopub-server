@@ -21,6 +21,15 @@ public class ServerInfo extends org.nanopub.extra.server.ServerInfo {
 		postNanopubsEnabled = Boolean.parseBoolean(prop.getProperty("post-nanopubs-enabled"));
 		postPeersEnabled = Boolean.parseBoolean(prop.getProperty("post-peers-enabled"));
 		description = "nanopub-server " + prop.getProperty("version") + ", " + prop.getProperty("build-date");
+		try {
+			maxNanopubTriples = Integer.parseInt(prop.getProperty("max-nanopub-triples"));
+		} catch (Exception ex) {}
+		try {
+			maxNanopubBytes = Long.parseLong(prop.getProperty("max-nanopub-bytes"));
+		} catch (Exception ex) {}
+		try {
+			maxNanopubs = Long.parseLong(prop.getProperty("max-nanopubs"));
+		} catch (Exception ex) {}
 		loadFromDb = true;
 	}
 

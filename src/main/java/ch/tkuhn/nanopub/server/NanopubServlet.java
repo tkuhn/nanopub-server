@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.tkuhn.nanopub.server.NanopubDb.NotTrustyNanopubException;
+import ch.tkuhn.nanopub.server.NanopubDb.OversizedNanopubException;
 
 public class NanopubServlet extends HttpServlet {
 
@@ -79,6 +80,8 @@ public class NanopubServlet extends HttpServlet {
 						resp.setStatus(201);
 					} catch (NotTrustyNanopubException ex) {
 						resp.sendError(400, "Nanopub is not trusty: " + ex.getMessage());
+					} catch (OversizedNanopubException ex) {
+						resp.sendError(400, "Nanopub is too large: " + ex.getMessage());
 					} catch (Exception ex) {
 						resp.sendError(500, "Error storing nanopub: " + ex.getMessage());
 					}
