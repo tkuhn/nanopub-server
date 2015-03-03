@@ -6,6 +6,7 @@ import org.nanopub.MultiNanopubRdfHandler;
 import org.nanopub.MultiNanopubRdfHandler.NanopubHandler;
 import org.nanopub.Nanopub;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +79,7 @@ public class LoadFiles implements Runnable {
 			try {
 				final File processingFile = new File(processingDir, f.getName());
 				f.renameTo(processingFile);
-				RDFFormat format = RDFFormat.forFileName(processingFile.getName());
+				RDFFormat format = Rio.getParserFormatForFileName(processingFile.getName());
 				MultiNanopubRdfHandler.process(format, processingFile, new NanopubHandler() {
 					@Override
 					public void handleNanopub(Nanopub np) {

@@ -17,6 +17,7 @@ import org.nanopub.extra.index.IndexUtils;
 import org.nanopub.extra.index.NanopubIndex;
 import org.openrdf.model.URI;
 import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public class NanopubPage extends Page {
 		String rf = getReq().getPresentationFormat();
 		RDFFormat format = null;
 		if (ext != null) {
-			format = RDFFormat.forFileName("np." + ext);
+			format = Rio.getParserFormatForFileName("np." + ext);
 			if (format == null) {
 				getResp().sendError(400, "Unknown format: " + ext);
 				return;
@@ -73,7 +74,7 @@ public class NanopubPage extends Page {
 			if ("text/plain".equals(mimeType)) {
 				rf = "text/plain";
 			} else {
-				format = RDFFormat.forMIMEType(mimeType);
+				format = Rio.getParserFormatForMIMEType(mimeType);
 			}
 		}
 		if (format == null) {
