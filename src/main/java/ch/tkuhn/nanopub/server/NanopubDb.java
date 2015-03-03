@@ -340,6 +340,7 @@ public class NanopubDb {
 					out.write(bytes);
 					packageOut.write(bytes);
 				}
+				packageOut.close();
 				packageAsStream = new ByteArrayInputStream(bOut.toByteArray());
 				GridFSInputFile i = packageGridFs.createFile(packageAsStream);
 				i.setFilename(pageNo + "");
