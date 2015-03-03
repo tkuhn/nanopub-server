@@ -5,8 +5,8 @@
   <artifactId>nanopub-server</artifactId>
   <packaging>war</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>nanopub-server Maven Webapp</name>
-  <url>http://maven.apache.org</url>
+  <name>nanopub-server</name>
+  <url>https://github.com/tkuhn/nanopub-server</url>
   <properties>
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
