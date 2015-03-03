@@ -201,7 +201,7 @@ public class NanopubDb {
 		if (info.getMaxNanopubBytes() != null && np.getByteCount() > info.getMaxNanopubBytes()) {
 			throw new OversizedNanopubException(np);
 		}
-		if (info.getMaxNanopubs() != null && nextNanopubNo > info.getMaxNanopubs()) {
+		if (isFull()) {
 			throw new NanopubDbException("Server is full (maximum number of nanopubs reached)");
 		}
 		String artifactCode = TrustyUriUtils.getArtifactCode(np.getUri().toString());
@@ -395,6 +395,11 @@ public class NanopubDb {
 		} catch (Exception ex) {
 			return 0.0f;
 		}
+	}
+
+	public boolean isFull() {
+		ServerInfo info = ServerConf.getInfo();
+		return (info.getMaxNanopubs() != null && nextNanopubNo >= info.getMaxNanopubs());
 	}
 
 }

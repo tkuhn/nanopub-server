@@ -132,7 +132,7 @@ public class ScanPeers implements Runnable {
 
 	private void collectNanopubs(ServerInfo si) {
 		stillAlive();
-		if (!ServerConf.get().isCollectNanopubsEnabled()) {
+		if (!ServerConf.get().isCollectNanopubsEnabled() || NanopubDb.get().isFull()) {
 			isFinished = true;
 			return;
 		}
