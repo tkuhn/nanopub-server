@@ -20,6 +20,7 @@ import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.NanopubUtils;
 import org.nanopub.NanopubWithNs;
+import org.nanopub.extra.server.NanopubServerUtils;
 import org.nanopub.extra.server.ServerInfo.ServerInfoException;
 import org.nanopub.trusty.TrustyNanopubUtils;
 import org.openrdf.OpenRDFException;
@@ -118,9 +119,14 @@ public class NanopubDb {
 			addPeerToCollection(s);
 		}
 		if (!db.getCollectionNames().contains("journal")) {
+			setJournalField("journal-version", "0.2");
 			setJournalField("journal-id", Math.abs(new Random().nextLong()) + "");
 			setJournalField("next-nanopub-no", "0");
 			setJournalField("page-size", ServerConf.get().getInitPageSize() + "");
+		} else if (getJournalVersionValue() < 0.002) {
+			logger.error("Old database found in MongoDB: " + conf.getMongoDbName() +
+				". Erase or rename this DB and restart the nanopub server.");
+			throw new RuntimeException("Old database found in MongoDB");
 		}
 		journalId = Long.parseLong(getJournalField("journal-id"));
 		pageSize = Integer.parseInt(getJournalField("page-size"));
@@ -380,6 +386,14 @@ public class NanopubDb {
 
 	public int getPageSize() {
 		return pageSize;
+	}
+
+	public float getJournalVersionValue() {
+		try {
+			return NanopubServerUtils.getVersionValue(getJournalField("journal-version"));
+		} catch (Exception ex) {
+			return 0.0f;
+		}
 	}
 
 }

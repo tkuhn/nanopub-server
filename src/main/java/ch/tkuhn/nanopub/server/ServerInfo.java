@@ -16,6 +16,7 @@ public class ServerInfo extends org.nanopub.extra.server.ServerInfo {
 	}
 
 	public ServerInfo(Properties prop) {
+		protocolVersion = "0.2";
 		publicUrl = prop.getProperty("public-url");
 		admin = prop.getProperty("admin");
 		postNanopubsEnabled = Boolean.parseBoolean(prop.getProperty("post-nanopubs-enabled"));
