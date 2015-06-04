@@ -31,6 +31,7 @@ public class NanopubServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
+			setGeneralHeaders(resp);
 			ServerRequest r = new ServerRequest(req);
 			if (r.isEmpty()) {
 				MainPage.show(r, resp);
@@ -59,6 +60,7 @@ public class NanopubServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
+			setGeneralHeaders(resp);
 			ServerRequest r = new ServerRequest(req);
 			if (r.isEmpty()) {
 				if (!ServerConf.getInfo().isPostNanopubsEnabled()) {
@@ -113,9 +115,19 @@ public class NanopubServlet extends HttpServlet {
 	}
 
 	@Override
+	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		super.doOptions(req, resp);
+		setGeneralHeaders(resp);
+	}
+
+	@Override
 	public void init() throws ServletException {
 		logger.info("Init");
 		check();
+	}
+
+	private void setGeneralHeaders(HttpServletResponse resp) {
+		resp.setHeader("Access-Control-Allow-Origin", "*");
 	}
 
 	private void check() {
