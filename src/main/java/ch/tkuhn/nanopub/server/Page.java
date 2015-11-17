@@ -58,9 +58,11 @@ public abstract class Page {
 		print("<a href=\"" + artifactCode + ".trig\" type=\"application/x-trig\">trig</a>, ");
 		print("<a href=\"" + artifactCode + ".nq\" type=\"text/x-nquads\">nq</a>, ");
 		print("<a href=\"" + artifactCode + ".xml\" type=\"application/trix\">xml</a>, ");
+		print("<a href=\"" + artifactCode + ".jsonld\" type=\"application/ld+json\">jsonld</a>, ");
 		print("<a href=\"" + artifactCode + ".trig.txt\" type=\"text/plain\">trig.txt</a>, ");
 		print("<a href=\"" + artifactCode + ".nq.txt\" type=\"text/plain\">nq.txt</a>, ");
-		print("<a href=\"" + artifactCode + ".xml.txt\" type=\"text/plain\">xml.txt</a>");
+		print("<a href=\"" + artifactCode + ".xml.txt\" type=\"text/plain\">xml.txt</a>, ");
+		print("<a href=\"" + artifactCode + ".jsonld.txt\" type=\"text/plain\">jsonld.txt</a>");
 		print(")</span>");
 	}
 

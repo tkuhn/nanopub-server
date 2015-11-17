@@ -60,7 +60,7 @@ public class NanopubPage extends Page {
 				return;
 			}
 		} else if (rf == null) {
-			String suppFormats = "application/trig,application/x-trig,text/x-nquads,application/trix";
+			String suppFormats = "application/trig,application/x-trig,text/x-nquads,application/trix,application/ld+json";
 			if (isIndexNanopub) {
 				suppFormats += ",text/html";
 			} else {
