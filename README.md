@@ -16,7 +16,8 @@ Requirements:
 - Java 1.7 or higher
 - Access to a MongoDB instance
 - Disk space of up to around 10kB per nanopublication (5-6kB is average so far,
-  but this value might change)
+  but this value might change; the current size of the network can be seen
+  here: http://npmonitor.inn.ac/)
 
 In addition, we assume here that Git and Maven are installed (tested with
 Maven version 3; version 2.0.9 might work too).
@@ -35,6 +36,10 @@ Edit the file `local.conf.properties` to configure your instance of the server,
 and then compile it (run in the top `nanopub-server` directory):
 
     $ mvn package
+
+(Depending on the state of this repository, you might also have to install
+the latest snapshot version of https://github.com/Nanopublication/nanopub-java
+with `git clone ...` and `mvn install`.)
 
 Then you can run the nanopub server using Maven's Jetty plugin:
 
