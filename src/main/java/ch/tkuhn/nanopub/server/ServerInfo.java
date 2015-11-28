@@ -37,7 +37,7 @@ public class ServerInfo extends org.nanopub.extra.server.ServerInfo {
 	@Override
 	public int getPageSize() {
 		if (loadFromDb) {
-			pageSize = NanopubDb.get().getPageSize();
+			pageSize = NanopubDb.get().getJournal().getPageSize();
 		}
 		return super.getPageSize();
 	}
@@ -53,7 +53,7 @@ public class ServerInfo extends org.nanopub.extra.server.ServerInfo {
 	@Override
 	public long getJournalId() {
 		if (loadFromDb) {
-			journalId = NanopubDb.get().getJournalId();
+			journalId = NanopubDb.get().getJournal().getId();
 		}
 		return super.getJournalId();
 	}
@@ -63,8 +63,8 @@ public class ServerInfo extends org.nanopub.extra.server.ServerInfo {
 		if (loadFromDb) {
 			NanopubDb db = NanopubDb.get();
 			nextNanopubNo = db.getNextNanopubNo();
-			pageSize = db.getPageSize();
-			journalId = db.getJournalId();
+			pageSize = db.getJournal().getPageSize();
+			journalId = db.getJournal().getId();
 		}
 		return super.asJson();
 	}

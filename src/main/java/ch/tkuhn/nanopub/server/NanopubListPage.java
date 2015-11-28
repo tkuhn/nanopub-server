@@ -27,8 +27,8 @@ public class NanopubListPage extends Page {
 		super(req, httpResp);
 		NanopubDb db = NanopubDb.get();
 		synchronized(db) {
-			pageSize = db.getPageSize();
-			lastPage = db.getCurrentPageNo();
+			pageSize = db.getJournal().getPageSize();
+			lastPage = db.getJournal().getCurrentPageNo();
 			nextNpNo = db.getNextNanopubNo();
 			String[] paramValues = req.getHttpRequest().getParameterValues("page");
 			if (paramValues != null && paramValues.length > 0) {
@@ -36,8 +36,8 @@ public class NanopubListPage extends Page {
 			} else {
 				pageNo = lastPage;
 			}
-			pageContent = db.getPageContent(pageNo);
-			getResp().addHeader("ETag", "W/\"" + db.getJournalStateId() + "\"");
+			pageContent = db.getJournal().getPageContent(pageNo);
+			getResp().addHeader("ETag", "W/\"" + db.getJournal().getStateId() + "\"");
 		}
 		setCanonicalLink("/" + PAGE_NAME + "?page=" + pageNo);
 		getResp().addHeader("Link", "<" + PAGE_NAME + "?page=1>; rel=\"start\"");

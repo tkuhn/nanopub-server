@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -20,7 +19,6 @@ import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.NanopubUtils;
 import org.nanopub.NanopubWithNs;
-import org.nanopub.extra.server.NanopubServerUtils;
 import org.nanopub.extra.server.ServerInfo.ServerInfoException;
 import org.nanopub.trusty.TrustyNanopubUtils;
 import org.openrdf.OpenRDFException;
@@ -102,9 +100,7 @@ public class NanopubDb {
 	private MongoClient mongo;
 	private DB db;
 	private GridFS packageGridFs;
-	private long journalId;
-	private int pageSize;
-	private long nextNanopubNo;
+	private Journal journal;
 
 	private NanopubDb() throws UnknownHostException {
 		conf = ServerConf.get();
@@ -118,34 +114,11 @@ public class NanopubDb {
 		for (String s : conf.getInitialPeers()) {
 			addPeerToCollection(s);
 		}
-		if (!db.getCollectionNames().contains("journal")) {
-			setJournalField("journal-version", "0.2");
-			setJournalField("journal-id", Math.abs(new Random().nextLong()) + "");
-			setJournalField("next-nanopub-no", "0");
-			setJournalField("page-size", ServerConf.get().getInitPageSize() + "");
-		} else if (getJournalVersionValue() < 0.002) {
-			logger.error("Old database found in MongoDB: " + conf.getMongoDbName() +
-				". Erase or rename this DB and restart the nanopub server.");
-			throw new RuntimeException("Old database found in MongoDB");
-		}
-		journalId = Long.parseLong(getJournalField("journal-id"));
-		pageSize = Integer.parseInt(getJournalField("page-size"));
-		nextNanopubNo = Long.parseLong(getJournalField("next-nanopub-no"));
+		journal = new Journal(db);
 	}
 
-	private String getJournalField(String field) {
-		BasicDBObject query = new BasicDBObject("_id", field);
-		DBCursor cursor = getJournalCollection().find(query);
-		if (cursor.hasNext()) {
-			return cursor.next().get("value").toString();
-		} else {
-			return null;
-		}
-	}
-
-	private void setJournalField(String field, String value) {
-		BasicDBObject dbObj = new BasicDBObject("_id", field).append("value", value);
-		getJournalCollection().save(dbObj);
+	public Journal getJournal() {
+		return journal;
 	}
 
 	public MongoClient getMongoClient() {
@@ -154,10 +127,6 @@ public class NanopubDb {
 
 	private DBCollection getNanopubCollection() {
 		return db.getCollection("nanopubs");
-	}
-
-	private DBCollection getJournalCollection() {
-		return db.getCollection("journal");
 	}
 
 	public Nanopub getNanopub(String artifactCode) {
@@ -218,19 +187,18 @@ public class NanopubDb {
 			BasicDBObject dbObj = new BasicDBObject("_id", artifactCode).append("nanopub", npString).append("uri", np.getUri().toString());
 			DBCollection coll = getNanopubCollection();
 			if (!coll.find(id).hasNext()) {
-				readNextNanopubNo();
-				long currentPageNo = getCurrentPageNo();
-				String pageContent = getPageContent(currentPageNo);
+				journal.checkNextNanopubNo();
+				long currentPageNo = journal.getCurrentPageNo();
+				String pageContent = journal.getPageContent(currentPageNo);
 				pageContent += np.getUri() + "\n";
-				nextNanopubNo++;
 				// TODO Implement proper transactions, rollback, etc.
 				// The following three lines of code are critical. If Java gets interrupted
 				// in between, the data will remain in a slightly inconsistent state (but, I
 				// think, without serious consequences).
-				setJournalField("next-nanopub-no", "" + nextNanopubNo);
+				journal.increaseNextNanopubNo();
 				// If interrupted here, the current page of the journal will miss one entry
 				// (e.g. contain only 999 instead of 1000 entries).
-				setPageContent(currentPageNo, pageContent);
+				journal.setPageContent(currentPageNo, pageContent);
 				// If interrupted here, journal will contain an entry that cannot be found in
 				// the database. This entry might be loaded later and then appear twice in the
 				// journal.
@@ -242,27 +210,6 @@ public class NanopubDb {
 		if (logNanopubLoading) {
 			logger.info("Nanopub loaded: " + np.getUri());
 		}
-	}
-
-	public long getCurrentPageNo() {
-		return getNextNanopubNo()/getPageSize() + 1;
-	}
-
-	private void setPageContent(long pageNo, String pageContent) {
-		setJournalField("page" + pageNo, pageContent);
-	}
-
-	public String getPageContent(long pageNo) {
-		String pageName = "page" + pageNo;
-		String pageContent = getJournalField(pageName);
-		if (pageContent == null) {
-			if (getNextNanopubNo() % getPageSize() > 0) {
-				throw new RuntimeException("Cannot find journal page: " + pageName);
-			}
-			// Make new page
-			pageContent = "";
-		}
-		return pageContent;
 	}
 
 	public DBCollection getPeerCollection() {
@@ -314,7 +261,7 @@ public class NanopubDb {
 	}
 
 	public void writePackageToStream(long pageNo, boolean gzipped, OutputStream out) throws IOException {
-		if (pageNo < 1 || pageNo >= getCurrentPageNo()) {
+		if (pageNo < 1 || pageNo >= journal.getCurrentPageNo()) {
 			throw new IllegalArgumentException("Not a complete page: " + pageNo);
 		}
 		GridFSDBFile f = packageGridFs.findOne(pageNo + "");
@@ -327,7 +274,7 @@ public class NanopubDb {
 				}
 				ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 				packageOut = new GZIPOutputStream(bOut);
-				String pageContent = getPageContent(pageNo);
+				String pageContent = journal.getPageContent(pageNo);
 				for (String uri : pageContent.split("\\n")) {
 					Nanopub np = getNanopub(TrustyUriUtils.getArtifactCode(uri));
 					String s;
@@ -365,41 +312,13 @@ public class NanopubDb {
 		}
 	}
 
-	public long getJournalId() {
-		return journalId;
-	}
-
 	public synchronized long getNextNanopubNo() {
-		return nextNanopubNo;
-	}
-
-	public synchronized void readNextNanopubNo() {
-		long loadedNextNanopubNo = Long.parseLong(getJournalField("next-nanopub-no"));
-		if (loadedNextNanopubNo != nextNanopubNo) {
-			nextNanopubNo = loadedNextNanopubNo;
-			throw new RuntimeException("ERROR. Mismatch of nanopub count from MongoDB: several parallel processes?");
-		}
-	}
-
-	public String getJournalStateId() {
-		return getJournalId() + "/" + getNextNanopubNo();
-	}
-
-	public int getPageSize() {
-		return pageSize;
-	}
-
-	public float getJournalVersionValue() {
-		try {
-			return NanopubServerUtils.getVersionValue(getJournalField("journal-version"));
-		} catch (Exception ex) {
-			return 0.0f;
-		}
+		return journal.getNextNanopubNo();
 	}
 
 	public boolean isFull() {
 		ServerInfo info = ServerConf.getInfo();
-		return (info.getMaxNanopubs() != null && nextNanopubNo >= info.getMaxNanopubs());
+		return (info.getMaxNanopubs() != null && journal.getNextNanopubNo() >= info.getMaxNanopubs());
 	}
 
 }
