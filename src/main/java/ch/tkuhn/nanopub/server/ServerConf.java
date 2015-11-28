@@ -23,7 +23,8 @@ public class ServerConf {
 	}
 
 	private Properties conf;
-	private String[] uriPattern;
+	private String uriPattern;
+	private String hashPattern;
 	private ServerInfo info;
 
 	private ServerConf() {
@@ -115,19 +116,18 @@ public class ServerConf {
 		return loadDir;
 	}
 
-	/**
-	 * Returns URI patterns. Processing of these patterns is not yet implemented...
-	 * 
-	 * @return Empty array if no URI pattern is set (matches all URIs). Otherwise,
-	 * list of patterns to match (from start of URI).
-	 */
-	public String[] getUriPattern() {
+	public String getUriPattern() {
 		if (uriPattern == null) {
-			String p = conf.getProperty("uri-pattern");
-			uriPattern = p.split(" ");
-			if (p.trim().isEmpty()) uriPattern = new String[] {};
+			uriPattern = conf.getProperty("uri-pattern").replaceAll("\\s+", " ").trim();
 		}
 		return uriPattern;
+	}
+
+	public String getHashPattern() {
+		if (hashPattern == null) {
+			hashPattern = conf.getProperty("hash-pattern").replaceAll("\\s+", " ").trim();
+		}
+		return hashPattern;
 	}
 
 }

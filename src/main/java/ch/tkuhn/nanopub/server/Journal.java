@@ -2,7 +2,6 @@ package ch.tkuhn.nanopub.server;
 
 import java.util.Random;
 
-import org.nanopub.extra.server.NanopubServerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,17 +30,37 @@ public class Journal {
 
 	private void init() {
 		if (!db.getCollectionNames().contains("journal")) {
-			// No journal found: Create new one
-			setField("journal-version", "0.2");
+			logger.info("No journal found: Create new one");
+			setField("journal-version", NanopubServerUtils.journalVersion);
 			setField("journal-id", Math.abs(new Random().nextLong()) + "");
 			setField("next-nanopub-no", "0");
 			setField("page-size", ServerConf.get().getInitPageSize() + "");
-		} else if (getVersionValue() < 0.002) {
+			setField("uri-pattern", ServerConf.get().getUriPattern());
+			setField("hash-pattern", ServerConf.get().getHashPattern());
+		}
+		int v = getVersionValue();
+		if (v == NanopubServerUtils.journalVersionValue) {
+			logger.info("Journal version is up-to-date: " + getField("journal-version"));
+			return;
+		}
+		if (v > NanopubServerUtils.journalVersionValue) {
+			logger.error("Unknown (too new) journal version found");
+			throw new RuntimeException("Unknown (too new) journal version found");
+		}
+		logger.info("Journal version is not up-to-date: " + getField("journal-version"));
+		logger.info("Journal version is not up-to-date: Try to upgrade...");
+		if (v < 2) {
 			// Found journal version is too old: Abort
 			logger.error("Old database found in MongoDB: " + ServerConf.get().getMongoDbName() +
 				". Erase or rename this DB and restart the nanopub server.");
 			throw new RuntimeException("Old database found in MongoDB");
 		}
+		if (v == 2) {
+			setField("uri-pattern", "");
+			setField("hash-pattern", "");
+		}
+		setField("journal-version", NanopubServerUtils.journalVersion);
+		logger.info("Journal upgraded to version " + NanopubServerUtils.journalVersion);
 	}
 
 	public long getId() {
@@ -83,11 +102,11 @@ public class Journal {
 		return getId() + "/" + getNextNanopubNo();
 	}
 
-	public synchronized float getVersionValue() {
+	public synchronized int getVersionValue() {
 		try {
 			return NanopubServerUtils.getVersionValue(getField("journal-version"));
 		} catch (Exception ex) {
-			return 0.0f;
+			return 0;
 		}
 	}
 
