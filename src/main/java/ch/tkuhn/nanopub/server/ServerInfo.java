@@ -59,12 +59,30 @@ public class ServerInfo extends org.nanopub.extra.server.ServerInfo {
 	}
 
 	@Override
+	public String getUriPattern() {
+		if (loadFromDb) {
+			uriPattern = NanopubDb.get().getJournal().getUriPattern();
+		}
+		return super.getUriPattern();
+	}
+
+	@Override
+	public String getHashPattern() {
+		if (loadFromDb) {
+			hashPattern = NanopubDb.get().getJournal().getHashPattern();
+		}
+		return super.getHashPattern();
+	}
+
+	@Override
 	public String asJson() {
 		if (loadFromDb) {
-			NanopubDb db = NanopubDb.get();
-			nextNanopubNo = db.getNextNanopubNo();
-			pageSize = db.getJournal().getPageSize();
-			journalId = db.getJournal().getId();
+			Journal j = NanopubDb.get().getJournal();
+			nextNanopubNo = j.getNextNanopubNo();
+			pageSize = j.getPageSize();
+			journalId = j.getId();
+			uriPattern = j.getUriPattern();
+			hashPattern = j.getHashPattern();
 		}
 		return super.asJson();
 	}

@@ -13,7 +13,9 @@ import com.mongodb.DBCursor;
 public class Journal {
 
 	private final long journalId;
-	private int pageSize;
+	private final int pageSize;
+	private final String uriPattern;
+	private final String hashPattern;
 	private long nextNanopubNo;
 
 	private DB db;
@@ -25,6 +27,8 @@ public class Journal {
 		init();
 		journalId = Long.parseLong(getField("journal-id"));
 		pageSize = Integer.parseInt(getField("page-size"));
+		uriPattern = getField("uri-pattern");
+		hashPattern = getField("hash-pattern");
 		nextNanopubNo = Long.parseLong(getField("next-nanopub-no"));
 	}
 
@@ -77,6 +81,14 @@ public class Journal {
 
 	public synchronized long getCurrentPageNo() {
 		return getNextNanopubNo()/getPageSize() + 1;
+	}
+
+	public String getUriPattern() {
+		return uriPattern;
+	}
+
+	public String getHashPattern() {
+		return hashPattern;
 	}
 
 	private String getField(String field) {
