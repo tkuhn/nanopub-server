@@ -23,19 +23,25 @@ public class Journal {
 
 	public Journal(DB db) {
 		this.db = db;
+		init();
+		journalId = Long.parseLong(getField("journal-id"));
+		pageSize = Integer.parseInt(getField("page-size"));
+		nextNanopubNo = Long.parseLong(getField("next-nanopub-no"));
+	}
+
+	private void init() {
 		if (!db.getCollectionNames().contains("journal")) {
+			// No journal found: Create new one
 			setField("journal-version", "0.2");
 			setField("journal-id", Math.abs(new Random().nextLong()) + "");
 			setField("next-nanopub-no", "0");
 			setField("page-size", ServerConf.get().getInitPageSize() + "");
 		} else if (getVersionValue() < 0.002) {
+			// Found journal version is too old: Abort
 			logger.error("Old database found in MongoDB: " + ServerConf.get().getMongoDbName() +
 				". Erase or rename this DB and restart the nanopub server.");
 			throw new RuntimeException("Old database found in MongoDB");
 		}
-		journalId = Long.parseLong(getField("journal-id"));
-		pageSize = Integer.parseInt(getField("page-size"));
-		nextNanopubNo = Long.parseLong(getField("next-nanopub-no"));
 	}
 
 	public long getId() {
