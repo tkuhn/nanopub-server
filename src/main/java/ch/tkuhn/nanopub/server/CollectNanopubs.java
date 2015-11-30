@@ -19,6 +19,7 @@ import org.nanopub.MultiNanopubRdfHandler.NanopubHandler;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.extra.server.NanopubServerUtils;
+import org.nanopub.extra.server.NanopubSurfacePattern;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ public class CollectNanopubs {
 	private static final int processPagesPerRun = 10;
 
 	private static NanopubDb db = NanopubDb.get();
+	private static NanopubSurfacePattern ourPattern = ServerConf.getInfo().getNanopubSurfacePattern();
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -116,7 +118,7 @@ public class CollectNanopubs {
 			parent.stillAlive();
 			if (nextNp >= ignoreBeforePos) {
 				String ac = TrustyUriUtils.getArtifactCode(nanopubUri);
-				if (ac != null && !db.hasNanopub(ac)) {
+				if (ac != null && ourPattern.matchesUri(nanopubUri) && !db.hasNanopub(ac)) {
 					toLoad.add(ac);
 					if (!isLastPage && toLoad.size() > 5) {
 						// Download entire package if more than 5 nanopubs are new

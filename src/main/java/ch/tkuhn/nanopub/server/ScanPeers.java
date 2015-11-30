@@ -13,6 +13,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.nanopub.extra.server.NanopubServerUtils;
+import org.nanopub.extra.server.NanopubSurfacePattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,7 @@ public class ScanPeers implements Runnable {
 	private static Thread thread;
 
 	private static NanopubDb db = NanopubDb.get();
+	private static NanopubSurfacePattern ourPattern = ServerConf.getInfo().getNanopubSurfacePattern();
 
 	public static synchronized void check() {
 		if (running != null) {
@@ -133,6 +135,13 @@ public class ScanPeers implements Runnable {
 	private void collectNanopubs(ServerInfo si) {
 		stillAlive();
 		if (!ServerConf.get().isCollectNanopubsEnabled() || NanopubDb.get().isFull()) {
+			// We are not interested in collecting more nanopublications
+			isFinished = true;
+			return;
+		}
+		if (!ourPattern.overlapsWith(si.getNanopubSurfacePattern())) {
+			// Our patterns don't overlap, so we won't find the nanopubs we are looking
+			// for at that peer.
 			isFinished = true;
 			return;
 		}
