@@ -166,6 +166,7 @@ public class CollectNanopubs {
 							recordTime();
 							throw new RuntimeException("Downloading package took too long; interrupting");
 						}
+						if (!ourPattern.matchesUri(np.getUri().stringValue())) return;
 						try {
 							loadNanopub(np);
 						} catch (Exception ex) {
