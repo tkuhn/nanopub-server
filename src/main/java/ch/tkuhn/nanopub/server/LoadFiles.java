@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.nanopub.MultiNanopubRdfHandler;
 import org.nanopub.MultiNanopubRdfHandler.NanopubHandler;
+import org.nanopub.extra.server.NanopubSurfacePattern;
 import org.nanopub.Nanopub;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
@@ -16,6 +17,7 @@ public class LoadFiles implements Runnable {
 	private static Thread thread;
 
 	private static NanopubDb db = NanopubDb.get();
+	private static NanopubSurfacePattern ourPattern = ServerConf.getInfo().getNanopubSurfacePattern();
 
 	public static synchronized void check() {
 		if (running != null) {
@@ -83,6 +85,7 @@ public class LoadFiles implements Runnable {
 				MultiNanopubRdfHandler.process(format, processingFile, new NanopubHandler() {
 					@Override
 					public void handleNanopub(Nanopub np) {
+						if (!ourPattern.matchesUri(np.getUri().toString())) return;
 						try {
 							db.loadNanopub(np);
 						} catch (Exception ex) {

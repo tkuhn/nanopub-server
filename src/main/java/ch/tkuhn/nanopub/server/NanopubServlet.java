@@ -13,6 +13,7 @@ import net.trustyuri.TrustyUriUtils;
 import org.apache.commons.io.IOUtils;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
+import org.nanopub.extra.server.NanopubSurfacePattern;
 import org.nanopub.extra.server.ServerInfo.ServerInfoException;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
@@ -25,6 +26,8 @@ import ch.tkuhn.nanopub.server.NanopubDb.OversizedNanopubException;
 public class NanopubServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -4542560440919522982L;
+
+	private static NanopubSurfacePattern ourPattern = ServerConf.getInfo().getNanopubSurfacePattern();
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -74,19 +77,23 @@ public class NanopubServlet extends HttpServlet {
 					resp.sendError(400, "Error reading nanopub: " + ex.getMessage());
 				}
 				if (np != null) {
-					String code = TrustyUriUtils.getArtifactCode(np.getUri().toString());
-					try {
-						if (NanopubDb.get().getNanopub(code) == null) {
-							NanopubDb.get().loadNanopub(np);
+					if (ourPattern.matchesUri(np.getUri().toString())) {
+						String code = TrustyUriUtils.getArtifactCode(np.getUri().toString());
+						try {
+							if (NanopubDb.get().getNanopub(code) == null) {
+								NanopubDb.get().loadNanopub(np);
+							}
+							resp.setHeader("Location", TrustyUriUtils.getArtifactCode(np.getUri().toString()));
+							resp.setStatus(201);
+						} catch (NotTrustyNanopubException ex) {
+							resp.sendError(400, "Nanopub is not trusty: " + ex.getMessage());
+						} catch (OversizedNanopubException ex) {
+							resp.sendError(400, "Nanopub is too large: " + ex.getMessage());
+						} catch (Exception ex) {
+							resp.sendError(500, "Error storing nanopub: " + ex.getMessage());
 						}
-						resp.setHeader("Location", TrustyUriUtils.getArtifactCode(np.getUri().toString()));
-						resp.setStatus(201);
-					} catch (NotTrustyNanopubException ex) {
-						resp.sendError(400, "Nanopub is not trusty: " + ex.getMessage());
-					} catch (OversizedNanopubException ex) {
-						resp.sendError(400, "Nanopub is too large: " + ex.getMessage());
-					} catch (Exception ex) {
-						resp.sendError(500, "Error storing nanopub: " + ex.getMessage());
+					} else {
+						resp.sendError(500, "Nanopub doesn't match pattern for this server: " + np.getUri());
 					}
 				}
 			} else if (r.getRequestString().equals(PeerListPage.PAGE_NAME)) {

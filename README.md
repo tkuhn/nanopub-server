@@ -56,7 +56,7 @@ server to map a public URL to the nanopub server, for example:
     http://example.org/np/ > http://0.0.0.0:8080/nanopub-server/
 
 Add the public URL to the line `public-url=` of the configuration file and
-restart the server. Then, it will connect to the server network.
+recompile and restart the server. Then, it will connect to the server network.
 
 
 Usage
