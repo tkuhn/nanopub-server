@@ -33,6 +33,8 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
@@ -104,7 +106,15 @@ public class NanopubDb {
 
 	private NanopubDb() throws UnknownHostException {
 		conf = ServerConf.get();
-		mongo = new MongoClient(conf.getMongoDbHost(), conf.getMongoDbPort());
+		ServerAddress serverAddress = new ServerAddress(conf.getMongoDbHost(), conf.getMongoDbPort());
+		List<MongoCredential> credentials = new ArrayList<>();
+		if (conf.getMongoDbUsername() != null) {
+			credentials.add(MongoCredential.createMongoCRCredential(
+					conf.getMongoDbUsername(),
+					conf.getMongoDbName(),
+					conf.getMongoDbPassword().toCharArray()));
+		}
+		mongo = new MongoClient(serverAddress, credentials);
 		db = mongo.getDB(conf.getMongoDbName());
 		packageGridFs = new GridFS(db, "packages_gzipped");
 		init();

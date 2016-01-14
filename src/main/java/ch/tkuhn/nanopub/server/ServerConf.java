@@ -88,6 +88,16 @@ public class ServerConf {
 		return conf.getProperty("mongodb.dbname");
 	}
 
+	public String getMongoDbUsername() {
+		String username = conf.getProperty("mongodb.username");
+		if (username == null || username.isEmpty()) return null;
+		return username;
+	}
+
+	public String getMongoDbPassword() {
+		return conf.getProperty("mongodb.password");
+	}
+
 	public String[] getInitialPeers() {
 		String s = conf.getProperty("initial-peers");
 		if (s == null) return new String[] {};
