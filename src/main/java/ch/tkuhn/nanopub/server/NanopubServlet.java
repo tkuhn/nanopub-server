@@ -1,7 +1,9 @@
 package ch.tkuhn.nanopub.server;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -103,7 +105,7 @@ public class NanopubServlet extends HttpServlet {
 				}
 				try {
 					StringWriter sw = new StringWriter();
-					IOUtils.copy(req.getInputStream(), sw);
+					IOUtils.copy(new InputStreamReader(req.getInputStream(), Charset.forName("UTF-8")), sw);
 					NanopubDb.get().addPeer(sw.toString().trim());
 					resp.setStatus(201);
 				} catch (ServerInfoException ex) {
