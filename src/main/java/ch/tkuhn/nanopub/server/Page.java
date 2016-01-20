@@ -15,6 +15,7 @@ public abstract class Page {
 	public Page(ServerRequest req, HttpServletResponse httpResp) {
 		this.req = req;
 		this.httpResp = httpResp;
+		httpResp.setCharacterEncoding("UTF-8");
 	}
 
 	public ServerRequest getReq() {
