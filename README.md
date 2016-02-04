@@ -15,8 +15,8 @@ Requirements:
 
 - Java 1.7 or higher
 - Access to a MongoDB instance
-- Disk space of up to around 10kB per nanopublication (5-6kB is average so far,
-  but this value might change; the current size of the network can be seen
+- Disk space of up to around 15kB per nanopublication (10-11kB is average so
+  far, but this value might change; the current size of the network can be seen
   here: http://npmonitor.inn.ac/)
 
 In addition, we assume here that Git and Maven are installed (tested with
