@@ -84,7 +84,7 @@ public class NanopubDb {
 
 	private static NanopubDb obj;
 
-	public static NanopubDb get() {
+	public synchronized static NanopubDb get() {
 		if (obj == null) {
 			try {
 				obj = new NanopubDb();

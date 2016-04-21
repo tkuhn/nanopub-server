@@ -16,7 +16,7 @@ public class Journal {
 	private final int pageSize;
 	private final String uriPattern;
 	private final String hashPattern;
-	private long nextNanopubNo;
+	private long nextNanopubNo = -1;
 
 	private DB db;
 
@@ -126,7 +126,7 @@ public class Journal {
 	public synchronized void checkNextNanopubNo() {
 		long loadedNextNanopubNo = Long.parseLong(getField("next-nanopub-no"));
 		if (loadedNextNanopubNo != nextNanopubNo) {
-			nextNanopubNo = loadedNextNanopubNo;
+			if (loadedNextNanopubNo > nextNanopubNo) nextNanopubNo = loadedNextNanopubNo;
 			throw new RuntimeException("ERROR. Mismatch of nanopub count from MongoDB: several parallel processes?");
 		}
 	}
