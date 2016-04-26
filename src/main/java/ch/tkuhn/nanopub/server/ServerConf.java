@@ -29,29 +29,29 @@ public class ServerConf {
 
 	private ServerConf() {
 		conf = new Properties();
-		InputStream in1 = null;
-		InputStream in2 = null;
+		loadProperties("conf.properties");
+		loadProperties("local.conf.properties");
+		info = new ServerInfo(conf);
+	}
+
+	private void loadProperties(String fileName) {
+		InputStream in = null;
 		try {
-			in1 = ServerConf.class.getResourceAsStream("conf.properties");
+			in = ServerConf.class.getResourceAsStream(fileName);
+			Properties tempProp = new Properties();
 			try {
-				conf.load(in1);
+				tempProp.load(in);
 			} catch (IOException ex) {
 				LoggerFactory.getLogger(NanopubDb.class).error(ex.getMessage(), ex);
 				System.exit(1);
 			}
-			in2 = ServerConf.class.getResourceAsStream("local.conf.properties");
-			if (in2 != null) {
-				try {
-					conf.load(in2);
-				} catch (IOException ex) {
-					LoggerFactory.getLogger(NanopubDb.class).error(ex.getMessage(), ex);
-					System.exit(1);
-				}
+			for (Object k : tempProp.keySet()) {
+				// This is for backward compatibility, as we used to use hyphens instead of
+				// periods in property keys:
+				conf.setProperty(k.toString().replace('-', '.'), tempProp.getProperty(k.toString()));
 			}
-			info = new ServerInfo(conf);
 		} finally {
-			close(in1);
-			close(in2);
+			close(in);
 		}
 	}
 
@@ -65,15 +65,15 @@ public class ServerConf {
 	}
 
 	public boolean isPeerScanEnabled() {
-		return Boolean.parseBoolean(conf.getProperty("peer-scan-enabled"));
+		return Boolean.parseBoolean(conf.getProperty("peer.scan.enabled"));
 	}
 
 	public boolean isCollectNanopubsEnabled() {
-		return Boolean.parseBoolean(conf.getProperty("collect-nanopubs-enabled"));
+		return Boolean.parseBoolean(conf.getProperty("collect.nanopubs.enabled"));
 	}
 
 	public boolean isCheckNanopubsOnGetEnabled() {
-		return Boolean.parseBoolean(conf.getProperty("check-nanopubs-on-get"));
+		return Boolean.parseBoolean(conf.getProperty("check.nanopubs.on.get"));
 	}
 
 	public String getMongoDbHost() {
@@ -99,43 +99,43 @@ public class ServerConf {
 	}
 
 	public String[] getInitialPeers() {
-		String s = conf.getProperty("initial-peers");
+		String s = conf.getProperty("initial.peers");
 		if (s == null) return new String[] {};
 		return s.split(" ");
 	}
 
 	public int getInitPageSize() {
-		return Integer.parseInt(conf.getProperty("init-page-size"));
+		return Integer.parseInt(conf.getProperty("init.page.size"));
 	}
 
 	public int getWaitMsBeforePeerScan() {
-		return Integer.parseInt(conf.getProperty("wait-ms-before-peer-scan"));
+		return Integer.parseInt(conf.getProperty("wait.ms.before.peer.scan"));
 	}
 
 	public int getWaitMsBeforeFileLoad() {
-		return Integer.parseInt(conf.getProperty("wait-ms-before-file-load"));
+		return Integer.parseInt(conf.getProperty("wait.ms.before.file.load"));
 	}
 
 	public boolean isLogNanopubLoadingEnabled() {
-		return Boolean.parseBoolean(conf.getProperty("log-nanopub-loading"));
+		return Boolean.parseBoolean(conf.getProperty("log.nanopub.loading"));
 	}
 
 	public String getLoadDir() {
-		String loadDir = conf.getProperty("load-dir");
+		String loadDir = conf.getProperty("load.dir");
 		if (loadDir != null && loadDir.isEmpty()) loadDir = null;
 		return loadDir;
 	}
 
 	public String getUriPattern() {
 		if (uriPattern == null) {
-			uriPattern = conf.getProperty("uri-pattern").replaceAll("\\s+", " ").trim();
+			uriPattern = conf.getProperty("uri.pattern").replaceAll("\\s+", " ").trim();
 		}
 		return uriPattern;
 	}
 
 	public String getHashPattern() {
 		if (hashPattern == null) {
-			hashPattern = conf.getProperty("hash-pattern").replaceAll("\\s+", " ").trim();
+			hashPattern = conf.getProperty("hash.pattern").replaceAll("\\s+", " ").trim();
 		}
 		return hashPattern;
 	}
