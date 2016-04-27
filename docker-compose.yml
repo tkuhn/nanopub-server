@@ -1,0 +1,12 @@
+version: '2'
+services:
+  nanopub:
+    build: .
+    depends_on:
+      - db
+    environment:
+      - NPS_MONGODB_HOST=db
+    ports:
+      - 8080:8080
+  db:
+    image: mongo

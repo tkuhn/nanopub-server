@@ -8,6 +8,21 @@ entire nanopubs. No queries supported; no triple store involved. The current
 implementation uses MongoDB to store the nanopubs.
 
 
+Easy Deployment with Docker
+--------------------------
+
+Requirements:
+
+- Docker 1.10 or higher
+- Docker-compose 1.6 or higher
+
+After cloning the repository and simply execute:
+
+    $ docker-compose up
+
+Config can be changed by passing environment variables prefixed with `NPS_`.
+E.g. setting `mongodb.host` is done via variable `NPS_MONGODB_HOST`.
+
 Compilation and Deployment
 --------------------------
 
@@ -57,7 +72,6 @@ server to map a public URL to the nanopub server, for example:
 
 Add the public URL to the line `public-url=` of the configuration file and
 recompile and restart the server. Then, it will connect to the server network.
-
 
 Usage
 -----

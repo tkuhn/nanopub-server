@@ -15,4 +15,4 @@ RUN mvn package
 EXPOSE 8080
 
 # define run command
-CMD ["mvn", "jetty:run"]
+CMD ["bash", "scripts/start.sh"]
