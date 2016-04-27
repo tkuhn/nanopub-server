@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+#
+# Appends the values found in environment variables starting with NPS_ to the
+# local conf file.
+#
+
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+cd -P ..
+
+scripts/env-to-properties.sh >> src/main/resources/ch/tkuhn/nanopub/server/local.conf.properties
