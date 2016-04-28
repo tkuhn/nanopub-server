@@ -5,7 +5,7 @@
 # starting with NPS_.
 #
 
-cd "$( dirname "${BASH_SOURCE[0]}" )"
-cd -P ..
+# Go to parent directory of this script file:
+cd "$( dirname "${BASH_SOURCE[0]}" )" && cd -P ..
 
 scripts/env-to-properties.sh > src/main/resources/ch/tkuhn/nanopub/server/local.conf.properties
