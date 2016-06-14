@@ -135,6 +135,15 @@ public class NanopubDb {
 		return mongo;
 	}
 
+	public boolean isAccessible() {
+		try {
+			mongo.getConnector().getDBPortPool(mongo.getAddress()).get().ensureOpen();
+		} catch (Exception ex) {
+			return false;
+		}
+		return true;
+	}
+
 	private DBCollection getNanopubCollection() {
 		return db.getCollection("nanopubs");
 	}

@@ -38,10 +38,14 @@ public class NanopubServlet extends HttpServlet {
 		try {
 			setGeneralHeaders(resp);
 			ServerRequest r = new ServerRequest(req);
-			if (r.isEmpty()) {
-				MainPage.show(r, resp);
-			} else if (r.hasArtifactCode()) {
+			if (r.hasArtifactCode()) {
 				NanopubPage.show(r, resp);
+			} else if (!NanopubDb.get().isAccessible()) {
+				// The above (single nanopub) gives a nice 500 error code if MongoDB is not running,
+				// but the pages below don't. That's why we need this check here.
+				resp.sendError(500, "MongoDB is not accessible");
+			} else if (r.isEmpty()) {
+				MainPage.show(r, resp);
 			} else if (r.getRequestString().equals(NanopubListPage.PAGE_NAME)) {
 				NanopubListPage.show(r, resp);
 			} else if (r.getRequestString().equals(PeerListPage.PAGE_NAME)) {
