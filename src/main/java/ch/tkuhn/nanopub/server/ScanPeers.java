@@ -91,6 +91,7 @@ public class ScanPeers implements Runnable {
 		for (String peerUri : peerUris) {
 			ServerInfo si = null;
 			try {
+				logger.info("Trying " + peerUri);
 				si = ServerInfo.load(peerUri);
 				checkPeerLists(si);
 				collectNanopubs(si);
@@ -136,14 +137,20 @@ public class ScanPeers implements Runnable {
 
 	private void collectNanopubs(ServerInfo si) {
 		stillAlive();
-		if (!ServerConf.get().isCollectNanopubsEnabled() || NanopubDb.get().isFull()) {
-			// We are not interested in collecting more nanopublications
+		logger.info("Check if we are interested in more nanopubs...");
+		if (!ServerConf.get().isCollectNanopubsEnabled()) {
+			logger.info("This server doesn't collect nanopubs. Aborting nanopub collection.");
 			isFinished = true;
 			return;
 		}
+		if (NanopubDb.get().isFull()) {
+			logger.info("This server is full. Aborting nanopub collection.");
+			isFinished = true;
+			return;
+		}
+		logger.info("Check if other server's nanopub subset overlaps with ours...");
 		if (!ourPattern.overlapsWith(si.getNanopubSurfacePattern())) {
-			// Our patterns don't overlap, so we won't find the nanopubs we are looking
-			// for at that peer.
+			logger.info("Patters of this and other server don't overlap. Aborting nanopub collection.");
 			isFinished = true;
 			return;
 		}
