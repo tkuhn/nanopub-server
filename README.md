@@ -30,9 +30,16 @@ server network:
 
 - [Nanopub monitor](http://npmonitor.inn.ac)
 
+From that monitor page, you can find the URLs of the current servers in the
+network, for example this one:
 
-Easy Deployment with Docker
---------------------------
+- [Example of a nanopub server](http://np.inn.ac/)
+
+
+Deployment
+----------
+
+### Easy Deployment with Docker
 
 Requirements:
 
@@ -47,8 +54,7 @@ Config can be changed by passing environment variables prefixed with `NPS_`.
 E.g. setting `mongodb.host` is done via variable `NPS_MONGODB_HOST`.
 
 
-Compilation and Deployment
---------------------------
+### Manual Compilation and Deployment
 
 Requirements:
 
@@ -101,7 +107,8 @@ recompile and restart the server. Then, it will connect to the server network.
 Usage
 -----
 
-To retrieve a nanopub like
+Usage is pretty straightforward when you look at the web interface that a
+nanopub server provides. To retrieve a nanopub like
 
     http://example.org/mynanopubs/RAPpJU5UOB4pavfWyk7FE3WQiam5yBpmIlviAQWtBSC4M
 
