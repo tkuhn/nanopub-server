@@ -4,8 +4,13 @@ Nanopub Server
 This is an implementation of a nanopublication server. Such servers form a
 server network, which can be used to publish
 [nanopublications](http://nanopub.org) that have [trusty
-URIs](http://arxiv.org/abs/1401.5775). Such a server only returns entire
-nanopubs. No queries supported; no triple store involved.
+URIs](http://arxiv.org/abs/1401.5775). (Such a server only returns entire
+nanopubs. No queries supported; no triple store involved.)
+
+Nanopublications are tiny snippets of data with provenance information attached.
+They can be organized in a very flexible manner into large datasets (which can
+also be described as nanopublications). More details can be found in the
+publications listed below.
 
 
 Publications
