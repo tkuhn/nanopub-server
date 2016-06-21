@@ -12,6 +12,10 @@ They can be organized in a very flexible manner into large datasets (which can
 also be described as nanopublications). More details can be found in the
 publications listed below.
 
+To access the server network, the
+[nanopub-java](https://github.com/Nanopublication/nanopub-java) library can be
+used.
+
 
 Publications
 ------------
@@ -24,7 +28,8 @@ The following publications explain the approach:
   http://arxiv.org/abs/1411.2749
 - Kuhn et al. Decentralized provenance-aware publishing with nanopublications.
   PeerJ Preprints. https://peerj.com/preprints/1760/
-
+- Kuhn. nanopub-java: A Java Library for Nanopublications. In Proceedings of the
+  5th Workshop on Linked Science (LISC 2015). http://arxiv.org/abs/1508.04977
 
 Current Network
 ---------------
