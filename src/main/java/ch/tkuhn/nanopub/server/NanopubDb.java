@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -34,6 +33,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
@@ -86,12 +86,7 @@ public class NanopubDb {
 
 	public synchronized static NanopubDb get() {
 		if (obj == null) {
-			try {
-				obj = new NanopubDb();
-			} catch (UnknownHostException ex) {
-				LoggerFactory.getLogger(NanopubDb.class).error(ex.getMessage(), ex);
-				System.exit(1);
-			}
+			obj = new NanopubDb();
 		}
 		return obj;
 	}
@@ -104,7 +99,8 @@ public class NanopubDb {
 	private GridFS packageGridFs;
 	private Journal journal;
 
-	private NanopubDb() throws UnknownHostException {
+	private NanopubDb() {
+		logger.info("Initialize new DB object");
 		conf = ServerConf.get();
 		ServerAddress serverAddress = new ServerAddress(conf.getMongoDbHost(), conf.getMongoDbPort());
 		List<MongoCredential> credentials = new ArrayList<>();
@@ -135,10 +131,12 @@ public class NanopubDb {
 		return mongo;
 	}
 
+	private static DBObject pingCommand = new BasicDBObject("ping", "1");
+
 	public boolean isAccessible() {
 		try {
-			mongo.getConnector().getDBPortPool(mongo.getAddress()).get().ensureOpen();
-		} catch (Exception ex) {
+			db.command(pingCommand);
+		} catch (MongoException ex) {
 			return false;
 		}
 		return true;
@@ -199,32 +197,26 @@ public class NanopubDb {
 		} catch (RDFHandlerException ex) {
 			throw new RuntimeException("Unexpected exception when processing nanopub", ex);
 		}
-		db.requestStart();
-		try {
-			db.requestEnsureConnection();
-			BasicDBObject id = new BasicDBObject("_id", artifactCode);
-			BasicDBObject dbObj = new BasicDBObject("_id", artifactCode).append("nanopub", npString).append("uri", np.getUri().toString());
-			DBCollection coll = getNanopubCollection();
-			if (!coll.find(id).hasNext()) {
-				journal.checkNextNanopubNo();
-				long currentPageNo = journal.getCurrentPageNo();
-				String pageContent = journal.getPageContent(currentPageNo);
-				pageContent += np.getUri() + "\n";
-				// TODO Implement proper transactions, rollback, etc.
-				// The following three lines of code are critical. If Java gets interrupted
-				// in between, the data will remain in a slightly inconsistent state (but, I
-				// think, without serious consequences).
-				journal.increaseNextNanopubNo();
-				// If interrupted here, the current page of the journal will miss one entry
-				// (e.g. contain only 999 instead of 1000 entries).
-				journal.setPageContent(currentPageNo, pageContent);
-				// If interrupted here, journal will contain an entry that cannot be found in
-				// the database. This entry might be loaded later and then appear twice in the
-				// journal.
-				coll.insert(dbObj);
-			}
-		} finally {
-			db.requestDone();
+		BasicDBObject id = new BasicDBObject("_id", artifactCode);
+		BasicDBObject dbObj = new BasicDBObject("_id", artifactCode).append("nanopub", npString).append("uri", np.getUri().toString());
+		DBCollection coll = getNanopubCollection();
+		if (!coll.find(id).hasNext()) {
+			journal.checkNextNanopubNo();
+			long currentPageNo = journal.getCurrentPageNo();
+			String pageContent = journal.getPageContent(currentPageNo);
+			pageContent += np.getUri() + "\n";
+			// TODO Implement proper transactions, rollback, etc.
+			// The following three lines of code are critical. If Java gets interrupted
+			// in between, the data will remain in a slightly inconsistent state (but, I
+			// think, without serious consequences).
+			journal.increaseNextNanopubNo();
+			// If interrupted here, the current page of the journal will miss one entry
+			// (e.g. contain only 999 instead of 1000 entries).
+			journal.setPageContent(currentPageNo, pageContent);
+			// If interrupted here, journal will contain an entry that cannot be found in
+			// the database. This entry might be loaded later and then appear twice in the
+			// journal.
+			coll.insert(dbObj);
 		}
 		if (logNanopubLoading) {
 			logger.info("Nanopub loaded: " + np.getUri());
