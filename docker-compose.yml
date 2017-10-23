@@ -10,3 +10,5 @@ services:
       - 8080:8080
   db:
     image: mongo
+    volumes:
+      - /data/nanopubs/db:/data/db
