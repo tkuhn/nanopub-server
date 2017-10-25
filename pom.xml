@@ -88,9 +88,9 @@
     <finalName>nanopub-server</finalName>
     <plugins>
       <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <version>6.1.26</version>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.4.7.v20170914</version>
       </plugin>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
