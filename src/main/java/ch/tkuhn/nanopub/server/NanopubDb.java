@@ -13,6 +13,10 @@ import java.util.zip.GZIPOutputStream;
 import net.trustyuri.TrustyUriUtils;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.nanopub.MalformedNanopubException;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
@@ -217,6 +221,18 @@ public class NanopubDb {
 			// the database. This entry might be loaded later and then appear twice in the
 			// journal.
 			coll.insert(dbObj);
+		}
+		String postUrl = ServerConf.get().getPostUrl();
+		if (postUrl != null && !postUrl.isEmpty()) {
+			try {
+				HttpPost post = new HttpPost(postUrl);
+				post.setHeader("Content-Type", internalFormat.getDefaultMIMEType());
+				post.setEntity(new StringEntity(npString));
+				HttpResponse response = HttpClientBuilder.create().build().execute(post);
+				logger.info("Nanopub posted to " + postUrl + ": " + response.getStatusLine().getReasonPhrase());
+			} catch (Exception ex) {
+				logger.error("Error while posting nanopub", ex);
+			}
 		}
 		if (logNanopubLoading) {
 			logger.info("Nanopub loaded: " + np.getUri());

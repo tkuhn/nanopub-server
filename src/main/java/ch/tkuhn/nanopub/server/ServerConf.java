@@ -26,6 +26,7 @@ public class ServerConf {
 	private String uriPattern;
 	private String hashPattern;
 	private ServerInfo info;
+	private String postUrl;
 
 	private ServerConf() {
 		conf = new Properties();
@@ -140,4 +141,10 @@ public class ServerConf {
 		return hashPattern;
 	}
 
+	public String getPostUrl() {
+		if (postUrl == null) {
+			postUrl = conf.getProperty("post.new.nanopubs.to").trim();
+		}
+		return postUrl;
+	}
 }
