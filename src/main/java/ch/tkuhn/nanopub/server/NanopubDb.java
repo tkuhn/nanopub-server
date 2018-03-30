@@ -12,8 +12,10 @@ import java.util.zip.GZIPOutputStream;
 
 import net.trustyuri.TrustyUriUtils;
 
+import org.apache.commons.io.output.NullOutputStream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -229,7 +231,9 @@ public class NanopubDb {
 				post.setHeader("Content-Type", internalFormat.getDefaultMIMEType());
 				post.setEntity(new StringEntity(npString));
 				HttpResponse response = HttpClientBuilder.create().build().execute(post);
-				logger.info("Nanopub posted to " + postUrl + ": " + response.getStatusLine().getReasonPhrase());
+				if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+					logger.error("Failed to post nanopub to " + postUrl + ": " + response.getStatusLine().getReasonPhrase());
+				}
 			} catch (Exception ex) {
 				logger.error("Error while posting nanopub", ex);
 			}
@@ -285,6 +289,13 @@ public class NanopubDb {
 		if (r.containsField("nextNanopubNo")) nextNanopubNo = Long.parseLong(r.get("nextNanopubNo").toString());
 		if (journalId == null || nextNanopubNo == null) return null;
 		return Pair.of(journalId, nextNanopubNo);
+	}
+
+	public void populatePackageCache() throws IOException {
+		long c = journal.getCurrentPageNo();
+		for (long page = 1; page < c; page++) {
+			writePackageToStream(page, false, new NullOutputStream());
+		}
 	}
 
 	public void writePackageToStream(long pageNo, boolean gzipped, OutputStream out) throws IOException {
