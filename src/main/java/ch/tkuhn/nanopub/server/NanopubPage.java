@@ -2,6 +2,7 @@ package ch.tkuhn.nanopub.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -10,11 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 import net.trustyuri.TrustyUriUtils;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.nanopub.HtmlWriter;
 import org.nanopub.MalformedNanopubException;
 import org.nanopub.Nanopub;
+import org.nanopub.Nanopub2Html;
 import org.nanopub.NanopubUtils;
 import org.nanopub.extra.index.IndexUtils;
 import org.nanopub.extra.index.NanopubIndex;
+import org.nanopub.trusty.TrustyNanopubUtils;
 import org.openrdf.model.URI;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
@@ -55,19 +59,24 @@ public class NanopubPage extends Page {
 		RDFFormat format = null;
 		if (ext != null) {
 			format = Rio.getParserFormatForFileName("np." + ext);
+			if (ext.equals("stnp")) {
+				format = TrustyNanopubUtils.STNP_FORMAT;
+			}
 			if (format == null) {
 				getResp().sendError(400, "Unknown format: " + ext);
 				return;
 			}
 		} else if (rf == null) {
-			String suppFormats = "application/trig,application/x-trig,text/x-nquads,application/trix,application/ld+json";
+			String suppFormats = "text/html,application/trig,application/x-trig,text/x-nquads,application/trix,application/ld+json";
 			if (isIndexNanopub) {
 				suppFormats += ",text/html";
 			} else {
 				suppFormats += ",text/plain";
 			}
 			String mimeType = Utils.getMimeType(getHttpReq(), suppFormats);
-			if (isIndexNanopub && "text/html".equals(mimeType)) {
+			if (isIndexNanopub && "text/html".equals(mimeType) && rf == null) {
+				// Show index-specific HTML reprensetation when HTML is requested by content negotiation,
+				// but not if ".html" ending is used (in the latter case, use the general HTML view).
 				showIndex(nanopub);
 				return;
 			}
@@ -78,7 +87,7 @@ public class NanopubPage extends Page {
 			}
 		}
 		if (format == null) {
-			format = RDFFormat.TRIG;
+			format = HtmlWriter.HTML_FORMAT;
 		}
 		if (!format.supportsContexts()) {
 			getResp().sendError(400, "Unsuitable RDF format: " + ext);
@@ -93,7 +102,11 @@ public class NanopubPage extends Page {
 		OutputStream out = null;
 		try {
 			out = getResp().getOutputStream();
-			NanopubUtils.writeToStream(nanopub, out, format);
+			if (format == HtmlWriter.HTML_FORMAT) {
+				Nanopub2Html.createHtml(nanopub, out, true);
+			} else {
+				NanopubUtils.writeToStream(nanopub, out, format);
+			}
 		} catch (Exception ex) {
 			getResp().sendError(500, "Internal error: " + ex.getMessage());
 			logger.error(ex.getMessage(), ex);

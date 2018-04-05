@@ -6,6 +6,9 @@ services:
       - db
     environment:
       - NPS_MONGODB_HOST=db
+      - COLLECT_NANOPUBS_ENABLED=true
+      - POST_NEW_NANOPUBS_TO=localhost:8090
+      - WAIT_MS_BEFORE_PEER_SCAN=1000
     ports:
       - 8080:8080
   db:

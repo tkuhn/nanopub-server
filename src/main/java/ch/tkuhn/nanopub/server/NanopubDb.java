@@ -294,8 +294,14 @@ public class NanopubDb {
 	public void populatePackageCache() throws IOException {
 		long c = journal.getCurrentPageNo();
 		for (long page = 1; page < c; page++) {
-			writePackageToStream(page, false, new NullOutputStream());
+			if (!isPackageCached(page)) {
+				writePackageToStream(page, false, new NullOutputStream());
+			}
 		}
+	}
+
+	public boolean isPackageCached(long pageNo) {
+		return packageGridFs.findOne(pageNo + "") != null;
 	}
 
 	public void writePackageToStream(long pageNo, boolean gzipped, OutputStream out) throws IOException {
