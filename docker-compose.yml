@@ -6,12 +6,14 @@ services:
       - db
     environment:
       - NPS_MONGODB_HOST=db
-      - COLLECT_NANOPUBS_ENABLED=true
-      - POST_NEW_NANOPUBS_TO=localhost:8090
-      - WAIT_MS_BEFORE_PEER_SCAN=1000
+      - NPS_COLLECT_NANOPUBS_ENABLED=true  # nanopubs are collected from other servers (needs about 60GB of disk space, or possibly more)
+      - NPS_PUBLIC_URL=http://your.domain.com/path/  # replace this with the URL where this server is publicly accessible; needs to end with /
+      - NPS_ADMIN=  # you can add admin info here, e.g. Tobias Kuhn <kuhntobias@gmail.com> (optional)
+      - NPS_LOAD_DIR=/data/dropbox/
     ports:
       - 8080:8080
   db:
     image: mongo
     volumes:
-      - /data/nanopubs/db:/data/db
+      - /path/to/mongodb/data/dir/:/data/db  # specify the host directory for the database here
+      - /path/to/dropbox/dir/:/data/dropbox  # specify the host directory from which files of nanopublications are automatically loaded

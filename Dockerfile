@@ -8,8 +8,7 @@ WORKDIR /opt/application
 ADD . /opt/application
 
 # install & package
-RUN mvn install
-RUN mvn package
+RUN mvn compile
 
 # expose port 8080
 EXPOSE 8080
