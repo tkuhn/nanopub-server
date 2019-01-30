@@ -4,6 +4,6 @@
 /scratch
 /load
 /classpath.txt
-*.log
-local.*
+**/*.log
+**/local.*
 /src/main/resources/log4j.properties
