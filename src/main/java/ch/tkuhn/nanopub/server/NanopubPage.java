@@ -2,13 +2,10 @@ package ch.tkuhn.nanopub.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import javax.servlet.http.HttpServletResponse;
-
-import net.trustyuri.TrustyUriUtils;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.nanopub.HtmlWriter;
@@ -24,6 +21,8 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.trustyuri.TrustyUriUtils;
 
 public class NanopubPage extends Page {
 

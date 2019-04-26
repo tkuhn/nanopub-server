@@ -25,7 +25,13 @@ public class Journal {
 	public Journal(DB db) {
 		this.db = db;
 		init();
-		journalId = Long.parseLong(getField("journal-id"));
+		long j = Long.parseLong(getField("journal-id"));
+		if (j == 0) {
+			// Prebuilt DB from a downloaded package that doesn't have a journal ID yet
+			j = Math.abs(new Random().nextLong());
+			setField("journal-id", j + "");
+		}
+		journalId = j;
 		pageSize = Integer.parseInt(getField("page-size"));
 		uriPattern = getField("uri-pattern");
 		hashPattern = getField("hash-pattern");
