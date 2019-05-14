@@ -21,12 +21,15 @@ public class LoadFiles implements Runnable {
 
 	public static synchronized void check() {
 		if (running != null) {
-			if (running.aliveAtTime + 60 * 60 * 1000 < System.currentTimeMillis()) {
-				running.logger.info("No sign of life of the daemon for 60 minutes... (the starting of a new one is disabled)");
+//			if (running.aliveAtTime + 60 * 60 * 1000 < System.currentTimeMillis()) {
+//				running.logger.info("No sign of life of the daemon for 60 minutes... (the starting of a new one is disabled)");
+//				running.aliveAtTime = System.currentTimeMillis();
+//				return;
+			if (running.aliveAtTime + 7 * 24 * 60 * 60 * 1000 < System.currentTimeMillis()) {
+				running.logger.info("No sign of life of the daemon for 7 days. Starting a new one...");
 				running.aliveAtTime = System.currentTimeMillis();
-				return;
-//				running = null;
-//				thread.interrupt();
+				running = null;
+				thread.interrupt();
 			} else {
 				return;
 			}
