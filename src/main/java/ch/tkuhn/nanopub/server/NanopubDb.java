@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import net.trustyuri.TrustyUriUtils;
-
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpResponse;
@@ -19,6 +17,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.eclipse.rdf4j.RDF4JException;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.nanopub.MalformedNanopubException;
 import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
@@ -26,9 +27,6 @@ import org.nanopub.NanopubUtils;
 import org.nanopub.NanopubWithNs;
 import org.nanopub.extra.server.ServerInfo.ServerInfoException;
 import org.nanopub.trusty.TrustyNanopubUtils;
-import org.openrdf.OpenRDFException;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +42,8 @@ import com.mongodb.ServerAddress;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
+
+import net.trustyuri.TrustyUriUtils;
 
 /**
  * Class that connects to MongoDB. Each nanopub server instance needs its own DB (but this is not
@@ -164,7 +164,7 @@ public class NanopubDb {
 			np = new NanopubImpl(nanopubString, internalFormat);
 		} catch (MalformedNanopubException ex) {
 			throw new RuntimeException("Stored nanopub is not wellformed (this shouldn't happen)", ex);
-		} catch (OpenRDFException ex) {
+		} catch (RDF4JException ex) {
 			throw new RuntimeException("Stored nanopub is corrupted (this shouldn't happen)", ex);
 		}
 		if (ServerConf.get().isCheckNanopubsOnGetEnabled() && !TrustyNanopubUtils.isValidTrustyNanopub(np)) {

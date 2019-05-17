@@ -8,6 +8,9 @@ import java.text.SimpleDateFormat;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 import org.nanopub.HtmlWriter;
 import org.nanopub.MalformedNanopubException;
 import org.nanopub.Nanopub;
@@ -16,9 +19,6 @@ import org.nanopub.NanopubUtils;
 import org.nanopub.extra.index.IndexUtils;
 import org.nanopub.extra.index.NanopubIndex;
 import org.nanopub.trusty.TrustyNanopubUtils;
-import org.openrdf.model.URI;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public class NanopubPage extends Page {
 		String rf = getReq().getPresentationFormat();
 		RDFFormat format = null;
 		if (ext != null) {
-			format = Rio.getParserFormatForFileName("np." + ext);
+			format = Rio.getParserFormatForFileName("np." + ext).orElse(null);
 			if (ext.equals("stnp")) {
 				format = TrustyNanopubUtils.STNP_FORMAT;
 			}
@@ -82,7 +82,7 @@ public class NanopubPage extends Page {
 			if ("text/plain".equals(mimeType)) {
 				rf = "text/plain";
 			} else {
-				format = Rio.getParserFormatForMIMEType(mimeType);
+				format = Rio.getParserFormatForMIMEType(mimeType).orElse(null);
 			}
 		}
 		if (format == null) {
@@ -158,7 +158,7 @@ public class NanopubPage extends Page {
 				if (!npi.getCreators().isEmpty()) {
 					println("<h3>Creators:</h3>");
 					println("<ul>");
-					for (URI uri : npi.getCreators()) {
+					for (IRI uri : npi.getCreators()) {
 						println("<li><a href=\"" + uri + "\" rel=\"nofollow\">" + uri + "</a></li>");
 					}
 					println("</ul>");
@@ -167,7 +167,7 @@ public class NanopubPage extends Page {
 			if (!npi.getSeeAlsoUris().isEmpty()) {
 				println("<h3>See Also:</h3>");
 				println("<ul>");
-				for (URI uri : npi.getSeeAlsoUris()) {
+				for (IRI uri : npi.getSeeAlsoUris()) {
 					println("<li><a href=\"" + uri + "\" rel=\"nofollow\">" + uri + "</a></li>");
 				}
 				println("</ul>");
@@ -181,7 +181,7 @@ public class NanopubPage extends Page {
 			if (!npi.getSubIndexes().isEmpty()) {
 				println("<h3>Includes as Sub-Indexes:</h3>");
 				println("<table><tbody>");
-				for (URI uri : npi.getSubIndexes()) {
+				for (IRI uri : npi.getSubIndexes()) {
 					printItem(uri);
 				}
 				println("</tbody></table>");
@@ -189,7 +189,7 @@ public class NanopubPage extends Page {
 			if (!npi.getElements().isEmpty()) {
 				println("<h3>Includes as Elements:</h3>");
 				println("<table><tbody>");
-				for (URI uri : npi.getElements()) {
+				for (IRI uri : npi.getElements()) {
 					printItem(uri);
 				}
 				println("</tbody></table>");
@@ -200,7 +200,7 @@ public class NanopubPage extends Page {
 		}
 	}
 
-	private void printItem(URI uri) throws IOException {
+	private void printItem(IRI uri) throws IOException {
 		String artifactCode = TrustyUriUtils.getArtifactCode(uri.toString());
 		print("<tr>");
 		print("<td>");

@@ -17,8 +17,8 @@ import org.nanopub.Nanopub;
 import org.nanopub.NanopubImpl;
 import org.nanopub.extra.server.NanopubSurfacePattern;
 import org.nanopub.extra.server.ServerInfo.ServerInfoException;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.Rio;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class NanopubServlet extends HttpServlet {
 				}
 				Nanopub np = null;
 				try {
-					np = new NanopubImpl(req.getInputStream(), Rio.getParserFormatForMIMEType(req.getContentType(), RDFFormat.TRIG));
+					np = new NanopubImpl(req.getInputStream(), Rio.getParserFormatForMIMEType(req.getContentType()).orElse(RDFFormat.TRIG));
 				} catch (Exception ex) {
 					resp.sendError(400, "Error reading nanopub: " + ex.getMessage());
 				}
