@@ -6,4 +6,4 @@
 # Go to parent directory of this script file:
 cd "$( dirname "${BASH_SOURCE[0]}" )" && cd -P ..
 
-cp src/main/resources/log4j.properties.template src/main/resources/log4j.properties
+cp target/nanopub-server/WEB-INF/classes/log4j.properties.template target/nanopub-server/WEB-INF/classes/log4j.properties

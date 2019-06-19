@@ -5,5 +5,5 @@
 /load
 /classpath.txt
 **/*.log
-#**/local.*
+**/local.*
 /src/main/resources/log4j.properties
