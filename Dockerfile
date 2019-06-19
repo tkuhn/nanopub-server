@@ -1,17 +1,11 @@
-# Use latest Maven as base docker image
-FROM maven
+# Pull base image
+FROM tomcat:8-jre8
 
-# define mainworkdir
-WORKDIR /opt/application
+# Remove default webapps:
+RUN rm -fr /usr/local/tomcat/webapps/*
 
-# add all app files to workdir
-ADD . /opt/application
+# Add nanopub-server app at root position:
+COPY target/nanopub-server /usr/local/tomcat/webapps/ROOT
 
-# install & package
-RUN mvn compile
-
-# expose port 8080
+# Port:
 EXPOSE 8080
-
-# define run command
-CMD ["bash", "scripts/start.sh"]
