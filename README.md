@@ -47,7 +47,7 @@ network, for example this one:
 
 - Example of a nanopub servers:
   - http://np.inn.ac/
-  - http://app.tkuhn.eculture.labs.vu.nl/nanopub-server-1/
+  - http://server.nanopubs.lod.labs.vu.nl/
   - https://server.nanopubs.knows.idlab.ugent.be/
 
 
