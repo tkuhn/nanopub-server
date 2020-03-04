@@ -38,12 +38,17 @@ Have a look at this nanopub monitor ([source
 code](https://github.com/tkuhn/nanopub-monitor)) to see the current nanopub
 server network:
 
-- [Nanopub monitor](http://npmonitor.inn.ac)
+- Nanopub Monitor: 
+  - http://npmonitor.inn.ac
+  - http://app.tkuhn.eculture.labs.vu.nl/nanopub-monitor/
 
 From that monitor page, you can find the URLs of the current servers in the
 network, for example this one:
 
-- [Example of a nanopub server](http://np.inn.ac/)
+- Example of a nanopub servers:
+  - http://np.inn.ac/
+  - http://app.tkuhn.eculture.labs.vu.nl/nanopub-server-1/
+  - https://server.nanopubs.knows.idlab.ugent.be/
 
 
 Deployment
