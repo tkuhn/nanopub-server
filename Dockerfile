@@ -1,12 +1,15 @@
 # Pull base image
-FROM tomcat:8-jre8
+FROM tomcat:8-jdk8
 
 # Remove default webapps:
-RUN rm -fr /usr/local/tomcat/webapps/*
+RUN apt-get update &&\
+    apt-get install -y maven &&\
+    rm -fr /usr/local/tomcat/webapps/*
 
-COPY target/nanopub-server /usr/local/tomcat/nanopub-server/target/nanopub-server
-COPY scripts /usr/local/tomcat/nanopub-server/scripts
-RUN ln -s /usr/local/tomcat/nanopub-server/target/nanopub-server /usr/local/tomcat/webapps/ROOT
+COPY . /usr/local/tomcat/nanopub-server/
+WORKDIR /usr/local/tomcat/nanopub-server/
+
+RUN mvn clean install && ln -s /usr/local/tomcat/nanopub-server/target/nanopub-server /usr/local/tomcat/webapps/ROOT
 
 # Port:
 EXPOSE 8080
