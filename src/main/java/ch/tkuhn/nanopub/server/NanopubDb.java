@@ -232,7 +232,7 @@ public class NanopubDb {
 				try {
 					HttpPost post = new HttpPost(postUrl);
 					post.setHeader("Content-Type", internalFormat.getDefaultMIMEType());
-					post.setEntity(new StringEntity(npString));
+					post.setEntity(new StringEntity(npString, "UTF-8"));
 					HttpResponse response = HttpClientBuilder.create().build().execute(post);
 					if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 						success = true;
