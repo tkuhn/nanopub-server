@@ -73,6 +73,16 @@ public class NanopubDb {
 
 	}
 
+	public static class ProtectedNanopubException extends Exception {
+
+		private static final long serialVersionUID = 3978608156725990918L;
+
+		public ProtectedNanopubException(Nanopub np) {
+			super(np.getUri().toString());
+		}
+
+	}
+
 	public static class NanopubDbException extends Exception {
 
 		private static final long serialVersionUID = 162796031985052353L;
@@ -179,12 +189,15 @@ public class NanopubDb {
 	}
 
 	public synchronized void loadNanopub(Nanopub np) throws NotTrustyNanopubException,
-			OversizedNanopubException, NanopubDbException {
+			OversizedNanopubException, NanopubDbException, ProtectedNanopubException {
 		if (np instanceof NanopubWithNs) {
 			((NanopubWithNs) np).removeUnusedPrefixes();
 		}
 		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
 			throw new NotTrustyNanopubException(np);
+		}
+		if (Utils.isProtectedNanopub(np)) {
+			throw new ProtectedNanopubException(np);
 		}
 		ServerInfo info = ServerConf.getInfo();
 		if (info.getMaxNanopubTriples() != null && np.getTripleCount() > info.getMaxNanopubTriples()) {
