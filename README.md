@@ -39,14 +39,12 @@ code](https://github.com/tkuhn/nanopub-monitor)) to see the current nanopub
 server network:
 
 - Nanopub Monitor: 
-  - http://npmonitor.inn.ac
   - http://app.tkuhn.eculture.labs.vu.nl/nanopub-monitor/
 
 From that monitor page, you can find the URLs of the current servers in the
 network, for example this one:
 
 - Example of a nanopub servers:
-  - http://np.inn.ac/
   - http://server.nanopubs.lod.labs.vu.nl/
   - https://server.nanopubs.knows.idlab.ugent.be/
 
