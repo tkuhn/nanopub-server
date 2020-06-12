@@ -128,7 +128,7 @@ public class ScanPeers implements Runnable {
 				}
 			}
 		}
-		if (!myUrl.isEmpty() && !knowsMe && si.isPostPeersEnabled()) {
+		if (!ServerConf.get().isRunAsLocalServerEnabled() && !myUrl.isEmpty() && !knowsMe && si.isPostPeersEnabled()) {
 			HttpPost post = new HttpPost(si.getPublicUrl() + PeerListPage.PAGE_NAME);
 			post.setEntity(new StringEntity(myUrl));
 			HttpResponse response = HttpClientBuilder.create().build().execute(post);

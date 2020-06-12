@@ -196,7 +196,7 @@ public class NanopubDb {
 		if (!TrustyNanopubUtils.isValidTrustyNanopub(np)) {
 			throw new NotTrustyNanopubException(np);
 		}
-		if (Utils.isProtectedNanopub(np)) {
+		if (!ServerConf.get().isRunAsLocalServerEnabled() && Utils.isProtectedNanopub(np)) {
 			throw new ProtectedNanopubException(np);
 		}
 		ServerInfo info = ServerConf.getInfo();

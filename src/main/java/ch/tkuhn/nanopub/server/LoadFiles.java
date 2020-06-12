@@ -94,7 +94,7 @@ public class LoadFiles implements Runnable {
 						try {
 							db.loadNanopub(np);
 						} catch (Exception ex) {
-							throw new RuntimeException(ex);
+							logger.error("Failed to load nanopublication", ex);
 						}
 						stillAlive();
 					}

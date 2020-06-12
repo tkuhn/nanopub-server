@@ -65,6 +65,10 @@ public class ServerConf {
 		}
 	}
 
+	public boolean isRunAsLocalServerEnabled() {
+		return Boolean.parseBoolean(conf.getProperty("run.as.local.server"));
+	}
+
 	public boolean isPeerScanEnabled() {
 		return Boolean.parseBoolean(conf.getProperty("peer.scan.enabled"));
 	}

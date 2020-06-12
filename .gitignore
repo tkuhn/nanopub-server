@@ -2,8 +2,10 @@
 /target
 /bin
 /scratch
+/db
 /load
 /classpath.txt
 *.log
 local.*
 /src/main/resources/log4j.properties
+/docker-compose.override.yml
