@@ -13,8 +13,8 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - /path/to/dropbox/dir/:/data/dropbox/  # specify the host directory from which files of nanopublications are automatically loaded
+      - ./load:/data/dropbox/  # specify the host directory from which files of nanopublications are automatically loaded
   db:
     image: mongo
     volumes:
-      - /path/to/mongodb/data/dir/:/data/db  # specify the host directory for the database here
+      - ./db:/data/db  # specify the host directory for the database here
