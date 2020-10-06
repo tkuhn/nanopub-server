@@ -237,30 +237,32 @@ public class NanopubDb {
 			// journal.
 			coll.insert(dbObj);
 		}
-		String postUrl = ServerConf.get().getPostUrl();
-		if (postUrl != null && !postUrl.isEmpty()) {
-			int failedTries = 0;
-			boolean success = false;
-			while (!success && failedTries < 3) {
-				try {
-					HttpPost post = new HttpPost(postUrl);
-					post.setHeader("Content-Type", internalFormat.getDefaultMIMEType());
-					post.setEntity(new StringEntity(npString, "UTF-8"));
-					HttpResponse response = HttpClientBuilder.create().build().execute(post);
-					if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-						success = true;
-					} else {
-						logger.error("Failed to post nanopub to " + postUrl + ": " + response.getStatusLine().getReasonPhrase());
+		String[] postUrls = ServerConf.get().getPostUrls();
+		for (String postUrl : postUrls) {
+			if (postUrl != null && !postUrl.isEmpty()) {
+				int failedTries = 0;
+				boolean success = false;
+				while (!success && failedTries < 3) {
+					try {
+						HttpPost post = new HttpPost(postUrl);
+						post.setHeader("Content-Type", internalFormat.getDefaultMIMEType());
+						post.setEntity(new StringEntity(npString, "UTF-8"));
+						HttpResponse response = HttpClientBuilder.create().build().execute(post);
+						if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+							success = true;
+						} else {
+							logger.error("Failed to post nanopub to " + postUrl + ": " + response.getStatusLine().getReasonPhrase());
+							failedTries++;
+						}
+					} catch (Exception ex) {
+						logger.error("Error while posting nanopub", ex);
 						failedTries++;
 					}
-				} catch (Exception ex) {
-					logger.error("Error while posting nanopub", ex);
-					failedTries++;
-				}
-				if (!success) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException ex) {}
+					if (!success) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException ex) {}
+					}
 				}
 			}
 		}
