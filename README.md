@@ -59,11 +59,7 @@ Requirements:
 - Docker 1.10 or higher
 - Docker-compose 1.6 or higher
 
-After cloning the repository, compile with Maven:
-
-    $ mvn clean install
-
-And then execute:
+After cloning the repository, execute:
 
     $ docker-compose up
 
