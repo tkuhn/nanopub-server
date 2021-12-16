@@ -15,8 +15,5 @@ cd "$( dirname "${BASH_SOURCE[0]}" )" && cd -P ..
 # Load environment variables to local config file:
 scripts/set-localconf-from-env.sh
 
-# Configure logging parameters:
-scripts/configure-logging.sh
-
 # Run Tomcat web application server:
 catalina.sh run
