@@ -21,4 +21,4 @@ services:
     #image: mongo
     restart: unless-stopped
     volumes:
-      - ./db:/data/db  # specify the host directory for the database here
+      - ./data/mongodb:/data/db  # specify the host directory for the database here
