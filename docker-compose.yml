@@ -2,6 +2,8 @@ version: '2'
 services:
   nanopub:
     build: .
+    #image: nanopub/server
+    restart: unless-stopped
     depends_on:
       - db
     environment:
@@ -15,6 +17,8 @@ services:
     volumes:
       - ./load:/data/dropbox/  # specify the host directory from which files of nanopublications are automatically loaded
   db:
-    image: mongo
+    image: nanopub/mongo
+    #image: mongo
+    restart: unless-stopped
     volumes:
       - ./db:/data/db  # specify the host directory for the database here
