@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.nanopub.HtmlWriter;
@@ -164,6 +167,35 @@ public class NanopubPage extends Page {
 					println("</ul>");
 				}
 			}
+
+			List<IRI> superseding = new ArrayList<>();
+			List<IRI> derivedFrom = new ArrayList<>();
+			for (Statement st : np.getPubinfo()) {
+				if (!st.getSubject().equals(np.getUri())) continue;
+				if (!(st.getObject() instanceof IRI)) continue;
+				if (st.getPredicate().equals(Nanopub.SUPERSEDES)) {
+					superseding.add((IRI) st.getObject());
+				} else if (st.getPredicate().stringValue().equals("http://www.w3.org/ns/prov#wasDerivedFrom")) {
+					derivedFrom.add((IRI) st.getObject());
+				}
+			}
+			if (!superseding.isEmpty()) {
+				println("<h3>Supersedes:</h3>");
+				println("<ul>");
+				for (IRI uri : superseding) {
+					println("<li><a href=\"" + uri + "\" rel=\"nofollow\">" + uri + "</a></li>");
+				}
+				println("</ul>");
+			}
+			if (!derivedFrom.isEmpty()) {
+				println("<h3>Derived From:</h3>");
+				println("<ul>");
+				for (IRI uri : derivedFrom) {
+					println("<li><a href=\"" + uri + "\" rel=\"nofollow\">" + uri + "</a></li>");
+				}
+				println("</ul>");
+			}
+
 			if (!npi.getSeeAlsoUris().isEmpty()) {
 				println("<h3>See Also:</h3>");
 				println("<ul>");
