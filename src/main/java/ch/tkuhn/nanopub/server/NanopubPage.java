@@ -2,6 +2,7 @@ package ch.tkuhn.nanopub.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import org.nanopub.Nanopub2Html;
 import org.nanopub.NanopubUtils;
 import org.nanopub.extra.index.IndexUtils;
 import org.nanopub.extra.index.NanopubIndex;
+import org.nanopub.extra.security.SignatureUtils;
 import org.nanopub.trusty.TrustyNanopubUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +107,15 @@ public class NanopubPage extends Page {
 		try {
 			out = getResp().getOutputStream();
 			if (format == HtmlWriter.HTML_FORMAT) {
-				Nanopub2Html.createHtml(nanopub, out, true);
+				String htmlString = Nanopub2Html.createHtmlString(nanopub, true);
+				if (SignatureUtils.getSignatureElement(nanopub) != null) {
+					// Move this feature to Nanopub2Html:
+					final String apiUrl = "https://grlc.nps.petapico.org/tapas/tapas.html?op=/get_latest_version&autosubmit=on&param_np=";
+					final String url = apiUrl + Utils.urlEncode(nanopub.getUri().stringValue());
+					htmlString = htmlString.replace("<div class=\"nanopub\">", "<p style=\"font-family: sans-serif;\">(find latest version <a style=\"color: #00f;\" href=\"" + url + "\">here</a>)</p><div class=\"nanopub\">");
+				}
+				PrintStream ps = new PrintStream(out);
+				ps.print(htmlString);
 			} else {
 				NanopubUtils.writeToStream(nanopub, out, format);
 			}

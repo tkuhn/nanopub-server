@@ -1,5 +1,7 @@
 package ch.tkuhn.nanopub.server;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,6 +39,14 @@ public class Utils {
 			if (st.getObject().equals(PROTECTED_NANOPUB)) return true;
 		}
 		return false;
+	}
+
+	public static String urlEncode(Object o) {
+		try {
+			return URLEncoder.encode((o == null ? "" : o.toString()), "UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
 }
