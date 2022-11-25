@@ -110,47 +110,12 @@ public class NanopubPage extends Page {
 				String htmlString = Nanopub2Html.createHtmlString(nanopub, true);
 				if (SignatureUtils.getSignatureElement(nanopub) != null) {
 					// Move this feature to Nanopub2Html:
-					final String script =
-							  "var getUpdateStatus = function(elementId, npUri) {\n"
-							+ "  document.getElementById(elementId).innerHTML = \"<em>Checking for updates...</em>\";\n"
-							+ "  const apiUrl = 'https://grlc.nps.petapico.org/api/local/local/get_latest_version?np=' + npUri;\n"
-							+ "  var r = new XMLHttpRequest();\n"
-							+ "  r.open('GET', apiUrl, true);\n"
-							+ "  r.setRequestHeader('Accept', 'application/json');\n"
-							+ "  r.responseType = 'json';\n"
-							+ "  r.onload = function() {\n"
-							+ "    var h = '';\n"
-							+ "    if (r.status == 200) {\n"
-							+ "      const bindings = r.response['results']['bindings'];\n"
-							+ "      if (bindings.length == 1 && bindings[0]['latest']['value'] === npUri) {\n"
-							+ "        h = 'This is the latest version.';\n"
-							+ "      } else if (bindings.length == 0) {\n"
-							+ "        h = 'This nanopublication has been <strong>retracted</strong>.'\n"
-							+ "      } else {\n"
-							+ "        h = 'This nanopublication has a <strong>newer version</strong>: ';\n"
-							+ "        if (bindings.length > 1) {\n"
-							+ "        h = 'This nanopublication has <strong>newer versions</strong>: ';\n"
-							+ "        }\n"
-							+ "        for (const b of bindings) {\n"
-							+ "          l = b['latest']['value'];\n"
-							+ "          h += ' <code><a href=\"' + l + '\">' + l + '</a></code>';\n"
-							+ "        }\n"
-							+ "      }\n"
-							+ "    } else {\n"
-							+ "      h = \"<em>An error has occurred while checking for updates.</en>\";\n"
-							+ "    }\n"
-							+ "    document.getElementById(elementId).innerHTML = h;\n"
-							+ "  };\n"
-							+ "  r.send();\n"
-							+ "};\n";
 					htmlString = htmlString.replace("<div class=\"nanopub\">",
 							"<p style=\"font-family: sans-serif;\">"
 							+ "<span id=\"status\"></span>"
 							+ "</p>\n"
-							+ "<script>"
-							+ script
-							+ "getUpdateStatus(\"status\", '" + nanopub.getUri().stringValue() + "');"
-							+ "</script>\n"
+							+ "<script type=\"text/javascript\" src=\"scripts/nanopub.js\"></script>\n"
+							+ "<script>getUpdateStatus(\"status\", '" + nanopub.getUri().stringValue() + "');</script>\n"
 							+ "<div class=\"nanopub\">");
 				}
 				PrintStream ps = new PrintStream(out);

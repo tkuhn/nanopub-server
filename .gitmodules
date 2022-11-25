@@ -1,0 +1,3 @@
+[submodule "src/main/resources/ch/tkuhn/nanopub/server/nanopub-js"]
+	path = src/main/resources/ch/tkuhn/nanopub/server/nanopub-js
+	url = git@github.com:knowledgepixels/nanopub-js.git

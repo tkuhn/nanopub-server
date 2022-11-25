@@ -26,6 +26,7 @@ public class ResourcePage extends Page {
 	}
 
 	public void show() throws IOException {
+		getResp().setContentType(resourceType);
 		InputStream in = null;
 		OutputStream out = null;
 		try {
@@ -36,7 +37,6 @@ public class ResourcePage extends Page {
 			if (in != null) in.close();
 			if (out != null) out.close();
 		}
-		getResp().setContentType(resourceType);
 	}
 
 }

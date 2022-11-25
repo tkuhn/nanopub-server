@@ -57,6 +57,8 @@ public class NanopubServlet extends HttpServlet {
 				ResourcePage.show(r, resp, "style.css", "text/css");
 			} else if (r.getFullRequest().equals("/style/favicon.ico")) {
 				ResourcePage.show(r, resp, "favicon.ico", "image/x-icon");
+			} else if (r.getFullRequest().equals("/scripts/nanopub.js")) {
+				ResourcePage.show(r, resp, "nanopub-js/nanopub.js", "text/javascript");
 			} else {
 				resp.sendError(400, "Invalid GET request: " + r.getFullRequest());
 			}
