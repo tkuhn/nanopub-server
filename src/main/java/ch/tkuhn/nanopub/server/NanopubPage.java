@@ -79,7 +79,7 @@ public class NanopubPage extends Page {
 			}
 			String mimeType = Utils.getMimeType(getHttpReq(), suppFormats);
 			if (isIndexNanopub && "text/html".equals(mimeType) && rf == null) {
-				// Show index-specific HTML reprensetation when HTML is requested by content negotiation,
+				// Show index-specific HTML representation when HTML is requested by content negotiation,
 				// but not if ".html" ending is used (in the latter case, use the general HTML view).
 				showIndex(nanopub);
 				return;
