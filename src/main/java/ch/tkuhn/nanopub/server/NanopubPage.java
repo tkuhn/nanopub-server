@@ -115,7 +115,7 @@ public class NanopubPage extends Page {
 							+ "<span id=\"status\"></span>"
 							+ "</p>\n"
 							+ "<script type=\"text/javascript\" src=\"scripts/nanopub.js\"></script>\n"
-							+ "<script>getUpdateStatus(\"status\", '" + nanopub.getUri().stringValue() + "');</script>\n"
+							+ "<script>getStatus(\"status\", '" + nanopub.getUri().stringValue() + "');</script>\n"
 							+ "<div class=\"nanopub\">");
 				}
 				PrintStream ps = new PrintStream(out);
