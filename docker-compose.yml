@@ -2,7 +2,7 @@ version: '2'
 services:
   nanopub:
     build: .
-    #image: nanopub/server
+    image: nanopub/server:mongo7
     restart: unless-stopped
     depends_on:
       - db
@@ -21,8 +21,8 @@ services:
         max-size: "10m"
         max-file: "3"
   db:
-    image: nanopub/mongo
-    #image: mongo
+    #image: nanopub/mongo
+    image: mongo:7
     restart: unless-stopped
     volumes:
       - ./data/mongodb:/data/db  # specify the host directory for the database here
