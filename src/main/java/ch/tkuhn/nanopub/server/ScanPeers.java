@@ -82,6 +82,8 @@ public class ScanPeers implements Runnable {
 		stillAlive();
 		isFinished = true;
 		List<String> peerUris = new ArrayList<>(db.getPeerUris());
+		// Ignore own URL if present in peer list:
+		peerUris.remove(ServerConf.getInfo().getPublicUrl());
 		if (random.nextFloat() < 0.1) {
 			// Use random ordering with 10% chance
 			logger.info("Collect and contact peers (random ordering)...");
