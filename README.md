@@ -34,20 +34,20 @@ The following publications explain the approach:
 Current Network
 ---------------
 
-Have a look at this nanopub monitor ([source
+Have a look at these nanopub monitors ([source
 code](https://github.com/tkuhn/nanopub-monitor)) to see the current nanopub
 server network:
 
 - Nanopub Monitor: 
-  - http://app.tkuhn.eculture.labs.vu.nl/nanopub-monitor/
+  - https://monitor.knowledgepixels.com/
+  - https://monitor.np.trustyuri.net/
 
 From that monitor page, you can find the URLs of the current servers in the
 network, for example this one:
 
 - Example of a nanopub servers:
-  - http://server.nanopubs.lod.labs.vu.nl/
-  - https://server.nanopubs.knows.idlab.ugent.be/
-
+  - https://np.knowledgepixels.com/
+  - https://np.petapico.org/
 
 Deployment
 ----------
