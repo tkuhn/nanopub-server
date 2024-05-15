@@ -2,7 +2,7 @@ version: '2'
 services:
   nanopub:
     build: .
-    #image: nanopub/server
+    image: nanopub/server
     restart: unless-stopped
     depends_on:
       - db
