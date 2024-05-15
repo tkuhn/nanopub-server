@@ -45,9 +45,9 @@ server network:
 From that monitor page, you can find the URLs of the current servers in the
 network, for example this one:
 
-- Example of a nanopub servers:
+- Example of nanopub servers:
   - https://np.knowledgepixels.com/
-  - https://np.petapico.org/
+  - https://server.np.trustyuri.net/
 
 Deployment
 ----------
